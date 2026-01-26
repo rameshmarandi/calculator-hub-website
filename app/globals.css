@@ -1,26 +1,75 @@
 @import "tailwindcss";
 
+/* ===============================
+   PREMIUM DESIGN SYSTEM
+   (Finance / SaaS Grade)
+================================ */
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Backgrounds */
+  --bg: #f5f7fb;              /* App background */
+  --surface: #ffffff;         /* Cards / header */
+  --surface-2: #f0f3f9;       /* Secondary panels */
+
+  /* Borders */
+  --border: #e2e6f0;
+
+  /* Text */
+  --text-main: #1f2937;       /* Almost black */
+  --text-muted: #6b7280;      /* Muted gray */
+ /* Primary (Blue) */
+  --result-primary-bg: rgba(59, 130, 246, 0.08);
+  --result-primary-border: #3b82f6;
+
+  /* Success (Green) */
+  --result-success-bg: rgba(34, 197, 94, 0.08);
+  --result-success-border: #22c55e;
+
+  /* Warning (Orange) */
+  --result-warning-bg: rgba(249, 115, 22, 0.08);
+  --result-warning-border: #f97316;
+
+  /* Danger (Red) */
+  --result-danger-bg: rgba(239, 68, 68, 0.08);
+  --result-danger-border: #ef4444;
+  /* Brand */
+  --primary: #2563eb;         /* Calm blue */
+  --primary-hover: #1e40af;
+
+  /* States */
+  --success: #16a34a;
+  --warning: #f59e0b;
+  --danger: #dc2626;
+
+  /* Interaction */
+  --hover-bg: rgba(37, 99, 235, 0.06);
+  --active-bg: rgba(37, 99, 235, 0.12);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* ===== DARK MODE (PREMIUM) ===== */
+.dark {
+  --bg: #0b1020;              /* Deep navy */
+  --surface: #121833;         /* Elevated surface */
+  --surface-2: #1a2140;
+
+  --border: #2a3158;
+
+  --text-main: #e5e7eb;
+  --text-muted: #9ca3af;
+
+  --primary: #93c5fd;
+  --primary-hover: #bfdbfe;
+
+  --success: #4ade80;
+  --warning: #facc15;
+  --danger: #f87171;
+
+  --hover-bg: rgba(147, 197, 253, 0.12);
+  --active-bg: rgba(147, 197, 253, 0.22);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
+/* ===== GLOBAL ===== */
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--bg);
+  color: var(--text-main);
 }
