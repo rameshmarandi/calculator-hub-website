@@ -1,29 +1,45 @@
 //Finance Calculators
 
-import CagrCalculator from "../components/calculators/CagrCalculator";
-import CarLoanEmiCalculator from "../components/calculators/CarLoanEmiCalculator";
-import CompoundInterestCalculator from "../components/calculators/CompoundInterestCalculator";
-import EducationLoanEmiCalculator from "../components/calculators/EducationLoanEmiCalculator";
-import EmiCalculator from "../components/calculators/EmiCalculator";
-import FireCalculator from "../components/calculators/FireCalculator";
-import FixedDepositCalculator from "../components/calculators/FixedDepositCalculator";
+import BreakEvenCalculator from "../components/calculators/finance/BreakEvenCalculator";
+import BusinessLoanCalculator from "../components/calculators/finance/BusinessLoanCalculator";
+import CagrCalculator from "../components/calculators/finance/CagrCalculator";
+import CarLoanEmiCalculator from "../components/calculators/finance/CarLoanEmiCalculator";
+import CompoundInterestCalculator from "../components/calculators/finance/CompoundInterestCalculator";
+import CreditCardEMICalculator from "../components/calculators/finance/CreditCardEMICalculator";
+import CTCToInHandCalculator from "../components/calculators/finance/CTCToInHandCalculator";
+import CurrencyConverter from "../components/calculators/finance/CurrencyConverter";
+import EducationLoanEmiCalculator from "../components/calculators/finance/EducationLoanEmiCalculator";
+import EducationLoanRepaymentCalculator from "../components/calculators/finance/EducationLoanRepaymentCalculator";
+import EmiCalculator from "../components/calculators/finance/EmiCalculator";
+import FireCalculator from "../components/calculators/finance/FireCalculator";
+import FixedDepositCalculator from "../components/calculators/finance/FixedDepositCalculator";
+import GratuityCalculator from "../components/calculators/finance/GratuityCalculator";
+import GSTCalculator from "../components/calculators/finance/GSTCalculator";
 
-import HomeLoanEmiCalculator from "../components/calculators/HomeLoanEmiCalculator";
-import InflationCalculator from "../components/calculators/InflationCalculator";
-import LumpsumInvestmentCalculator from "../components/calculators/LumpsumInvestmentCalculator";
-import MutualFundReturnCalculator from "../components/calculators/MutualFundReturnCalculator";
-import NetWorthCalculator from "../components/calculators/NetWorthCalculator";
-import NpsCalculator from "../components/calculators/NpsCalculator";
+import HomeLoanEmiCalculator from "../components/calculators/finance/HomeLoanEmiCalculator";
+import HomeLoanVsRentCalculator from "../components/calculators/finance/HomeLoanVsRentCalculator";
+import HraCalculator from "../components/calculators/finance/HraCalculator";
+import IncomeTaxCalculator from "../components/calculators/finance/IncomeTaxCalculator";
+import InflationCalculator from "../components/calculators/finance/InflationCalculator";
+import LoanEligibilityCalculator from "../components/calculators/finance/LoanEligibilityCalculator";
+import LoanPrepaymentCalculator from "../components/calculators/finance/LoanPrepaymentCalculator";
+import LumpsumInvestmentCalculator from "../components/calculators/finance/LumpsumInvestmentCalculator";
+import MutualFundReturnCalculator from "../components/calculators/finance/MutualFundReturnCalculator";
+import NetWorthCalculator from "../components/calculators/finance/NetWorthCalculator";
+import NpsCalculator from "../components/calculators/finance/NpsCalculator";
 
-import PersonalLoanEmiCalculator from "../components/calculators/PersonalLoanEmiCalculator";
-import PPFCalculator from "../components/calculators/PPFCalculator";
-import RecurringDepositCalculator from "../components/calculators/RecurringDepositCalculator";
-import RetirementPlanningCalculator from "../components/calculators/RetirementPlanningCalculator";
-import SimpleInterestCalculator from "../components/calculators/SimpleInterestCalculator";
-import SipCalculator from "../components/calculators/SipCalculator";
-import StepUpSipCalculator from "../components/calculators/StepUpSipCalculator";
-import SwpCalculator from "../components/calculators/SwpCalculator";
-import XirrCalculator from "../components/calculators/XirrCalculator";
+import PersonalLoanEmiCalculator from "../components/calculators/finance/PersonalLoanEmiCalculator";
+import PPFCalculator from "../components/calculators/finance/PPFCalculator";
+import RecurringDepositCalculator from "../components/calculators/finance/RecurringDepositCalculator";
+import RetirementPlanningCalculator from "../components/calculators/finance/RetirementPlanningCalculator";
+import ROICalculator from "../components/calculators/finance/ROICalculator";
+import SalaryInHandCalculator from "../components/calculators/finance/SalaryInHandCalculator";
+import SimpleInterestCalculator from "../components/calculators/finance/SimpleInterestCalculator";
+import SipCalculator from "../components/calculators/finance/SipCalculator";
+import StartupValuationCalculator from "../components/calculators/finance/StartupValuationCalculator";
+import StepUpSipCalculator from "../components/calculators/finance/StepUpSipCalculator";
+import SwpCalculator from "../components/calculators/finance/SwpCalculator";
+import XirrCalculator from "../components/calculators/finance/XirrCalculator";
 
 const CALCULATOR_MAP = {
   //Finance Calculators
@@ -47,7 +63,24 @@ const CALCULATOR_MAP = {
   "swp-calculator": SwpCalculator,
   "inflation-calculator": InflationCalculator,
   "retirement-planning-calculator": RetirementPlanningCalculator,
+  "fire-calculator": FireCalculator,
   "net-worth-calculator": NetWorthCalculator,
+  "income-tax-calculator": IncomeTaxCalculator,
+  "hra-calculator": HraCalculator,
+  "gratuity-calculator": GratuityCalculator,
+  "salary-in-hand-calculator": SalaryInHandCalculator,
+  "ctc-to-in-hand-calculator": CTCToInHandCalculator,
+  "loan-eligibility-calculator": LoanEligibilityCalculator,
+  "loan-prepayment-calculator": LoanPrepaymentCalculator,
+  "home-loan-vs-rent-calculator": HomeLoanVsRentCalculator,
+  "credit-card-emi-calculator": CreditCardEMICalculator,
+  "gst-calculator": GSTCalculator,
+  "currency-converter": CurrencyConverter,
+  "break-even-calculator": BreakEvenCalculator,
+  "roi-calculator": ROICalculator,
+  "business-loan-calculator": BusinessLoanCalculator,
+  "startup-valuation-calculator": StartupValuationCalculator,
+  "education-loan-repayment-calculator": EducationLoanRepaymentCalculator,
 };
 
 export default CALCULATOR_MAP;
