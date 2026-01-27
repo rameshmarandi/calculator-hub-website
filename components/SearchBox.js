@@ -11,6 +11,7 @@ export default function SearchBox() {
   const router = useRouter();
   const boxRef = useRef(null);
 
+  /* ---------------- FILTER ---------------- */
   useEffect(() => {
     if (!query.trim()) {
       setResults([]);
@@ -26,17 +27,21 @@ export default function SearchBox() {
     setActiveIndex(-1);
   }, [query]);
 
+  /* ---------------- CLICK OUTSIDE ---------------- */
   useEffect(() => {
     function handleClickOutside(e) {
       if (boxRef.current && !boxRef.current.contains(e.target)) {
         setResults([]);
       }
     }
-    document.addEventListener("mousedown", handleClickOutside);
+
+    // ✅ click (NOT mousedown)
+    document.addEventListener("click", handleClickOutside);
     return () =>
-      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("click", handleClickOutside);
   }, []);
 
+  /* ---------------- KEYBOARD ---------------- */
   function handleKeyDown(e) {
     if (!results.length) return;
 
@@ -44,10 +49,14 @@ export default function SearchBox() {
       setActiveIndex(i => Math.min(i + 1, results.length - 1));
     } else if (e.key === "ArrowUp") {
       setActiveIndex(i => Math.max(i - 1, 0));
-    } else if (e.key === "Enter" && activeIndex >= 0) {
-      setQuery(results[activeIndex].label);
-      router.push(results[activeIndex].slug);
-      setResults([]);
+    } else if (e.key === "Enter") {
+      const target =
+        activeIndex >= 0 ? results[activeIndex] : results[0];
+
+      if (target) {
+        router.push(target.slug);
+        setResults([]);
+      }
     } else if (e.key === "Escape") {
       setResults([]);
     }
@@ -55,24 +64,39 @@ export default function SearchBox() {
 
   return (
     <div ref={boxRef} className="relative w-full">
-      <input
-        type="search"
-        value={query}
-        onChange={e => setQuery(e.target.value)}
-        onKeyDown={handleKeyDown}
-        placeholder="Search calculators..."
-        className="
-          w-full rounded-md px-4 py-2 text-sm
-          focus:outline-none focus:ring-2
-        "
-        style={{
-          backgroundColor: "var(--surface)",
-          border: "1px solid var(--border)",
-          color: "var(--text-main)",
-          caretColor: "var(--primary)",
-        }}
-      />
+      {/* INPUT */}
+      <div className="relative">
+        <span
+          className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none"
+          style={{ color: "var(--text-muted)" }}
+        >
+          🔍
+        </span>
 
+        <input
+          type="search"
+          value={query}
+          onChange={e => setQuery(e.target.value)}
+          onKeyDown={handleKeyDown}
+          placeholder="Search calculators..."
+          className="
+            w-full rounded-md
+            pl-10 pr-4 py-2.5
+            text-sm
+            outline-none
+            focus:ring-2 focus:ring-[var(--primary)]
+            focus:border-[var(--primary)]
+          "
+          style={{
+            backgroundColor: "var(--surface)",
+            border: "1px solid var(--border)",
+            color: "var(--text-main)",
+            caretColor: "var(--primary)",
+          }}
+        />
+      </div>
+
+      {/* SUGGESTIONS */}
       {results.length > 0 && (
         <div
           className="absolute z-50 mt-1 w-full rounded-md shadow-lg"
@@ -88,7 +112,6 @@ export default function SearchBox() {
               <div
                 key={item.slug}
                 onClick={() => {
-                  setQuery(item.label);
                   router.push(item.slug);
                   setResults([]);
                 }}

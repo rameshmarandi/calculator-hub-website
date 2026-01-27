@@ -6,9 +6,9 @@ export default function RightSidebar() {
       <RelatedCalculators />
 
       {/* ADS PLACEHOLDER */}
-      <div className="bg-white dark:bg-slate-900 rounded-lg p-4 text-center text-sm text-slate-500">
+      {/* <div className="bg-white dark:bg-slate-900 rounded-lg p-4 text-center text-sm text-slate-500">
         Advertisement
-      </div>
+      </div> */}
     </aside>
   );
 }

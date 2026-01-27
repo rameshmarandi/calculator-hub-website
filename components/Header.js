@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { Menu, X } from "lucide-react";
 import SearchBox from "./SearchBox";
 import DarkModeToggle from "./DarkModeToggle";
 
@@ -10,8 +11,7 @@ const NAV_LINKS = [
   { href: "/health", label: "Health" },
   { href: "/construction", label: "Construction" },
   { href: "/education", label: "Education" },
-  { href: "/about", label: "About" },
-  { href: "/contact", label: "Contact" },
+  { href: "/astrology", label: "Astrology" },
 ];
 
 export default function Header() {
@@ -19,98 +19,101 @@ export default function Header() {
 
   return (
     <header
-      className="sticky top-0 z-50 backdrop-blur"
+      className="sticky top-0 z-50 backdrop-blur-md"
       style={{
         backgroundColor: "var(--surface)",
         borderBottom: "1px solid var(--border)",
       }}
     >
       <div className="max-w-7xl mx-auto px-4 py-3">
-
         {/* ================= DESKTOP ================= */}
-        <div className="hidden lg:grid grid-cols-[auto_1fr_auto] items-center gap-6">
-
+        <div className="hidden lg:flex items-center gap-6">
           {/* LOGO */}
           <Link
             href="/"
-            className="text-xl font-bold whitespace-nowrap"
+            className="text-xl font-bold shrink-0"
             style={{ color: "var(--primary)" }}
           >
             EasyCalc
           </Link>
 
           {/* SEARCH */}
-          <SearchBox />
+          <div className="flex-1 max-w-xl">
+            <SearchBox />
+          </div>
 
-          {/* RIGHT ACTIONS */}
-          <div className="flex items-center gap-5">
-            <nav className="flex items-center gap-4 text-sm">
+          {/* NAV + ACTIONS */}
+          <div className="flex items-center gap-3">
+            <nav className="flex items-center gap-1">
               {NAV_LINKS.map(link => (
                 <Link
                   key={link.href}
                   href={link.href}
-                  className="transition"
+                  className="px-3 py-1.5 rounded-md text-sm transition-colors"
                   style={{ color: "var(--text-main)" }}
+                  onMouseEnter={e =>
+                    (e.currentTarget.style.backgroundColor =
+                      "var(--hover-bg)")
+                  }
+                  onMouseLeave={e =>
+                    (e.currentTarget.style.backgroundColor =
+                      "transparent")
+                  }
                 >
                   {link.label}
                 </Link>
               ))}
             </nav>
 
-            <span
-              className="text-xs"
-              style={{ color: "var(--text-muted)" }}
-            >
-              EN
-            </span>
-
             <DarkModeToggle />
           </div>
         </div>
 
-        {/* ================= MOBILE / TABLET ================= */}
+        {/* ================= MOBILE ================= */}
         <div className="lg:hidden space-y-3">
-
           <div className="flex items-center justify-between">
             <Link
               href="/"
-              className="text-xl font-bold"
+              className="text-lg font-bold"
               style={{ color: "var(--primary)" }}
             >
               EasyCalc
             </Link>
 
             <div className="flex items-center gap-2">
+              <DarkModeToggle />
+
               <button
-                aria-label="Menu"
+                aria-label="Toggle Menu"
                 onClick={() => setOpen(!open)}
                 className="p-2 rounded-md"
                 style={{ border: "1px solid var(--border)" }}
               >
-                ☰
+                {open ? <X size={18} /> : <Menu size={18} />}
               </button>
-
-              <DarkModeToggle />
             </div>
           </div>
 
+          {/* SEARCH (mobile only) */}
           <SearchBox />
 
-          {/* MOBILE MENU */}
           {open && (
             <nav
-              className="rounded-lg p-3 space-y-2"
+              className="rounded-lg p-2 space-y-1"
               style={{
                 backgroundColor: "var(--surface)",
                 border: "1px solid var(--border)",
               }}
             >
-              {NAV_LINKS.map(link => (
+              {[...NAV_LINKS,
+                { href: "/about", label: "About" },
+                { href: "/contact", label: "Contact" },
+              ].map(link => (
                 <Link
                   key={link.href}
                   href={link.href}
                   onClick={() => setOpen(false)}
-                  className="block px-3 py-2 rounded transition"
+                  className="block px-3 py-2 rounded text-sm transition-colors"
                   style={{ color: "var(--text-main)" }}
                 >
                   {link.label}
@@ -119,7 +122,6 @@ export default function Header() {
             </nav>
           )}
         </div>
-
       </div>
     </header>
   );
