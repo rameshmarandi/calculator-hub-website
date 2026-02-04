@@ -3,25 +3,30 @@
 import { useEffect, useState } from "react";
 
 export default function DarkModeToggle() {
-  const [mounted, setMounted] = useState(false);
-  const [isDark, setIsDark] = useState(false);
+  const [isDark, setIsDark] = useState(null);
 
-  // ONLY read current state, do NOT apply theme
   useEffect(() => {
-    setMounted(true);
-    setIsDark(document.documentElement.classList.contains("dark"));
+    const saved = localStorage.getItem("theme");
+    const dark = saved === "dark";
+
+    document.documentElement.classList.toggle("dark", dark);
+    setIsDark(dark);
   }, []);
 
   function toggleTheme() {
-    const html = document.documentElement;
-    const nextIsDark = !html.classList.contains("dark");
+    const next = !isDark;
 
-    html.classList.toggle("dark", nextIsDark);
-    localStorage.setItem("theme", nextIsDark ? "dark" : "light");
-    setIsDark(nextIsDark);
+    document.documentElement.classList.toggle("dark", next);
+    localStorage.setItem("theme", next ? "dark" : "light");
+    setIsDark(next);
   }
 
-  if (!mounted) return null;
+  // render stable placeholder to avoid layout shift
+  if (isDark === null) {
+    return (
+      <div className="w-9 h-9 border border-[color:var(--border)] rounded-md" />
+    );
+  }
 
   return (
     <button
@@ -33,8 +38,7 @@ export default function DarkModeToggle() {
         hover:bg-[color:var(--hover-bg)]
         transition
       "
-      aria-label="Toggle dark mode"
-    >
+      aria-label="Toggle dark mode">
       {isDark ? "🌙" : "☀️"}
     </button>
   );
