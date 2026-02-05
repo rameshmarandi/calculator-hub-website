@@ -1,30 +1,23 @@
 /** @type {import('next-sitemap').IConfig} */
 
-const { FULL_BASE_URL } = require('./lib/constant');
+const { FULL_BASE_URL } = require("./lib/constant");
 
-const siteUrl =FULL_BASE_URL
-/*
-  IMPORTANT STRATEGY
-  -----------------
-  Finance -> highest priority
-  Construction -> high
-  Health -> medium high
-  Education -> medium
-  Astrology -> medium low
-  Utility -> low
-
-  This matches CPC + traffic potential
-*/
+const siteUrl = FULL_BASE_URL;
 
 module.exports = {
   siteUrl,
+
+  /* =================================
+     STATIC EXPORT COMPATIBILITY
+  ================================= */
+  outDir: "./out", // critical for nginx static hosting
 
   /* =================================
      CORE
   ================================= */
   generateRobotsTxt: true,
   generateIndexSitemap: true,
-  sitemapSize: 7000, // supports 1000s of pages safely
+  sitemapSize: 7000,
   autoLastmod: true,
 
   /* =================================
@@ -47,7 +40,7 @@ module.exports = {
   ],
 
   /* =================================
-     ROBOTS.TXT
+     ROBOTS
   ================================= */
   robotsTxtOptions: {
     policies: [
@@ -57,25 +50,18 @@ module.exports = {
       },
       {
         userAgent: "*",
-        disallow: [
-          "/admin",
-          "/api",
-          "/dashboard",
-          "/private",
-        ],
+        disallow: ["/admin", "/api", "/dashboard", "/private"],
       },
     ],
     additionalSitemaps: [`${siteUrl}/sitemap.xml`],
   },
 
   /* =================================
-     DYNAMIC PRIORITY RULES
-     This is the important part
+     SMART PRIORITY LOGIC
   ================================= */
   transform: async (config, path) => {
     const now = new Date().toISOString();
 
-    /* homepage */
     if (path === "/") {
       return {
         loc: path,
@@ -85,7 +71,6 @@ module.exports = {
       };
     }
 
-    /* category hubs */
     const categoryRules = [
       { prefix: "/finance", priority: 0.95, freq: "daily" },
       { prefix: "/construction", priority: 0.9, freq: "weekly" },
@@ -97,20 +82,10 @@ module.exports = {
 
     const rule = categoryRules.find((r) => path.startsWith(r.prefix));
 
-    if (rule) {
-      return {
-        loc: path,
-        changefreq: rule.freq,
-        priority: rule.priority,
-        lastmod: now,
-      };
-    }
-
-    /* fallback */
     return {
       loc: path,
-      changefreq: config.changefreq,
-      priority: config.priority,
+      changefreq: rule?.freq ?? config.changefreq,
+      priority: rule?.priority ?? config.priority,
       lastmod: now,
     };
   },

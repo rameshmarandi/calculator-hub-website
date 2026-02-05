@@ -5,14 +5,21 @@ import calculators from "@/data/calculators";
 import { buildCalculatorMetadata } from "@/lib/seo";
 
 /* =====================================
-   ✅ META (SERVER)
+   STATIC PARAMS (REQUIRED FOR EXPORT)
+===================================== */
+export function generateStaticParams() {
+  return calculators.astrology.map((c) => ({
+    calculator: c.slug,
+  }));
+}
+
+/* =====================================
+   META
 ===================================== */
 export async function generateMetadata({ params }) {
-  const { calculator } = await params; // ✅ REQUIRED in Next 16
+  const { calculator } = await params;
 
-  const calc = calculators.astrology.find(
-    (c) => c.slug === calculator
-  );
+  const calc = calculators.astrology.find((c) => c.slug === calculator);
 
   if (!calc) return {};
 
@@ -20,20 +27,17 @@ export async function generateMetadata({ params }) {
 }
 
 /* =====================================
-   ✅ PAGE (SERVER COMPONENT)
+   PAGE
 ===================================== */
 export default async function CalculatorPage({ params }) {
-  const { calculator } = await params; // ✅ REQUIRED
+  const { calculator } = await params;
 
-  const CalculatorComponent =
-    ASTROLOGY_CALCULATOR_MAP[calculator];
+  const CalculatorComponent = ASTROLOGY_CALCULATOR_MAP[calculator];
 
   if (!CalculatorComponent) {
     return (
       <div className="py-20 text-center">
-        <h1 className="text-xl font-semibold">
-          Calculator coming soon
-        </h1>
+        <h1 className="text-xl font-semibold">Calculator coming soon</h1>
       </div>
     );
   }

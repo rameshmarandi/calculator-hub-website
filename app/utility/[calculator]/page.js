@@ -6,20 +6,27 @@ import calculators from "@/data/calculators";
 import { buildCalculatorMetadata } from "@/lib/seo";
 
 /* ===============================================
-   STATIC BUILD
-   Makes pages prerendered → faster + better SEO
+   STATIC PARAMS (MANDATORY FOR output: "export")
+   
+=============================================== */
+export function generateStaticParams() {
+  return calculators.utility.map((c) => ({
+    calculator: c.slug,
+  }));
+}
+
+/* ===============================================
+   FORCE STATIC
 =============================================== */
 export const dynamic = "force-static";
 
 /* ===============================================
-   SEO METADATA (dynamic per slug)
+   SEO METADATA
 =============================================== */
 export async function generateMetadata({ params }) {
   const { calculator } = await params;
 
-  const calc = calculators.utility.find(
-    (c) => c.slug === calculator
-  );
+  const calc = calculators.utility.find((c) => c.slug === calculator);
 
   if (!calc) return {};
 
@@ -32,11 +39,10 @@ export async function generateMetadata({ params }) {
 export default async function CalculatorPage({ params }) {
   const { calculator } = await params;
 
-  const CalculatorComponent =
-    UTILITY_CALCULATOR_MAP[calculator];
+  const CalculatorComponent = UTILITY_CALCULATOR_MAP[calculator];
 
   if (!CalculatorComponent) {
-    notFound(); // proper 404 for SEO
+    notFound();
   }
 
   const schema = {
@@ -49,7 +55,6 @@ export default async function CalculatorPage({ params }) {
 
   return (
     <>
-      {/* Structured data for Google */}
       <Script
         id="utility-calculator-schema"
         type="application/ld+json"

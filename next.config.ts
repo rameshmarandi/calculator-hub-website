@@ -1,7 +1,29 @@
-import type { NextConfig } from "next";
+import type { NextConfig } from 'next'
 
 const nextConfig: NextConfig = {
-  /* config options here */
-};
+  /* ============================= */
+  /* STATIC EXPORT (Next 15/16)   */
+  /* ============================= */
+  output: 'export',
 
-export default nextConfig;
+  /* ============================= */
+  /* REQUIRED FOR STATIC IMAGES   */
+  /* ============================= */
+  images: {
+    unoptimized: true
+  },
+
+  /* ============================= */
+  /* ROUTING STABILITY FOR NGINX  */
+  /* ============================= */
+  trailingSlash: true,
+
+  /* ============================= */
+  /* PERF + SECURITY              */
+  /* ============================= */
+  compress: true,
+  poweredByHeader: false,
+  reactStrictMode: true
+}
+
+export default nextConfig
