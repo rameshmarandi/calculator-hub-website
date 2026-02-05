@@ -4,7 +4,7 @@ export default function TermsPage() {
       <h1 className="text-3xl font-bold mb-4">Terms of Service</h1>
 
       <p className="mb-4">
-        By accessing and using QuickCalcfy, you agree to comply with and be bound
+        By accessing and using Swiftcalcfy, you agree to comply with and be bound
         by the following terms and conditions.
       </p>
 
@@ -20,7 +20,7 @@ export default function TermsPage() {
       </p>
 
       <p>
-        QuickCalcfy reserves the right to modify or discontinue any part of the
+        Swiftcalcfy reserves the right to modify or discontinue any part of the
         website at any time without prior notice.
       </p>
     </main>

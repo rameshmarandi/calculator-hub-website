@@ -6,7 +6,7 @@ import Sidebar from "@/components/Sidebar";
 import RightSidebar from "@/components/RightSidebar";
 
 export const metadata = {
-  title: `QuickCalcfy - Free Online Calculators`,
+  title: `Swiftcalcfy - Free Online Calculators`,
   description:
     "Free online calculators for finance, health, construction, education and more.",
 };
