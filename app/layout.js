@@ -6,7 +6,7 @@ import Sidebar from "@/components/Sidebar";
 import RightSidebar from "@/components/RightSidebar";
 
 export const metadata = {
-  title: "EasyCalc - Free Online Calculators",
+  title: `QuickCalcfy - Free Online Calculators`,
   description:
     "Free online calculators for finance, health, construction, education and more.",
 };

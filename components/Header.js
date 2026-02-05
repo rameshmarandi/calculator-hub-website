@@ -34,7 +34,7 @@ export default function Header() {
             className="text-xl font-bold shrink-0"
             style={{ color: "var(--primary)" }}
           >
-            EasyCalc
+            QuickCalcfy
           </Link>
 
           {/* SEARCH */}
@@ -77,7 +77,7 @@ export default function Header() {
               className="text-lg font-bold"
               style={{ color: "var(--primary)" }}
             >
-              EasyCalc
+              QuickCalcfy
             </Link>
 
             <div className="flex items-center gap-2">

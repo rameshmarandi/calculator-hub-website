@@ -14,7 +14,7 @@ export default function ContactPage() {
       </p>
 
       <p className="font-medium mb-6">
-        📧 support@easycalc.com
+        📧 support@QuickCalcfy.com
       </p>
 
       <p>

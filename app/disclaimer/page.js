@@ -4,7 +4,7 @@ export default function DisclaimerPage() {
       <h1 className="text-3xl font-bold mb-4">Disclaimer</h1>
 
       <p className="mb-4">
-        The calculators and information provided on EasyCalc are intended for
+        The calculators and information provided on QuickCalcfy are intended for
         general informational purposes only. They should not be considered as
         professional financial, medical, legal, or investment advice.
       </p>
@@ -21,7 +21,7 @@ export default function DisclaimerPage() {
       </p>
 
       <p>
-        By using this website, you agree that EasyCalc is not responsible for
+        By using this website, you agree that QuickCalcfy is not responsible for
         any losses, damages, or decisions made based on the information
         provided.
       </p>

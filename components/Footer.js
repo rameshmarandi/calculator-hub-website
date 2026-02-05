@@ -13,7 +13,7 @@ export default function Footer() {
 
         {/* BRAND */}
         <div>
-          <h3 className="font-semibold mb-2">EasyCalc</h3>
+          <h3 className="font-semibold mb-2">QuickCalcfy</h3>
           <p style={{ color: "var(--text-muted)" }}>
             Free online calculators for finance, health, construction,
             education, and everyday use.
@@ -56,7 +56,7 @@ export default function Footer() {
         className="text-center text-xs py-3"
         style={{ color: "var(--text-muted)" }}
       >
-        © {new Date().getFullYear()} EasyCalc. All rights reserved.
+        © {new Date().getFullYear()} QuickCalcfy. All rights reserved.
       </div>
     </footer>
   );
