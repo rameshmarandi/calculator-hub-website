@@ -32,7 +32,7 @@ export default function Header() {
             href="/"
             className="text-xl font-bold shrink-0"
             style={{ color: "var(--primary)" }}>
-            Swiftcalcfy(Ramesh Marandi)
+            Swiftcalcfy(Ramesh Marandi Sanda)
           </Link>
 
           {/* SEARCH */}
