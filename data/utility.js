@@ -1,35 +1,65 @@
-import AgeCalculator from "../components/calculators/utility/AgeCalculator";
-import BinaryCalculator from "../components/calculators/utility/BinaryCalculator";
-import DateDifferenceCalculator from "../components/calculators/utility/DateDifferenceCalculator";
-import DiscountCalculator from "../components/calculators/utility/DiscountCalculator";
-import EquationSolver from "../components/calculators/utility/EquationSolver";
-import LogarithmCalculator from "../components/calculators/utility/LogarithmCalculator";
-import MatrixCalculator from "../components/calculators/utility/MatrixCalculator";
-import PercentageDecreaseCalculator from "../components/calculators/utility/PercentageDecreaseCalculator";
-import PercentageIncreaseCalculator from "../components/calculators/utility/PercentageIncreaseCalculator";
-import PowerCalculator from "../components/calculators/utility/PowerCalculator";
-import ProfitLossCalculator from "../components/calculators/utility/ProfitLossCalculator";
-import ScientificCalculator from "../components/calculators/utility/ScientificCalculator";
-import SimpleCalculator from "../components/calculators/utility/SimpleCalculator";
-import TimeCalculator from "../components/calculators/utility/TimeCalculator";
-import UnitConverter from "../components/calculators/utility/UnitConverter";
+import dynamic from "next/dynamic";
 
 const UTILITY_CALCULATOR_MAP = {
-  "age-calculator": AgeCalculator,
-  "date-difference-calculator": DateDifferenceCalculator,
-  "time-calculator": TimeCalculator,
-  "unit-converter": UnitConverter,
-  "percentage-increase-calculator": PercentageIncreaseCalculator,
-  "percentage-decrease-calculator": PercentageDecreaseCalculator,
-  "discount-calculator": DiscountCalculator,
-  "profit-and-loss-calculator": ProfitLossCalculator,
-  "simple-calculator": SimpleCalculator,
-  "scientific-calculator": ScientificCalculator,
-  "binary-calculator": BinaryCalculator,
-  "matrix-calculator": MatrixCalculator,
-  "equation-solver": EquationSolver,
-  "logarithm-calculator": LogarithmCalculator,
-  "power-calculator": PowerCalculator,
+  "age-calculator": dynamic(() =>
+    import("../components/calculators/utility/AgeCalculator")
+  ),
+
+  "date-difference-calculator": dynamic(() =>
+    import("../components/calculators/utility/DateDifferenceCalculator")
+  ),
+
+  "time-calculator": dynamic(() =>
+    import("../components/calculators/utility/TimeCalculator")
+  ),
+
+  "unit-converter": dynamic(() =>
+    import("../components/calculators/utility/UnitConverter")
+  ),
+
+  "percentage-increase-calculator": dynamic(() =>
+    import("../components/calculators/utility/PercentageIncreaseCalculator")
+  ),
+
+  "percentage-decrease-calculator": dynamic(() =>
+    import("../components/calculators/utility/PercentageDecreaseCalculator")
+  ),
+
+  "discount-calculator": dynamic(() =>
+    import("../components/calculators/utility/DiscountCalculator")
+  ),
+
+  "profit-and-loss-calculator": dynamic(() =>
+    import("../components/calculators/utility/ProfitLossCalculator")
+  ),
+
+  "simple-calculator": dynamic(() =>
+    import("../components/calculators/utility/SimpleCalculator")
+  ),
+
+  "scientific-calculator": dynamic(() =>
+    import("../components/calculators/utility/ScientificCalculator")
+  ),
+
+  "binary-calculator": dynamic(() =>
+    import("../components/calculators/utility/BinaryCalculator")
+  ),
+
+  "matrix-calculator": dynamic(() =>
+    import("../components/calculators/utility/MatrixCalculator")
+  ),
+
+  "equation-solver": dynamic(() =>
+    import("../components/calculators/utility/EquationSolver")
+  ),
+
+  "logarithm-calculator": dynamic(() =>
+    import("../components/calculators/utility/LogarithmCalculator")
+  ),
+
+  "power-calculator": dynamic(() =>
+    import("../components/calculators/utility/PowerCalculator")
+  ),
 };
 
 export default UTILITY_CALCULATOR_MAP;

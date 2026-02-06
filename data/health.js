@@ -1,43 +1,81 @@
-import BloodPressureCalculator from "../components/calculators/health/BloodPressureCalculator";
-import BMICalculator from "../components/calculators/health/BMICalculator";
-import BMRCalculator from "../components/calculators/health/BMRCalculator";
-import BodyFatPercentageCalculator from "../components/calculators/health/BodyFatPercentageCalculator";
-import CalorieBurnCalculator from "../components/calculators/health/CalorieBurnCalculator";
-import CalorieIntakeCalculator from "../components/calculators/health/CalorieIntakeCalculator";
-import ChildGrowthCalculator from "../components/calculators/health/ChildGrowthCalculator";
-import DiabetesRiskCalculator from "../components/calculators/health/DiabetesRiskCalculator";
-import HeartRateCalculator from "../components/calculators/health/HeartRateCalculator";
-import IdealWeightCalculator from "../components/calculators/health/IdealWeightCalculator";
-import KetoCalculator from "../components/calculators/health/KetoCalculator";
-import OvulationCalculator from "../components/calculators/health/OvulationCalculator";
-import PregnancyDueDateCalculator from "../components/calculators/health/PregnancyDueDateCalculator";
-import ProteinIntakeCalculator from "../components/calculators/health/ProteinIntakeCalculator";
-import TDEECalculator from "../components/calculators/health/TDEECalculator";
-import VO2MaxCalculator from "../components/calculators/health/VO2MaxCalculator";
-import WaterIntakeCalculator from "../components/calculators/health/WaterIntakeCalculator";
-import WeightGainCalculator from "../components/calculators/health/WeightGainCalculator";
-import WeightLossCalculator from "../components/calculators/health/WeightLossCalculator";
+import dynamic from "next/dynamic";
 
 const HEALTH_CALCULATOR_MAP = {
-  "bmi-calculator": BMICalculator,
-  "bmr-calculator": BMRCalculator,
-  "tdee-calculator": TDEECalculator,
-  "ideal-weight-calculator": IdealWeightCalculator,
-  "body-fat-percentage-calculator": BodyFatPercentageCalculator,
-  "calorie-intake-calculator": CalorieIntakeCalculator,
-  "protein-intake-calculator": ProteinIntakeCalculator,
-  "water-intake-calculator": WaterIntakeCalculator,
-  "weight-gain-calculator": WeightGainCalculator,
-  "weight-loss-calculator": WeightLossCalculator,
-  "pregnancy-due-date-calculator": PregnancyDueDateCalculator,
-  "ovulation-calculator": OvulationCalculator,
-  "heart-rate-calculator": HeartRateCalculator,
-  "blood-pressure-calculator": BloodPressureCalculator,
-  "diabetes-risk-calculator": DiabetesRiskCalculator,
-  "keto-calculator": KetoCalculator,
-  "child-growth-calculator": ChildGrowthCalculator,
-  "calorie-burn-calculator": CalorieBurnCalculator,
-  "vo2-max-calculator": VO2MaxCalculator,
+  "bmi-calculator": dynamic(() =>
+    import("../components/calculators/health/BMICalculator")
+  ),
+
+  "bmr-calculator": dynamic(() =>
+    import("../components/calculators/health/BMRCalculator")
+  ),
+
+  "tdee-calculator": dynamic(() =>
+    import("../components/calculators/health/TDEECalculator")
+  ),
+
+  "ideal-weight-calculator": dynamic(() =>
+    import("../components/calculators/health/IdealWeightCalculator")
+  ),
+
+  "body-fat-percentage-calculator": dynamic(() =>
+    import("../components/calculators/health/BodyFatPercentageCalculator")
+  ),
+
+  "calorie-intake-calculator": dynamic(() =>
+    import("../components/calculators/health/CalorieIntakeCalculator")
+  ),
+
+  "protein-intake-calculator": dynamic(() =>
+    import("../components/calculators/health/ProteinIntakeCalculator")
+  ),
+
+  "water-intake-calculator": dynamic(() =>
+    import("../components/calculators/health/WaterIntakeCalculator")
+  ),
+
+  "weight-gain-calculator": dynamic(() =>
+    import("../components/calculators/health/WeightGainCalculator")
+  ),
+
+  "weight-loss-calculator": dynamic(() =>
+    import("../components/calculators/health/WeightLossCalculator")
+  ),
+
+  "pregnancy-due-date-calculator": dynamic(() =>
+    import("../components/calculators/health/PregnancyDueDateCalculator")
+  ),
+
+  "ovulation-calculator": dynamic(() =>
+    import("../components/calculators/health/OvulationCalculator")
+  ),
+
+  "heart-rate-calculator": dynamic(() =>
+    import("../components/calculators/health/HeartRateCalculator")
+  ),
+
+  "blood-pressure-calculator": dynamic(() =>
+    import("../components/calculators/health/BloodPressureCalculator")
+  ),
+
+  "diabetes-risk-calculator": dynamic(() =>
+    import("../components/calculators/health/DiabetesRiskCalculator")
+  ),
+
+  "keto-calculator": dynamic(() =>
+    import("../components/calculators/health/KetoCalculator")
+  ),
+
+  "child-growth-calculator": dynamic(() =>
+    import("../components/calculators/health/ChildGrowthCalculator")
+  ),
+
+  "calorie-burn-calculator": dynamic(() =>
+    import("../components/calculators/health/CalorieBurnCalculator")
+  ),
+
+  "vo2-max-calculator": dynamic(() =>
+    import("../components/calculators/health/VO2MaxCalculator")
+  ),
 };
 
 export default HEALTH_CALCULATOR_MAP;

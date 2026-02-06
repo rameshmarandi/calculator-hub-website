@@ -4,7 +4,7 @@ export default function PrivacyPolicyPage() {
       <h1 className="text-3xl font-bold mb-4">Privacy Policy</h1>
 
       <p className="mb-4">
-        At EasyCalc, your privacy is important to us. This Privacy Policy
+        At Swiftcalcfy, your privacy is important to us. This Privacy Policy
         explains how we handle information when you use our website.
       </p>
 
@@ -35,7 +35,7 @@ export default function PrivacyPolicyPage() {
       </p>
 
       <p>
-        By using EasyCalc, you agree to this Privacy Policy.
+        By using Swiftcalcfy, you agree to this Privacy Policy.
       </p>
     </main>
   );
