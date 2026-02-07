@@ -1,33 +1,90 @@
-import { BRAND_NAME } from "../../lib/constant";
-
 export default function AboutPage() {
   return (
-    <main className="max-w-3xl mx-auto px-4 py-12">
-      <h1 className="text-3xl font-bold mb-4">{`About ${BRAND_NAME}`}</h1>
+    <main className="max-w-3xl mx-auto px-4 py-12 text-gray-800 leading-7">
+      <h1 className="text-3xl font-bold mb-4">About Us</h1>
 
       <p className="mb-4">
-        Swiftcalcfy is a free online calculator platform designed to help users
-        make quick, accurate, and informed calculations across multiple domains.
-        Our goal is to simplify complex calculations and make them accessible
-        to everyone, without requiring registrations or downloads.
+        Welcome to <strong>Swiftcalcfy</strong>, a fast, reliable, and free
+        online calculator platform designed to make everyday calculations simple
+        for everyone.
       </p>
 
-      <p className="mb-4">
-        We provide calculators for finance, health and fitness, construction,
-        education, astrology, and general daily use. Each calculator is built
-        with a focus on accuracy, simplicity, and mobile-friendly design.
-      </p>
+      {/* ---------------------- Mission ---------------------- */}
+
+      <h2 className="text-xl font-semibold mt-8 mb-2">Our Mission</h2>
 
       <p className="mb-4">
-        Swiftcalcfy is suitable for students, professionals, homeowners, investors,
-        and anyone who needs reliable calculation tools. All calculations are
-        performed instantly in your browser, ensuring speed and privacy.
+        Our mission is straightforward. Provide accurate, instant, and easy to
+        use calculators that save time and remove manual effort. Whether you are
+        calculating loan EMIs, taxes, health metrics, construction estimates, or
+        daily math problems, Swiftcalcfy helps you get results quickly without
+        complexity.
       </p>
+
+      {/* ---------------------- What We Offer ---------------------- */}
+
+      <h2 className="text-xl font-semibold mt-8 mb-2">What We Offer</h2>
+
+      <ul className="list-disc pl-6 mb-4 space-y-1">
+        <li>Finance and investment calculators</li>
+        <li>Loan and EMI calculators</li>
+        <li>Health and fitness tools</li>
+        <li>Construction and area calculators</li>
+        <li>Education and percentage tools</li>
+        <li>General everyday utility calculators</li>
+      </ul>
+
+      <p className="mb-4">
+        All tools work directly in your browser with no registration required.
+        You get instant results with a clean and distraction free experience.
+      </p>
+
+      {/* ---------------------- Why Trust ---------------------- */}
+
+      <h2 className="text-xl font-semibold mt-8 mb-2">
+        Why Choose Swiftcalcfy
+      </h2>
+
+      <ul className="list-disc pl-6 mb-4 space-y-1">
+        <li>100 percent free to use</li>
+        <li>No account or login required</li>
+        <li>Fast and lightweight performance</li>
+        <li>Mobile friendly design</li>
+        <li>Accurate formulas and instant results</li>
+        <li>Regular updates and improvements</li>
+      </ul>
+
+      {/* ---------------------- Vision ---------------------- */}
+
+      <h2 className="text-xl font-semibold mt-8 mb-2">Our Vision</h2>
+
+      <p className="mb-4">
+        We aim to build one of the most comprehensive calculator platforms on
+        the internet with hundreds of tools covering finance, health, education,
+        and daily productivity. Our focus is on simplicity, performance, and
+        usefulness rather than unnecessary complexity.
+      </p>
+
+      {/* ---------------------- Transparency ---------------------- */}
+
+      <h2 className="text-xl font-semibold mt-8 mb-2">Transparency</h2>
+
+      <p className="mb-4">
+        Swiftcalcfy may display advertisements to support hosting and
+        development costs. We always aim to keep the experience clean and
+        user-friendly. Your privacy and trust remain our top priority.
+      </p>
+
+      {/* ---------------------- Contact ---------------------- */}
+
+      <h2 className="text-xl font-semibold mt-8 mb-2">Get in Touch</h2>
 
       <p>
-        We continuously improve our calculators and add new tools to better
-        serve our users. If you have suggestions or feedback, feel free to
-        contact us.
+        Have suggestions, feedback, or feature requests? We are always
+        improving.
+        <br />
+        Contact us at:{" "}
+        <span className="font-medium">support@swiftcalcfy.com</span>
       </p>
     </main>
   );
