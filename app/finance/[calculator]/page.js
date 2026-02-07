@@ -23,9 +23,7 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }) {
   const { calculator } = await params;
 
-  const calc = calculators.finance.find(
-    (c) => c.slug === calculator
-  );
+  const calc = calculators.finance.find((c) => c.slug === calculator);
 
   if (!calc) return {};
 
@@ -43,15 +41,57 @@ export default async function CalculatorPage({ params }) {
   if (!CalculatorComponent) notFound();
 
   /* ---------- JSON-LD Schema ---------- */
-  const schema = {
+  // const schema = {
+  //   "@context": "https://schema.org",
+  //   "@type": "WebApplication",
+  //   name: calculator.replace(/-/g, " "),
+  //   applicationCategory: "FinanceApplication",
+  //   operatingSystem: "Any",
+  //   url: `${FULL_BASE_URL}/finance/${calculator}`,
+  // };
+
+  /* ---------- Schemas ---------- */
+  const title = calculator.replace(/-/g, " ");
+  const appSchema = {
     "@context": "https://schema.org",
-    "@type": "WebApplication",
-    name: calculator.replace(/-/g, " "),
+    "@type": "SoftwareApplication",
+    name: title,
     applicationCategory: "FinanceApplication",
     operatingSystem: "Any",
     url: `${FULL_BASE_URL}/finance/${calculator}`,
+    offers: {
+      "@type": "Offer",
+      price: "0",
+      priceCurrency: "INR",
+    },
   };
 
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Home",
+        item: FULL_BASE_URL,
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "Finance Calculators",
+        item: `${FULL_BASE_URL}/finance`,
+      },
+      {
+        "@type": "ListItem",
+        position: 3,
+        name: title,
+        item: `${FULL_BASE_URL}/finance/${calculator}`,
+      },
+    ],
+  };
+
+  const schemas = [appSchema, breadcrumbSchema];
   return (
     <>
       <Script
@@ -59,7 +99,7 @@ export default async function CalculatorPage({ params }) {
         type="application/ld+json"
         strategy="beforeInteractive"
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify(schema),
+          __html: JSON.stringify(schemas),
         }}
       />
 

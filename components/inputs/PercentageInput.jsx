@@ -1,90 +1,87 @@
-// export function PercentageInput({
-//   label,
-//   value,
-//   onChange,
-//   placeholder,
-//   hasError = false,
-// }) {
-//   return (
-//     <label className="block space-y-1">
-//       <span className="text-sm font-medium">
-//         {label}
-//       </span>
-
-//       <div className="relative">
-//         <input
-//           type="number"
-//           step="0.01"
-//           value={value}
-//           placeholder={placeholder}
-//           onChange={e => onChange(e.target.value)}
-//           className="w-full rounded-md px-3 py-2 pr-10 border transition"
-//           style={{
-//             backgroundColor: "var(--surface-2)",
-//             borderColor: hasError ? "#f87171" : "var(--border)",
-//           }}
-//         />
-
-//         {/* % Suffix */}
-//         <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-gray-500">
-//           %
-//         </span>
-//       </div>
-//     </label>
-//   );
-// }
-
-
-export function PercentageInput({
+export function PercentageInput ({
   label,
   value,
   onChange,
   placeholder,
-  hasError = false,
+  min = 0,
+  max = 100
 }) {
-  function handleChange(e) {
-    let raw = e.target.value;
+  const hasError = value !== '' && (Number(value) < min || Number(value) > max)
 
-    // digits + decimal only
-    raw = raw.replace(/[^0-9.]/g, "");
+  function handleChange (e) {
+    let raw = e.target.value
 
-    const parts = raw.split(".");
-    if (parts.length > 2) return;
+    // allow digits + decimal
+    raw = raw.replace(/[^0-9.]/g, '')
 
-    const num = raw === "" ? "" : Number(raw);
+    // only one dot
+    const parts = raw.split('.')
+    if (parts.length > 2) return
 
-    // clamp 0 to 100
-    if (num !== "" && (num < 0 || num > 100)) return;
+    // limit decimal precision (optional but professional)
+    if (parts[1]?.length > 2) return
 
-    onChange(raw);
+    // KEEP STRING (important)
+    onChange(raw)
   }
 
   return (
-    <label className="block space-y-1">
-      <span className="text-sm font-medium">{label}</span>
+    <label className='block space-y-1'>
+      <span className='text-sm font-medium text-[var(--text-main)]'>
+        {label}
+      </span>
 
-      <div className="relative">
+      <div className='relative'>
         <input
-          type="text"
-          inputMode="decimal"
-          value={value}
+          type='text'
+          inputMode='decimal'
+          value={value ?? ''}
           placeholder={placeholder}
           onChange={handleChange}
-          onWheel={(e) => e.target.blur()}
-          className="
-            w-full rounded-md px-3 py-2 pr-10 border transition
-            bg-[var(--surface-2)]
-            focus:ring-2 focus:ring-indigo-500
-          "
+          onWheel={e => e.target.blur()}
+          className='
+            // w-full rounded-md px-3 py-2 pr-10 border transition
+            // bg-[var(--surface-2)]
+            // text-[var(--text-main)]
+            // transition-all duration-200
+
+            // border-[var(--border)]
+
+            // focus:outline-none
+            // focus:border-indigo-500
+            // focus:bg-[var(--surface)]
+            // focus:shadow-[0_0_0_3px_rgba(99,102,241,0.08)]
+             w-full
+          rounded-lg
+          px-3 py-2
+          border
+          bg-[var(--surface-2)]
+          text-[var(--text-main)]
+
+         transition-all duration-200
+
+            border-[var(--border)]
+
+            focus:outline-none
+            focus:border-indigo-500
+            focus:bg-[var(--surface)]
+            focus:shadow-[0_0_0_3px_rgba(99,102,241,0.08)]
+          '
           style={{
-            borderColor: hasError ? "#f87171" : "var(--border)",
+            borderColor: hasError ? '#ef4444' : 'var(--border)'
           }}
         />
 
-        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-gray-500">
+        <span className='absolute right-3 top-1/2 -translate-y-1/2 text-sm text-gray-400'>
           %
         </span>
       </div>
+
+      {hasError && (
+        <p className='text-xs text-red-500'>
+          Enter between {min}% and {max}%
+        </p>
+      )}
     </label>
-  );
+  )
 }

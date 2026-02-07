@@ -1,223 +1,186 @@
 "use client";
 
-import { useState } from "react";
-import {
-  Calendar,
-  Calculator,
-  Wallet,
-  TrendingUp,
-  IndianRupee,
-  FileText,
-} from "lucide-react";
+import { useMemo, useState } from "react";
 
-import { PercentageInput } from "../../inputs/PercentageInput";
-import { AmountInput } from "../../inputs/AmountInput";
-import { ResultCard } from "../../ResultCard";
-import { InputField } from "../../inputs/InputField";
+import CalculatorLayout from "@/components/core/CalculatorLayout";
+import InputsGrid from "@/components/core/InputsGrid";
+import ResultHero from "@/components/core/ResultHero";
+import DonutBreakdownChart from "@/components/core/DonutBreakdownChart";
+import StatsGrid from "@/components/core/StatsGrid";
+import ComparisonMatrix from "@/components/core/ComparisonMatrix";
+import DataTable from "@/components/core/DataTable";
+import ExplanationText from "@/components/core/ExplanationText";
+
+import { calculateEmi } from "@/lib/emiMath";
+import { formatINR } from "@/lib/format";
+
+import EMIArticle from "../../content/finance/EMIArticle";
+import HomeLoanEMIArticle from "../../content/finance/HomeLoanEMIArticle";
+
+/*
+  STRUCTURE RULES FOLLOWED:
+  - page orchestrates only
+  - math in lib
+  - layout reusable
+  - no default values
+  - results only after valid input
+*/
 
 export default function HomeLoanEmiCalculator() {
-  const [loanAmount, setLoanAmount] = useState("");
-  const [interestRate, setInterestRate] = useState("");
-  const [tenureYears, setTenureYears] = useState("");
-  const [result, setResult] = useState(null);
-  const [error, setError] = useState("");
+  /* ================= STATE ================= */
 
-  /* ---------------- VALIDATION (HOME LOAN SPECIFIC) ---------------- */
-  function validate() {
-  if (!loanAmount || Number(loanAmount) <= 0) {
-    setError("Please enter a valid loan amount.");
-    return false;
-  }
+  const [values, setValues] = useState({
+    loan: "",
+    rate: "",
+    years: "",
+  });
 
-  if (
-    interestRate === "" ||
-    Number(interestRate) < 0 ||
-    Number(interestRate) > 100
-  ) {
-    setError("Interest rate should be between 0% and 100%.");
-    return false;
-  }
+  /* ================= VALIDATION ================= */
 
-  if (!tenureYears || Number(tenureYears) <= 0) {
-    setError("Loan tenure must be greater than 0.");
-    return false;
-  }
+  const isValid =
+    Number(values.loan) > 0 &&
+    Number(values.rate) > 0 &&
+    Number(values.years) > 0;
 
-  setError("");
-  return true;
-}
+  /* ================= CALCULATION ================= */
 
+  const result = useMemo(() => {
+    if (!isValid) return null;
 
-  /* ---------------- CALCULATION ---------------- */
-  function calculateEMI(e) {
-    e.preventDefault();
+    return calculateEmi(
+      Number(values.loan),
+      Number(values.rate),
+      Number(values.years),
+    );
+  }, [values, isValid]);
 
-    if (!validate()) {
-      setResult(null);
-      return;
-    }
+  /* ================= INPUT CONFIG ================= */
 
-    const P = Number(loanAmount);
-    const annualRate = Number(interestRate);
-    const years = Number(tenureYears);
+  const inputs = [
+    {
+      key: "loan",
+      label: "Home Loan Amount",
+      type: "amount",
+      placeholder: "50,00,000",
+      hint: "Enter total home loan amount",
+    },
+    {
+      key: "rate",
+      label: "Interest Rate (%)",
+      type: "percent",
+      placeholder: "8.5",
+      hint: "Annual home loan interest rate",
+    },
+    {
+      key: "years",
+      label: "Loan Tenure (Years)",
+      type: "number",
+      placeholder: "20",
+      hint: "Repayment duration in years",
+      min: 1,
+      max: 35,
+    },
+  ];
 
-    const n = years * 12;          // tenure in months
-    const r = annualRate / 12 / 100; // monthly interest rate
-
-    const emi =
-      r === 0
-        ? P / n
-        : (P * r * Math.pow(1 + r, n)) /
-          (Math.pow(1 + r, n) - 1);
-
-    const totalPayment = emi * n;
-    const totalInterest = totalPayment - P;
-
-    setResult({
-      emi: Math.round(emi),
-      totalInterest: Math.round(totalInterest),
-      totalPayment: Math.round(totalPayment),
-    });
-  }
+  /* ================= UI ================= */
 
   return (
-    <section
-      className="rounded-xl p-6 space-y-8"
-      style={{
-        backgroundColor: "var(--surface)",
-        border: "1px solid var(--border)",
-      }}
-    >
-      {/* ================= HEADER ================= */}
-      <header className="space-y-2">
-        <h1 className="text-2xl font-bold">
-          Home Loan EMI Calculator
-        </h1>
+    <CalculatorLayout
+      title="Home Loan EMI Calculator"
+      subtitle="Calculate monthly EMI, total interest payable and complete home loan repayment schedule instantly before applying for a housing loan."
+      badges={[
+        "100% Free",
+        "Instant Results",
+        "Bank Formula Accurate",
+        "No Signup Required",
+      ]}>
+      {/* ================= INPUTS ================= */}
+      <InputsGrid inputs={inputs} values={values} setValues={setValues} />
 
-        <p className="text-sm leading-relaxed">
-          Use this Home Loan EMI Calculator to calculate your monthly EMI,
-          total interest payable, and total repayment amount. It helps you
-          plan your home loan effectively before applying with a bank or NBFC.
-        </p>
-      </header>
-
-      {/* ================= FORM ================= */}
-      <form onSubmit={calculateEMI} className="space-y-4">
-        <AmountInput
-          label="Loan Amount"
-          value={loanAmount}
-          onChange={setLoanAmount}
-          placeholder="50,00,000"
-          hasError={error.toLowerCase().includes("loan")}
-        />
-
-        <PercentageInput
-          label="Interest Rate (per annum)"
-          value={interestRate}
-          onChange={setInterestRate}
-          placeholder="8.5"
-          hasError={error.toLowerCase().includes("interest")}
-        />
-
-        <InputField
-          icon={<Calendar size={18} />}
-          label="Loan Tenure (in years)"
-          value={tenureYears}
-          onChange={setTenureYears}
-          placeholder="20"
-          min={1}
-          max={30}
-          hasError={error.toLowerCase().includes("tenure")}
-        />
-
-        {error && (
-          <p className="text-sm text-red-500">
-            {error}
-          </p>
-        )}
-
-        <button
-          type="submit"
-          className="w-full py-2.5 rounded-md font-medium flex items-center justify-center gap-2"
-          style={{ backgroundColor: "var(--primary)", color: "#fff" }}
-        >
-          <Calculator size={18} />
-          Calculate EMI
-        </button>
-      </form>
-
-      {/* ================= RESULT ================= */}
+      {/* ================= RESULTS ================= */}
       {result && (
-        <div className="grid md:grid-cols-3 gap-4" aria-live="polite">
-          <ResultCard
-            variant="primary"
-            icon={<Wallet size={20} />}
-            label="Monthly EMI"
-            value={`₹ ${result.emi.toLocaleString("en-IN")}`}
+        <>
+          {/* MAIN HERO RESULT */}
+          <ResultHero label="Monthly EMI" value={result.emi} />
+
+          {/* DONUT BREAKDOWN */}
+          <DonutBreakdownChart
+            data={[
+              {
+                name: "Principal",
+                value: Number(values.loan),
+              },
+              {
+                name: "Interest",
+                value: result.totalInterest,
+              },
+            ]}
           />
 
-          <ResultCard
-            variant="warning"
-            icon={<TrendingUp size={20} />}
-            label="Total Interest Payable"
-            value={`₹ ${result.totalInterest.toLocaleString("en-IN")}`}
+          {/* STATS GRID */}
+          <StatsGrid
+            items={[
+              {
+                label: "Loan Amount",
+                value: formatINR(Number(values.loan)),
+                variant: "neutral",
+              },
+              {
+                label: "Total Interest Payable",
+                value: formatINR(result.totalInterest),
+                variant: "danger",
+              },
+              {
+                label: "Total Payment",
+                value: formatINR(result.totalPayment),
+                variant: "warning",
+              },
+              {
+                label: "Total Months",
+                value: Number(values.years) * 12,
+                variant: "info",
+              },
+            ]}
           />
 
-          <ResultCard
-            variant="neutral"
-            icon={<IndianRupee size={20} />}
-            label="Total Amount Payable"
-            value={`₹ ${result.totalPayment.toLocaleString("en-IN")}`}
+          {/* EXPLANATION SENTENCE (SEO + UX) */}
+          <ExplanationText
+            text={`For a home loan of ${formatINR(
+              Number(values.loan),
+            )} at ${values.rate}% interest for ${values.years} years, your monthly EMI will be ${formatINR(
+              result.emi,
+            )}. You will pay ${formatINR(
+              result.totalInterest,
+            )} as interest and ${formatINR(
+              result.totalPayment,
+            )} in total over the entire tenure.`}
           />
-        </div>
+
+          {/* TENURE COMPARISON */}
+          <ComparisonMatrix
+            columns={["Tenure", "EMI", "Total Interest"]}
+            rows={[10, 15, 20, 25, 30].map((y) => {
+              const r = calculateEmi(
+                Number(values.loan),
+                Number(values.rate),
+                y,
+              );
+
+              return [
+                `${y} years`,
+                formatINR(r.emi),
+                formatINR(r.totalInterest),
+              ];
+            })}
+          />
+
+          {/* FULL AMORTIZATION TABLE */}
+          <DataTable data={result.schedule} />
+        </>
       )}
 
-      {/* ================= INFO (SEO CONTENT) ================= */}
-      <article className="space-y-4 text-sm leading-relaxed">
-        <h2 className="font-semibold text-base flex items-center gap-2">
-          <FileText size={16} />
-          How Home Loan EMI is Calculated
-        </h2>
-
-        <p>
-          Home loan EMI (Equated Monthly Installment) is calculated using a
-          standard mathematical formula that takes into account the loan
-          amount, interest rate, and loan tenure. Banks and financial
-          institutions use this formula to determine your monthly repayment.
-        </p>
-
-        <div
-          className="rounded p-3 text-xs font-mono"
-          style={{ backgroundColor: "var(--surface-2)" }}
-        >
-          EMI = P × r × (1 + r)<sup>n</sup> / ((1 + r)<sup>n</sup> − 1)
-        </div>
-
-        <ul className="list-disc pl-5">
-          <li><strong>P</strong> = Home Loan Amount</li>
-          <li><strong>r</strong> = Monthly Interest Rate</li>
-          <li><strong>n</strong> = Loan Tenure in Months</li>
-        </ul>
-
-        <p>
-          Choosing a longer tenure reduces your monthly EMI but increases
-          the total interest payable. A shorter tenure increases EMI but
-          significantly lowers overall interest cost.
-        </p>
-      </article>
-
-      {/* ================= BENEFITS ================= */}
-      <aside className="text-sm space-y-2">
-        <h3 className="font-semibold">
-          Why use this Home Loan EMI Calculator?
-        </h3>
-        <ul className="list-disc pl-5">
-          <li>Plan long-term home loan repayments accurately</li>
-          <li>Compare EMI across different loan tenures</li>
-          <li>Understand total interest cost clearly</li>
-          <li>Free, fast, and accurate calculation</li>
-        </ul>
-      </aside>
-    </section>
+      {/* ================= SEO CONTENT ================= */}
+      <HomeLoanEMIArticle />
+    </CalculatorLayout>
   );
 }

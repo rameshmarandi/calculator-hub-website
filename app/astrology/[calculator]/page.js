@@ -41,11 +41,11 @@ export default async function CalculatorPage({ params }) {
       </div>
     );
   }
-
-  const schema = {
+  const title = calculator.replace(/-/g, " ");
+  const appSchema = {
     "@context": "https://schema.org",
-    "@type": "WebApplication",
-    name: `${calculator} Calculator`,
+    "@type": "SoftwareApplication",
+    name: `${title} Calculator`,
     applicationCategory: "LifestyleApplication",
     operatingSystem: "All",
     offers: {
@@ -55,6 +55,33 @@ export default async function CalculatorPage({ params }) {
     },
   };
 
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Home",
+        item: "https://yourdomain.com",
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "Astrology Calculators",
+        item: "https://yourdomain.com/astrology",
+      },
+      {
+        "@type": "ListItem",
+        position: 3,
+        name: `${title} Calculator`,
+        item: `https://yourdomain.com/astrology/${calculator}`,
+      },
+    ],
+  };
+
+  const schemas = [appSchema, breadcrumbSchema];
+
   return (
     <>
       <Script
@@ -62,7 +89,7 @@ export default async function CalculatorPage({ params }) {
         type="application/ld+json"
         strategy="beforeInteractive"
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify(schema),
+          __html: JSON.stringify(schemas),
         }}
       />
 

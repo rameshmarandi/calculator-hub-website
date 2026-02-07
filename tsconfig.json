@@ -31,7 +31,17 @@
     ".next/dev/types/**/*.ts",
     "**/*.mts",
     "app/layout.js",
-    "lib/getCalculator.js"
+    "lib/getCalculator.js",
+    "components/core/StatsGrid.js",
+    "components/core/ResultHero.js",
+    "components/core/InputsGrid.js",
+    "components/core/ExplanationText.js",
+    "components/core/DonutBreakdownChart.js",
+    "components/core/DataTable.js",
+    "components/core/ComparisonMatrix.js",
+    "components/core/CalculatorEngine.js",
+    "components/core/CalculatorLayout.js",
+    "components/core/ArticleBlock.js"
   ],
   "exclude": ["node_modules"]
 }

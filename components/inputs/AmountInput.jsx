@@ -1,81 +1,82 @@
-// import { formatIndianNumber , unformatNumber} from "../../lib/numberFormat";
+import { formatIndianNumber, unformatNumber } from '../../lib/numberFormat'
 
-import { formatIndianNumber, unformatNumber } from "../../lib/numberFormat";
+export function AmountInput ({
+  label,
+  value,
+  onChange,
+  placeholder,
+  min = 1,
+  max = 999999999999
+}) {
+  const hasError = value !== '' && Number(value) < min
 
+  function handleChange (e) {
+    let raw = unformatNumber(e.target.value)
 
+    if (!/^\d*$/.test(raw)) return
 
-// export function AmountInput({ label, value, onChange, placeholder }) {
-//   function handleChange(e) {
-//     const rawValue = unformatNumber(e.target.value);
-//     if (!/^\d*$/.test(rawValue)) return;
-//     onChange(rawValue);
-//   }
+    if (raw.length > 12) return
 
-//   return (
-//     <label className="block space-y-1">
-//       <span className="text-sm font-medium">{label}</span>
+    if (raw === '') {
+      onChange('')
+      return
+    }
 
-//       <div className="relative">
-//         <input
-//           type="text"
-//           value={formatIndianNumber(value)}
-//           placeholder={placeholder}
-//           onChange={handleChange}
-//           className="w-full rounded-md px-3 py-2 pl-8 border"
-//           style={{
-//             backgroundColor: "var(--surface-2)",
-//             borderColor: "var(--border)",
-//           }}
-//         />
+    const num = Number(raw)
 
-//         {/* ₹ Prefix */}
-//         <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-500">
-//           ₹
-//         </span>
-//       </div>
-//     </label>
-//   );
-// }
+    if (num > max) return
 
-
-export function AmountInput({ label, value, onChange, placeholder }) {
-  function handleChange(e) {
-    let raw = unformatNumber(e.target.value);
-
-    // digits only
-    if (!/^\d*$/.test(raw)) return;
-
-    // prevent absurd values (safety)
-    if (raw.length > 12) return;
-
-    onChange(raw);
+    onChange(num)
   }
 
   return (
-    <label className="block space-y-1">
-      <span className="text-sm font-medium">{label}</span>
+    <label className='block space-y-1'>
+      {/* LABEL */}
+      <span className='text-sm font-medium text-[var(--text-main)]'>
+        {label}
+      </span>
 
-      <div className="relative">
+      <div className='relative'>
         <input
-          type="text"
-          inputMode="numeric"   // mobile keypad
-          value={formatIndianNumber(value)}
+          type='text'
+          inputMode='numeric'
+          value={value ? formatIndianNumber(value) : ''}
           placeholder={placeholder}
           onChange={handleChange}
-          onWheel={(e) => e.target.blur()} // stop scroll bug
-          className="
-            w-full rounded-md px-3 py-2 pl-8
-            border transition
+          onWheel={e => e.target.blur()}
+          className='
+            w-full
+            rounded-lg
+            px-3 py-2 pl-8
+            border
             bg-[var(--surface-2)]
+            text-[var(--text-main)]
+            transition-all duration-200
+
             border-[var(--border)]
-            focus:ring-2 focus:ring-indigo-500
-          "
+
+            focus:outline-none
+            focus:border-indigo-500
+            focus:bg-[var(--surface)]
+            focus:shadow-[0_0_0_3px_rgba(99,102,241,0.08)]
+          '
+          style={{
+            borderColor: hasError ? '#ef4444' : undefined
+          }}
         />
 
-        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-500">
+        {/* RUPEE ICON */}
+        <span className='absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-400'>
           ₹
         </span>
       </div>
+
+      {/* ERROR */}
+      {hasError && (
+        <p className='text-xs text-red-500'>
+          Amount must be greater than ₹{min}
+        </p>
+      )}
     </label>
-  );
+  )
 }

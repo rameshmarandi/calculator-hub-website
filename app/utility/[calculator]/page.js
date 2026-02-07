@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import UTILITY_CALCULATOR_MAP from "../../../data/utility";
 import calculators from "@/data/calculators";
 import { buildCalculatorMetadata } from "@/lib/seo";
-
+import { FULL_BASE_URL } from "@/lib/constant";
 /* ===============================================
    STATIC PARAMS (MANDATORY FOR output: "export")
    
@@ -45,13 +45,48 @@ export default async function CalculatorPage({ params }) {
     notFound();
   }
 
-  const schema = {
+  const title = calculator.replaceAll("-", " ");
+
+  const appSchema = {
     "@context": "https://schema.org",
     "@type": "SoftwareApplication",
-    name: calculator.replaceAll("-", " "),
+    name: `${title} Calculator`,
     applicationCategory: "UtilityApplication",
     operatingSystem: "Web",
+    url: `${FULL_BASE_URL}/utility/${calculator}`,
+    offers: {
+      "@type": "Offer",
+      price: "0",
+      priceCurrency: "INR",
+    },
   };
+
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Home",
+        item: FULL_BASE_URL,
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "Utility Calculators",
+        item: `${FULL_BASE_URL}/utility`,
+      },
+      {
+        "@type": "ListItem",
+        position: 3,
+        name: `${title} Calculator`,
+        item: `${FULL_BASE_URL}/utility/${calculator}`,
+      },
+    ],
+  };
+
+  const schemas = [appSchema, breadcrumbSchema];
 
   return (
     <>
@@ -60,7 +95,7 @@ export default async function CalculatorPage({ params }) {
         type="application/ld+json"
         strategy="beforeInteractive"
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify(schema),
+          __html: JSON.stringify(schemas),
         }}
       />
 

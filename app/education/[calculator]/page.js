@@ -22,9 +22,7 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }) {
   const { calculator } = await params;
 
-  const calc = calculators.education.find(
-    (c) => c.slug === calculator
-  );
+  const calc = calculators.education.find((c) => c.slug === calculator);
 
   if (!calc) return {};
 
@@ -37,20 +35,54 @@ export async function generateMetadata({ params }) {
 export default async function CalculatorPage({ params }) {
   const { calculator } = await params;
 
-  const CalculatorComponent =
-    EDUCATION_CALCULATOR_MAP[calculator];
+  const CalculatorComponent = EDUCATION_CALCULATOR_MAP[calculator];
 
   if (!CalculatorComponent) notFound();
 
   /* -------- JSON-LD structured data -------- */
-  const schema = {
+
+  const title = calculator.replace(/-/g, " ");
+
+  const appSchema = {
     "@context": "https://schema.org",
-    "@type": "WebApplication",
-    name: calculator.replace(/-/g, " "),
+    "@type": "SoftwareApplication",
+    name: `${title} Calculator`,
     applicationCategory: "EducationalApplication",
     operatingSystem: "Any",
     url: `${FULL_BASE_URL}/education/${calculator}`,
+    offers: {
+      "@type": "Offer",
+      price: "0",
+      priceCurrency: "INR",
+    },
   };
+
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Home",
+        item: FULL_BASE_URL,
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "Education Calculators",
+        item: `${FULL_BASE_URL}/education`,
+      },
+      {
+        "@type": "ListItem",
+        position: 3,
+        name: `${title} Calculator`,
+        item: `${FULL_BASE_URL}/education/${calculator}`,
+      },
+    ],
+  };
+
+  const schemas = [appSchema, breadcrumbSchema];
 
   return (
     <>
@@ -59,7 +91,7 @@ export default async function CalculatorPage({ params }) {
         type="application/ld+json"
         strategy="beforeInteractive"
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify(schema),
+          __html: JSON.stringify(schemas),
         }}
       />
 

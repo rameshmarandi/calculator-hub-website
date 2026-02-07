@@ -39,12 +39,15 @@ export default async function CalculatorPage({ params }) {
   }
 
   /* Structured data helps ranking */
-  const schema = {
+
+  const title = calculator.replace(/-/g, " ");
+  const appSchema = {
     "@context": "https://schema.org",
-    "@type": "WebApplication",
-    name: "Construction Calculator",
+    "@type": "SoftwareApplication",
+    name: `${title} Calculator`,
     applicationCategory: "BusinessApplication",
     operatingSystem: "All",
+    url: `https://yourdomain.com/construction/${calculator}`,
     offers: {
       "@type": "Offer",
       price: "0",
@@ -52,6 +55,32 @@ export default async function CalculatorPage({ params }) {
     },
   };
 
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: "Home",
+        item: "https://yourdomain.com",
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "Construction Calculators",
+        item: "https://yourdomain.com/construction",
+      },
+      {
+        "@type": "ListItem",
+        position: 3,
+        name: `${title} Calculator`,
+        item: `https://yourdomain.com/construction/${calculator}`,
+      },
+    ],
+  };
+
+  const schemas = [appSchema, breadcrumbSchema];
   return (
     <>
       <Script
@@ -59,7 +88,7 @@ export default async function CalculatorPage({ params }) {
         type="application/ld+json"
         strategy="beforeInteractive"
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify(schema),
+          __html: JSON.stringify(schemas),
         }}
       />
 
