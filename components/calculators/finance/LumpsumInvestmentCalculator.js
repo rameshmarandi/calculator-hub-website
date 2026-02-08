@@ -1,216 +1,137 @@
 "use client";
 
-import { useState } from "react";
-import {
-  Calculator,
-  Wallet,
-  TrendingUp,
-  IndianRupee,
-  Calendar,
-  PiggyBank,
-} from "lucide-react";
+import { useMemo, useState } from "react";
 
-import { AmountInput } from "../../inputs/AmountInput";
-import { PercentageInput } from "../../inputs/PercentageInput";
-import { InputField } from "../../inputs/InputField";
-import { ResultCard } from "../../ResultCard";
+import CalculatorLayout from "@/components/core/CalculatorLayout";
+import InputsGrid from "@/components/core/InputsGrid";
+import ResultHero from "@/components/core/ResultHero";
+import DonutBreakdownChart from "@/components/core/DonutBreakdownChart";
+import StatsGrid from "@/components/core/StatsGrid";
+import ExplanationText from "@/components/core/ExplanationText";
+
+
+import { formatINR } from "@/lib/format";
+import { calculateLumpsum } from "../../../lib/formulas";
+import LumpsumInvestmentArticle from "../../content/finance/LumpsumInvestmentArticle";
 
 export default function LumpsumInvestmentCalculator() {
-  const [investmentAmount, setInvestmentAmount] = useState("");
-  const [annualReturn, setAnnualReturn] = useState("");
-  const [tenureYears, setTenureYears] = useState("");
-  const [result, setResult] = useState(null);
-  const [error, setError] = useState("");
+  /* ================= STATE ================= */
 
-  /* ---------------- BASIC VALIDATION (NOT STRICT) ---------------- */
-  function validate() {
-    if (!investmentAmount || Number(investmentAmount) <= 0) {
-      setError("Please enter a valid investment amount.");
-      return false;
-    }
+  const [values, setValues] = useState({
+    amount: "",
+    rate: "",
+    years: "",
+  });
 
-    if (
-      annualReturn === "" ||
-      Number(annualReturn) < 0 ||
-      Number(annualReturn) > 100
-    ) {
-      setError("Expected return should be between 0% and 100%.");
-      return false;
-    }
+  /* ================= NORMALIZED ================= */
 
-    if (!tenureYears || Number(tenureYears) <= 0) {
-      setError("Investment duration must be greater than 0.");
-      return false;
-    }
+  const amount = Number(values.amount);
+  const rate = Number(values.rate);
+  const years = Number(values.years);
 
-    setError("");
-    return true;
-  }
+  const isValid = amount > 0 && rate >= 0 && years > 0;
 
-  /* ---------------- CALCULATION ---------------- */
-  function calculateLumpsum(e) {
-    e.preventDefault();
+  /* ================= CALC ================= */
 
-    if (!validate()) {
-      setResult(null);
-      return;
-    }
+  const result = useMemo(() => {
+    if (!isValid) return null;
 
-    const P = Number(investmentAmount);
-    const r = Number(annualReturn) / 100;
-    const t = Number(tenureYears);
+    return calculateLumpsum (amount, rate, years);
+  }, [amount, rate, years, isValid]);
 
-    // Lumpsum compound interest formula
-    const futureValue = P * Math.pow(1 + r, t);
-    const gains = futureValue - P;
+  /* ================= INPUT CONFIG ================= */
 
-    setResult({
-      invested: Math.round(P),
-      gains: Math.round(gains),
-      futureValue: Math.round(futureValue),
-    });
-  }
+  const inputs = [
+    {
+      key: "amount",
+      label: "Investment Amount",
+      type: "amount",
+      placeholder: "1,00,000",
+      hint: "One-time investment",
+    },
+    {
+      key: "rate",
+      label: "Expected Annual Return (%)",
+      type: "percent",
+      placeholder: "12",
+      hint: "Estimated yearly return",
+    },
+    {
+      key: "years",
+      label: "Investment Duration (Years)",
+      type: "number",
+      placeholder: "10",
+      min: 1,
+      hint: "Longer duration increases compounding",
+    },
+  ];
+
+  /* ================= UI ================= */
 
   return (
-    <section
-      className="rounded-xl p-6 space-y-8"
-      style={{
-        backgroundColor: "var(--surface)",
-        border: "1px solid var(--border)",
-      }}
+    <CalculatorLayout
+      title="Lumpsum Investment Calculator"
+      subtitle="Estimate the future value of a one-time investment using compound growth."
+      badges={[
+        "100% Free",
+        "Instant Results",
+        "Compound Growth Accurate",
+        "No Signup Required",
+      ]}
     >
-      {/* ================= HEADER ================= */}
-      <header className="space-y-2">
-        <h1 className="text-2xl font-bold flex items-center gap-2">
-          <PiggyBank size={22} />
-          Lumpsum Investment Calculator
-        </h1>
+      <InputsGrid inputs={inputs} values={values} setValues={setValues} />
 
-        <p className="text-sm leading-relaxed">
-          Use this Lumpsum Investment Calculator to estimate the future value
-          of a one-time investment based on expected annual returns and
-          investment duration.
-        </p>
-      </header>
-
-      {/* ================= FORM ================= */}
-      <form onSubmit={calculateLumpsum} className="space-y-4">
-        <AmountInput
-          label="Investment Amount"
-          value={investmentAmount}
-          onChange={setInvestmentAmount}
-          placeholder="1,00,000"
-          hasError={error.toLowerCase().includes("investment")}
-        />
-
-        <PercentageInput
-          label="Expected Annual Return (%)"
-          value={annualReturn}
-          onChange={setAnnualReturn}
-          placeholder="12"
-          hasError={error.toLowerCase().includes("return")}
-        />
-
-        <InputField
-          icon={<Calendar size={18} />}
-          label="Investment Duration (in years)"
-          value={tenureYears}
-          onChange={setTenureYears}
-          placeholder="10"
-          hasError={error.toLowerCase().includes("duration")}
-        />
-
-        {/* Soft guidance */}
-        <p className="text-xs text-gray-500">
-          Equity investments typically deliver 10–15% annual returns over
-          long periods.
-        </p>
-
-        {error && (
-          <p className="text-sm text-red-500">
-            {error}
-          </p>
-        )}
-
-        <button
-          type="submit"
-          className="w-full py-2.5 rounded-md font-medium flex items-center justify-center gap-2"
-          style={{ backgroundColor: "var(--primary)", color: "#fff" }}
-        >
-          <Calculator size={18} />
-          Calculate Returns
-        </button>
-      </form>
-
-      {/* ================= RESULT ================= */}
       {result && (
-        <div className="grid md:grid-cols-3 gap-4" aria-live="polite">
-          <ResultCard
-            variant="neutral"
-            icon={<IndianRupee size={20} />}
-            label="Total Investment"
-            value={`₹ ${result.invested.toLocaleString("en-IN")}`}
+        <>
+          {/* HERO */}
+          <ResultHero label="Future Value" value={result.futureValue} />
+
+          {/* BREAKDOWN */}
+          <DonutBreakdownChart
+            data={[
+              { name: "Invested", value: result.invested },
+              { name: "Gains", value: result.gains },
+            ]}
           />
 
-          <ResultCard
-            variant="warning"
-            icon={<TrendingUp size={20} />}
-            label="Total Gains"
-            value={`₹ ${result.gains.toLocaleString("en-IN")}`}
+          {/* STATS */}
+          <StatsGrid
+            items={[
+              {
+                label: "Total Investment",
+                value: formatINR(result.invested),
+                variant: "neutral",
+              },
+              {
+                label: "Total Gains",
+                value: formatINR(result.gains),
+                variant: "success",
+              },
+              {
+                label: "Future Value",
+                value: formatINR(result.futureValue),
+                variant: "primary",
+              },
+              {
+                label: "Total Months",
+                value: result.months,
+                variant: "info",
+              },
+            ]}
           />
 
-          <ResultCard
-            variant="primary"
-            icon={<Wallet size={20} />}
-            label="Future Value"
-            value={`₹ ${result.futureValue.toLocaleString("en-IN")}`}
+          {/* EXPLANATION */}
+          <ExplanationText
+            text={`A one-time investment of ${formatINR(
+              amount
+            )} growing at ${rate}% annually for ${years} years can grow to ${formatINR(
+              result.futureValue
+            )} through compounding.`}
           />
-        </div>
+        </>
       )}
 
-      {/* ================= INFO (SEO) ================= */}
-      <article className="space-y-4 text-sm leading-relaxed">
-        <h2 className="font-semibold text-base">
-          How Lumpsum Investment Returns are Calculated
-        </h2>
-
-        <p>
-          A lumpsum investment is a one-time investment where returns grow
-          through compounding over time. The future value depends on the
-          annual rate of return and investment duration.
-        </p>
-
-        <p
-          className="font-mono text-xs p-3 rounded"
-          style={{ backgroundColor: "var(--surface-2)" }}
-        >
-          FV = P × (1 + r)<sup>t</sup>
-        </p>
-
-        <ul className="list-disc pl-5">
-          <li><strong>P</strong> = Initial investment amount</li>
-          <li><strong>r</strong> = Annual rate of return</li>
-          <li><strong>t</strong> = Investment duration in years</li>
-        </ul>
-
-        <p>
-          Longer investment duration significantly increases returns due to
-          the power of compounding.
-        </p>
-      </article>
-
-      {/* ================= BENEFITS ================= */}
-      <aside className="text-sm space-y-2">
-        <h3 className="font-semibold">
-          Why use a Lumpsum Investment Calculator?
-        </h3>
-        <ul className="list-disc pl-5">
-          <li>Estimate future value of one-time investments</li>
-          <li>Compare different return rates and durations</li>
-          <li>Understand compounding impact clearly</li>
-          <li>Fast, free, and accurate</li>
-        </ul>
-      </aside>
-    </section>
+      <LumpsumInvestmentArticle/>
+    </CalculatorLayout>
   );
 }

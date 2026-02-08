@@ -1,245 +1,275 @@
-"use client";
+import Link from "next/link";
 
-import { useState } from "react";
-import {
-  Calculator,
-  TrendingUp,
-  Percent,
-  Plus,
-  Trash2,
-  Calendar,
-} from "lucide-react";
-
-import { AmountInput } from "../../inputs/AmountInput";
-import { ResultCard } from "../../ResultCard";
-
-/* ---------------- XIRR HELPERS ---------------- */
-function daysBetween(d1, d2) {
-  return (d2.getTime() - d1.getTime()) / (1000 * 60 * 60 * 24);
-}
-
-function computeXIRR(cashFlows) {
-  let rate = 0.1; // initial guess 10%
-
-  for (let i = 0; i < 100; i++) {
-    let f = 0;
-    let df = 0;
-
-    for (let j = 0; j < cashFlows.length; j++) {
-      const days = daysBetween(cashFlows[0].date, cashFlows[j].date) / 365;
-      const amount = cashFlows[j].amount;
-
-      f += amount / Math.pow(1 + rate, days);
-      df += (-days * amount) / Math.pow(1 + rate, days + 1);
-    }
-
-    const newRate = rate - f / df;
-    if (Math.abs(newRate - rate) < 0.000001) {
-      return newRate * 100;
-    }
-    rate = newRate;
-  }
-
-  return rate * 100;
-}
-
-export default function XirrCalculator() {
-  const [cashFlows, setCashFlows] = useState([
-    { amount: "", date: "" },
-    { amount: "", date: "" },
-  ]);
-
-  const [result, setResult] = useState(null);
-  const [error, setError] = useState("");
-
-  /* ---------------- VALIDATION ---------------- */
-  function validate() {
-    let hasNegative = false;
-    let hasPositive = false;
-
-    for (const flow of cashFlows) {
-      if (!flow.amount || !flow.date) {
-        setError("Please enter amount and date for all cash flows.");
-        return false;
-      }
-
-      if (Number(flow.amount) < 0) hasNegative = true;
-      if (Number(flow.amount) > 0) hasPositive = true;
-    }
-
-    if (!hasNegative || !hasPositive) {
-      setError(
-        "XIRR requires at least one investment (negative) and one return (positive)."
-      );
-      return false;
-    }
-
-    setError("");
-    return true;
-  }
-
-  /* ---------------- CALCULATION ---------------- */
-  function calculateXirr(e) {
-    e.preventDefault();
-
-    if (!validate()) {
-      setResult(null);
-      return;
-    }
-
-    const flows = cashFlows
-      .map(f => ({
-        amount: Number(f.amount),
-        date: new Date(f.date),
-      }))
-      .sort((a, b) => a.date - b.date);
-
-    const xirr = computeXIRR(flows);
-
-    setResult({
-      xirr: xirr.toFixed(2),
-    });
-  }
-
-  function addRow() {
-    setCashFlows([...cashFlows, { amount: "", date: "" }]);
-  }
-
-  function removeRow(index) {
-    if (cashFlows.length <= 2) return;
-    setCashFlows(cashFlows.filter((_, i) => i !== index));
-  }
-
+const XirrCalculatorArticle = () => {
   return (
-    <section
-      className="rounded-xl p-6 space-y-8"
-      style={{
-        backgroundColor: "var(--surface)",
-        border: "1px solid var(--border)",
-      }}
-    >
-      {/* ================= HEADER ================= */}
-      <header>
-        <h1 className="text-2xl font-bold flex items-center gap-2">
-          <Percent size={22} />
-          XIRR Calculator
+    <article className="max-w-4xl mx-auto space-y-12 leading-relaxed text-sm sm:text-base text-[var(--text-main)]">
+
+      {/* ================= HERO ================= */}
+      <section className="space-y-6">
+        <h1 className="text-3xl font-bold">
+          XIRR Calculator – Calculate Real Annual Returns on SIP, Mutual Funds and Multiple Investments
         </h1>
 
-        <p className="text-sm leading-relaxed">
-          Calculate XIRR (Extended Internal Rate of Return) for investments
-          with irregular cash flows such as SIPs, mutual funds, stocks,
-          and real-world investments.
-        </p>
-      </header>
-
-      {/* ================= FORM ================= */}
-      <form onSubmit={calculateXirr} className="space-y-4">
-        {cashFlows.map((flow, index) => (
-          <div
-            key={index}
-            className="grid md:grid-cols-3 gap-3 items-end"
-          >
-            {/* Amount */}
-            <AmountInput
-              label={index === 0 ? "Cash Flow Amount" : undefined}
-              value={flow.amount}
-              onChange={val => {
-                const updated = [...cashFlows];
-                updated[index].amount = val;
-                setCashFlows(updated);
-              }}
-              placeholder="-10,000 or 15,000"
-            />
-
-            {/* ✅ Native Date Input ONLY */}
-            <label className="block space-y-1">
-              {index === 0 && (
-                <span className="text-sm font-medium flex items-center gap-1">
-                  <Calendar size={14} />
-                  Date
-                </span>
-              )}
-              <input
-                type="date"
-                value={flow.date}
-                onChange={e => {
-                  const updated = [...cashFlows];
-                  updated[index].date = e.target.value;
-                  setCashFlows(updated);
-                }}
-                className="w-full rounded-md px-3 py-2 border"
-                style={{
-                  backgroundColor: "var(--surface-2)",
-                  borderColor: "var(--border)",
-                  color: "var(--text-main)",
-                }}
-              />
-            </label>
-
-            {/* Remove */}
-            <button
-              type="button"
-              onClick={() => removeRow(index)}
-              className="text-red-500"
-              disabled={cashFlows.length <= 2}
-            >
-              <Trash2 size={18} />
-            </button>
-          </div>
-        ))}
-
-        <button
-          type="button"
-          onClick={addRow}
-          className="flex items-center gap-2 text-sm text-blue-600"
-        >
-          <Plus size={16} />
-          Add Cash Flow
-        </button>
-
-        {error && (
-          <p className="text-sm text-red-500">
-            {error}
-          </p>
-        )}
-
-        <button
-          type="submit"
-          className="w-full py-2.5 rounded-md font-medium flex items-center justify-center gap-2"
-          style={{ backgroundColor: "var(--primary)", color: "#fff" }}
-        >
-          <Calculator size={18} />
-          Calculate XIRR
-        </button>
-      </form>
-
-      {/* ================= RESULT ================= */}
-      {result && (
-        <ResultCard
-          variant="primary"
-          icon={<TrendingUp size={20} />}
-          label="XIRR (Annualized Return)"
-          value={`${result.xirr}%`}
-        />
-      )}
-
-      {/* ================= SEO INFO ================= */}
-      <article className="space-y-4 text-sm leading-relaxed">
-        <h2 className="font-semibold text-base">
-          What is XIRR?
-        </h2>
-
         <p>
-          XIRR (Extended Internal Rate of Return) measures the annualized
-          return of investments made at different dates. It is more accurate
-          than CAGR for SIPs and irregular cash flows.
+          When you invest money regularly through SIPs, staggered deposits, or
+          multiple transactions, simple return and CAGR stop giving accurate
+          results. Real life investing rarely happens with a single deposit and
+          single withdrawal.
         </p>
 
         <p>
-          XIRR is widely used by mutual fund investors, financial advisors,
-          and chartered accountants to evaluate real investment performance.
+          This is where XIRR becomes essential. XIRR calculates the true annual
+          rate of return when money is invested or withdrawn at different
+          dates. It gives you the most realistic picture of your portfolio’s
+          performance.
         </p>
-      </article>
-    </section>
+
+        <p>
+          Our XIRR Calculator instantly computes your actual yearly return
+          without complicated spreadsheets or formulas.
+        </p>
+
+        <p>
+          You may also use:
+          {" "}
+          <Link href="/finance/sip-calculator" className="text-blue-600 underline">
+            SIP Calculator
+          </Link>
+          ,{" "}
+          <Link href="/finance/cagr-calculator" className="text-blue-600 underline">
+            CAGR Calculator
+          </Link>
+          ,{" "}
+          <Link href="/finance/mutual-fund-return-calculator" className="text-blue-600 underline">
+            Mutual Fund Return Calculator
+          </Link>
+          , or{" "}
+          <Link href="/finance/lumpsum-investment-calculator" className="text-blue-600 underline">
+            Lumpsum Calculator
+          </Link>{" "}
+          for other investment planning needs.
+        </p>
+      </section>
+
+
+      {/* ================= WHAT IS XIRR ================= */}
+      <section className="space-y-4">
+        <h2 className="text-2xl font-bold">What is XIRR?</h2>
+
+        <p>
+          XIRR stands for Extended Internal Rate of Return. It measures the
+          annualized return of investments where cash flows happen on different
+          dates.
+        </p>
+
+        <p>
+          Unlike CAGR, which assumes a single investment and a single maturity
+          value, XIRR considers multiple deposits and withdrawals. This makes it
+          more accurate for SIPs, mutual funds, and real world portfolios.
+        </p>
+
+        <p>
+          In simple words, XIRR tells you the exact yearly growth rate of your
+          money considering every transaction.
+        </p>
+      </section>
+
+
+      {/* ================= WHY NEEDED ================= */}
+      <section className="space-y-4">
+        <h2 className="text-2xl font-bold">Why Simple Return and CAGR Are Not Enough</h2>
+
+        <p>
+          Many investors wrongly calculate returns using total profit or CAGR.
+          These methods assume all money was invested at once, which is rarely
+          true.
+        </p>
+
+        <p>
+          If you invest monthly through SIP, every installment has a different
+          investment period. Some money stays invested longer, some shorter.
+        </p>
+
+        <p>
+          Only XIRR correctly adjusts for these differences.
+        </p>
+
+        <ul className="list-disc pl-6 space-y-2">
+          <li>Handles multiple transactions</li>
+          <li>Accounts for exact dates</li>
+          <li>Shows true annual return</li>
+          <li>Used by professionals and analysts</li>
+        </ul>
+      </section>
+
+
+      {/* ================= WHEN TO USE ================= */}
+      <section className="space-y-4">
+        <h2 className="text-2xl font-bold">When Should You Use XIRR?</h2>
+
+        <p>
+          Use XIRR whenever investments are not made in one lump sum.
+        </p>
+
+        <ul className="list-disc pl-6 space-y-2">
+          <li>Monthly SIP investments</li>
+          <li>Recurring deposits</li>
+          <li>Multiple stock purchases</li>
+          <li>Portfolio with withdrawals</li>
+          <li>Systematic investment plans</li>
+          <li>Business or project cash flows</li>
+        </ul>
+
+        <p>
+          If money moves in and out at different times, XIRR is the correct
+          metric.
+        </p>
+      </section>
+
+
+      {/* ================= HOW TO USE ================= */}
+      <section className="space-y-4">
+        <h2 className="text-2xl font-bold">How to Use This XIRR Calculator</h2>
+
+        <ol className="list-decimal pl-6 space-y-2">
+          <li>Add each investment amount with its date</li>
+          <li>Add final withdrawal or current value with today’s date</li>
+          <li>Click calculate</li>
+        </ol>
+
+        <p>
+          The calculator automatically computes the annualized return percentage
+          considering all cash flows.
+        </p>
+      </section>
+
+
+      {/* ================= FORMULA ================= */}
+      <section className="space-y-4">
+        <h2 className="text-2xl font-bold">XIRR Formula</h2>
+
+        <div className="p-4 border rounded-lg bg-[var(--surface-2)] font-mono text-sm overflow-x-auto">
+          Σ (Cash Flow ÷ (1 + r)^(days/365)) = 0
+        </div>
+
+        <p>
+          Here, r is the return rate. Because this equation is complex and
+          iterative, it cannot be solved manually easily. That is why a
+          calculator is necessary.
+        </p>
+      </section>
+
+
+      {/* ================= EXAMPLE ================= */}
+      <section className="space-y-4">
+        <h2 className="text-2xl font-bold">Practical Example</h2>
+
+        <p>
+          Suppose you invest ₹5,000 every month for one year through SIP.
+        </p>
+
+        <ul className="list-disc pl-6 space-y-2">
+          <li>Total invested = ₹60,000</li>
+          <li>Current value = ₹68,000</li>
+        </ul>
+
+        <p>
+          Simple return says 13.3 percent. But this is misleading because each
+          installment was invested for a different period.
+        </p>
+
+        <p>
+          XIRR may show around 22 to 25 percent annual return depending on
+          growth. This is the real performance.
+        </p>
+      </section>
+
+
+      {/* ================= CAGR VS XIRR ================= */}
+      <section className="space-y-4">
+        <h2 className="text-2xl font-bold">CAGR vs XIRR</h2>
+
+        <ul className="list-disc pl-6 space-y-2">
+          <li><strong>CAGR:</strong> Single investment only</li>
+          <li><strong>XIRR:</strong> Multiple investments</li>
+          <li><strong>CAGR:</strong> Simpler</li>
+          <li><strong>XIRR:</strong> More accurate</li>
+          <li><strong>CAGR:</strong> Good for lumpsum</li>
+          <li><strong>XIRR:</strong> Best for SIP and portfolios</li>
+        </ul>
+
+        <p>
+          For modern investing, XIRR is generally preferred.
+        </p>
+      </section>
+
+
+      {/* ================= BENEFITS ================= */}
+      <section className="space-y-4">
+        <h2 className="text-2xl font-bold">Benefits of Using XIRR</h2>
+
+        <ul className="list-disc pl-6 space-y-2">
+          <li>Most accurate return calculation</li>
+          <li>Tracks real performance</li>
+          <li>Handles irregular cash flows</li>
+          <li>Professional standard metric</li>
+          <li>Better investment comparison</li>
+        </ul>
+      </section>
+
+
+      {/* ================= COMMON MISTAKES ================= */}
+      <section className="space-y-4">
+        <h2 className="text-2xl font-bold">Common Mistakes Investors Make</h2>
+
+        <ul className="list-disc pl-6 space-y-2">
+          <li>Using simple profit percentage</li>
+          <li>Ignoring time factor</li>
+          <li>Comparing SIP returns using CAGR</li>
+          <li>Not tracking portfolio regularly</li>
+          <li>Making decisions without real numbers</li>
+        </ul>
+
+        <p>
+          These mistakes can lead to wrong conclusions and poor investment
+          choices. Always use XIRR for accuracy.
+        </p>
+      </section>
+
+
+      {/* ================= FAQ ================= */}
+      <section className="space-y-4">
+        <h2 className="text-2xl font-bold">Frequently Asked Questions</h2>
+
+        <p><strong>Is XIRR better than CAGR?</strong> Yes for SIP or multiple transactions.</p>
+        <p><strong>Does Excel have XIRR?</strong> Yes, but this calculator is faster and easier.</p>
+        <p><strong>Is XIRR guaranteed future return?</strong> No. It only measures past performance.</p>
+        <p><strong>Is this calculator accurate?</strong> Yes. It follows standard financial formulas.</p>
+      </section>
+
+
+      {/* ================= FINAL ================= */}
+      <section className="space-y-4">
+        <h2 className="text-2xl font-bold">Final Thoughts</h2>
+
+        <p>
+          If you invest through SIPs or multiple transactions, relying on simple
+          returns or CAGR can mislead you. XIRR gives the true picture of your
+          portfolio growth.
+        </p>
+
+        <p>
+          Track your investments regularly, calculate real returns, and make
+          decisions based on accurate data.
+        </p>
+
+        <p className="font-medium">
+          Measure correctly. Invest smarter. Grow wealth consistently.
+        </p>
+      </section>
+
+    </article>
   );
-}
+};
+
+export default XirrCalculatorArticle;

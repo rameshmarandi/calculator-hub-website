@@ -1,12 +1,18 @@
-// "use client";
+"use client";
 
 import { AmountInput } from "@/components/inputs/AmountInput";
 import { PercentageInput } from "@/components/inputs/PercentageInput";
 import NumberInput from "@/components/inputs/NumberInput";
+import SelectInput from "@/components/inputs/SelectInput";
 
 /*
-  InputsGrid is ONLY layout.
-  It never renders raw <input />.
+  InputsGrid
+  Pure layout renderer
+  Supports:
+  - amount
+  - percent
+  - number
+  - select
 */
 
 export default function InputsGrid({ inputs, values, setValues }) {
@@ -15,7 +21,6 @@ export default function InputsGrid({ inputs, values, setValues }) {
       {inputs.map((i) => {
         const commonProps = {
           label: i.label,
-          placeholder: i.placeholder,
           value: values[i.key],
           onChange: (v) =>
             setValues({
@@ -27,16 +32,34 @@ export default function InputsGrid({ inputs, values, setValues }) {
         return (
           <div key={i.key}>
             {/* TYPE SWITCH */}
-            {i.type === "amount" && <AmountInput {...commonProps} />}
 
-            {i.type === "percent" && <PercentageInput {...commonProps} />}
-
-            {i.type === "number" && (
-              <NumberInput {...commonProps} min={i.min || 1} />
+            {i.type === "amount" && (
+              <AmountInput {...commonProps} placeholder={i.placeholder} />
             )}
 
-            {/* OPTIONAL HINT */}
-            {i.hint && <p className="text-xs text-gray-500 mt-1">{i.hint}</p>}
+            {i.type === "percent" && (
+              <PercentageInput {...commonProps} placeholder={i.placeholder} />
+            )}
+
+            {i.type === "number" && (
+              <NumberInput
+                {...commonProps}
+                placeholder={i.placeholder}
+                min={i.min || 1}
+              />
+            )}
+
+            {i.type === "select" && (
+              <SelectInput
+                {...commonProps}
+                options={i.options || []}
+              />
+            )}
+
+            {/* HINT */}
+            {i.hint && (
+              <p className="text-xs text-gray-500 mt-1">{i.hint}</p>
+            )}
           </div>
         );
       })}

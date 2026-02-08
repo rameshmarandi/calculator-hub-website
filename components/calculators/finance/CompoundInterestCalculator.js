@@ -1,232 +1,160 @@
 "use client";
 
-import { useState } from "react";
-import {
-  Calculator,
-  Wallet,
-  TrendingUp,
-  IndianRupee,
-  Calendar,
-  Percent,
-} from "lucide-react";
+import { useMemo, useState } from "react";
 
-import { AmountInput } from "../../inputs/AmountInput";
-import { PercentageInput } from "../../inputs/PercentageInput";
-import { InputField } from "../../inputs/InputField";
-import { ResultCard } from "../../ResultCard";
+import CalculatorLayout from "@/components/core/CalculatorLayout";
+import InputsGrid from "@/components/core/InputsGrid";
+import ResultHero from "@/components/core/ResultHero";
+import DonutBreakdownChart from "@/components/core/DonutBreakdownChart";
+import StatsGrid from "@/components/core/StatsGrid";
+import ExplanationText from "@/components/core/ExplanationText";
+
+
+import { formatINR } from "@/lib/format";
+import { calculateCompoundInterest } from "../../../lib/formulas";
+import CompoundInterestArticle from "../../content/finance/CompoundInterestArticle";
 
 export default function CompoundInterestCalculator() {
-  const [principal, setPrincipal] = useState("");
-  const [rate, setRate] = useState("");
-  const [time, setTime] = useState("");
-  const [frequency, setFrequency] = useState("1"); // yearly by default
-  const [result, setResult] = useState(null);
-  const [error, setError] = useState("");
+  /* ================= STATE ================= */
 
-  /* ---------------- BASIC VALIDATION ---------------- */
-  function validate() {
-    if (!principal || Number(principal) <= 0) {
-      setError("Please enter a valid principal amount.");
-      return false;
-    }
+  const [values, setValues] = useState({
+    principal: "",
+    rate: "",
+    years: "",
+    frequency: "1",
+  });
 
-    if (rate === "" || Number(rate) < 0 || Number(rate) > 100) {
-      setError("Interest rate should be between 0% and 100%.");
-      return false;
-    }
+  /* ================= NORMALIZED ================= */
 
-    if (!time || Number(time) <= 0) {
-      setError("Time period must be greater than 0.");
-      return false;
-    }
+  const principal = Number(values.principal);
+  const rate = Number(values.rate);
+  const years = Number(values.years);
+  const frequency = Number(values.frequency);
 
-    setError("");
-    return true;
-  }
+  const isValid =
+    principal > 0 &&
+    rate >= 0 &&
+    years > 0 &&
+    frequency > 0;
 
-  /* ---------------- CALCULATION ---------------- */
-  function calculateCompoundInterest(e) {
-    e.preventDefault();
+  /* ================= CALC ================= */
 
-    if (!validate()) {
-      setResult(null);
-      return;
-    }
+  const result = useMemo(() => {
+    if (!isValid) return null;
 
-    const P = Number(principal);
-    const r = Number(rate) / 100;
-    const t = Number(time);
-    const n = Number(frequency);
+    return calculateCompoundInterest(
+      principal,
+      rate,
+      years,
+      frequency,
+    );
+  }, [principal, rate, years, frequency, isValid]);
 
-    // Compound Interest Formula
-    const amount = P * Math.pow(1 + r / n, n * t);
-    const interest = amount - P;
+  /* ================= INPUT CONFIG ================= */
 
-    setResult({
-      principal: Math.round(P),
-      interest: Math.round(interest),
-      amount: Math.round(amount),
-    });
-  }
+  const inputs = [
+    {
+      key: "principal",
+      label: "Principal Amount",
+      type: "amount",
+      placeholder: "1,00,000",
+      hint: "Initial investment",
+    },
+    {
+      key: "rate",
+      label: "Annual Interest Rate (%)",
+      type: "percent",
+      placeholder: "8",
+      hint: "Interest per year",
+    },
+    {
+      key: "years",
+      label: "Investment Duration (Years)",
+      type: "number",
+      placeholder: "5",
+      min: 1,
+      hint: "Total time invested",
+    },
+    {
+      key: "frequency",
+      label: "Compounding Frequency",
+      type: "select",
+      options: [
+        { label: "Yearly", value: 1 },
+        { label: "Half-Yearly", value: 2 },
+        { label: "Quarterly", value: 4 },
+        { label: "Monthly", value: 12 },
+        { label: "Daily", value: 365 },
+      ],
+      hint: "How often interest compounds",
+    },
+  ];
+
+  /* ================= UI ================= */
 
   return (
-    <section
-      className="rounded-xl p-6 space-y-8"
-      style={{
-        backgroundColor: "var(--surface)",
-        border: "1px solid var(--border)",
-      }}
+    <CalculatorLayout
+      title="Compound Interest Calculator"
+      subtitle="Calculate compound growth of your investment with different compounding frequencies."
+      badges={[
+        "100% Free",
+        "Instant Results",
+        "Bank Formula Accurate",
+        "No Signup Required",
+      ]}
     >
-      {/* ================= HEADER ================= */}
-      <header>
-        <h1 className="text-2xl font-bold">
-          Compound Interest Calculator
-        </h1>
+      <InputsGrid inputs={inputs} values={values} setValues={setValues} />
 
-        <p className="text-sm leading-relaxed">
-          Use this Compound Interest Calculator to calculate the total interest
-          earned and final amount on an investment based on compounding
-          frequency, interest rate, and time period.
-        </p>
-      </header>
-
-      {/* ================= FORM ================= */}
-      <form onSubmit={calculateCompoundInterest} className="space-y-4">
-        <AmountInput
-          label="Principal Amount"
-          value={principal}
-          onChange={setPrincipal}
-          placeholder="1,00,000"
-          hasError={error.toLowerCase().includes("principal")}
-        />
-
-        <PercentageInput
-          label="Interest Rate (per annum)"
-          value={rate}
-          onChange={setRate}
-          placeholder="8"
-          hasError={error.toLowerCase().includes("rate")}
-        />
-
-        <InputField
-          icon={<Calendar size={18} />}
-          label="Time Period (in years)"
-          value={time}
-          onChange={setTime}
-          placeholder="10"
-          hasError={error.toLowerCase().includes("time")}
-        />
-
-        {/* Compounding Frequency */}
-        <label className="block space-y-1">
-          <span className="text-sm font-medium flex items-center gap-2">
-            <Percent size={16} />
-            Compounding Frequency
-          </span>
-
-          <select
-            value={frequency}
-            onChange={e => setFrequency(e.target.value)}
-            className="w-full rounded-md px-3 py-2 border"
-            style={{
-              backgroundColor: "var(--surface-2)",
-              borderColor: "var(--border)",
-            }}
-          >
-            <option value="1">Yearly</option>
-            <option value="2">Half-Yearly</option>
-            <option value="4">Quarterly</option>
-            <option value="12">Monthly</option>
-          </select>
-        </label>
-
-        {error && (
-          <p className="text-sm text-red-500">
-            {error}
-          </p>
-        )}
-
-        <button
-          type="submit"
-          className="w-full py-2.5 rounded-md font-medium flex items-center justify-center gap-2"
-          style={{ backgroundColor: "var(--primary)", color: "#fff" }}
-        >
-          <Calculator size={18} />
-          Calculate Interest
-        </button>
-      </form>
-
-      {/* ================= RESULT ================= */}
       {result && (
-        <div className="grid md:grid-cols-3 gap-4" aria-live="polite">
-          <ResultCard
-            variant="neutral"
-            icon={<IndianRupee size={20} />}
-            label="Principal Amount"
-            value={`₹ ${result.principal.toLocaleString("en-IN")}`}
+        <>
+          {/* HERO */}
+          <ResultHero label="Future Value" value={result.futureValue} />
+
+          {/* BREAKDOWN */}
+          <DonutBreakdownChart
+            data={[
+              { name: "Principal", value: result.invested },
+              { name: "Interest", value: result.gains },
+            ]}
           />
 
-          <ResultCard
-            variant="warning"
-            icon={<TrendingUp size={20} />}
-            label="Total Interest Earned"
-            value={`₹ ${result.interest.toLocaleString("en-IN")}`}
+          {/* STATS */}
+          <StatsGrid
+            items={[
+              {
+                label: "Principal",
+                value: formatINR(result.invested),
+                variant: "neutral",
+              },
+              {
+                label: "Interest Earned",
+                value: formatINR(result.gains),
+                variant: "success",
+              },
+              {
+                label: "Total Amount",
+                value: formatINR(result.futureValue),
+                variant: "primary",
+              },
+              {
+                label: "Total Months",
+                value: result.months,
+                variant: "info",
+              },
+            ]}
           />
 
-          <ResultCard
-            variant="primary"
-            icon={<Wallet size={20} />}
-            label="Maturity Amount"
-            value={`₹ ${result.amount.toLocaleString("en-IN")}`}
+          {/* EXPLANATION */}
+          <ExplanationText
+            text={`An investment of ${formatINR(
+              principal,
+            )} at ${rate}% interest compounded ${frequency} time(s) per year for ${years} years grows to ${formatINR(
+              result.futureValue,
+            )}.`}
           />
-        </div>
+        </>
       )}
-
-      {/* ================= INFO (SEO CONTENT) ================= */}
-      <article className="space-y-4 text-sm leading-relaxed">
-        <h2 className="font-semibold text-base">
-          How Compound Interest is Calculated
-        </h2>
-
-        <p>
-          Compound interest is calculated on the initial principal as well as
-          the accumulated interest from previous periods. The more frequently
-          interest is compounded, the higher the returns.
-        </p>
-
-        <p
-          className="font-mono text-xs p-3 rounded"
-          style={{ backgroundColor: "var(--surface-2)" }}
-        >
-          A = P × (1 + r / n)<sup>n × t</sup>
-        </p>
-
-        <ul className="list-disc pl-5">
-          <li><strong>P</strong> = Principal amount</li>
-          <li><strong>r</strong> = Annual interest rate</li>
-          <li><strong>n</strong> = Compounding frequency</li>
-          <li><strong>t</strong> = Time period in years</li>
-        </ul>
-
-        <p>
-          Compound interest plays a crucial role in long-term wealth creation,
-          especially for investments like fixed deposits, mutual funds, and
-          retirement savings.
-        </p>
-      </article>
-
-      {/* ================= BENEFITS ================= */}
-      <aside className="text-sm space-y-2">
-        <h3 className="font-semibold">
-          Why use a Compound Interest Calculator?
-        </h3>
-        <ul className="list-disc pl-5">
-          <li>Understand the power of compounding</li>
-          <li>Compare different compounding frequencies</li>
-          <li>Plan long-term investments effectively</li>
-          <li>Fast, accurate, and free</li>
-        </ul>
-      </aside>
-    </section>
+      <CompoundInterestArticle/>
+    </CalculatorLayout>
   );
 }

@@ -1,240 +1,156 @@
 "use client";
 
-import { useState } from "react";
-import {
-  Calculator,
-  Wallet,
-  TrendingUp,
-  IndianRupee,
-  Calendar,
-  Banknote,
-} from "lucide-react";
+import { useMemo, useState } from "react";
 
-import { AmountInput } from "../../inputs/AmountInput";
-import { PercentageInput } from "../../inputs/PercentageInput";
-import { InputField } from "../../inputs/InputField";
-import { ResultCard } from "../../ResultCard";
+import CalculatorLayout from "@/components/core/CalculatorLayout";
+import InputsGrid from "@/components/core/InputsGrid";
+import ResultHero from "@/components/core/ResultHero";
+import DonutBreakdownChart from "@/components/core/DonutBreakdownChart";
+import StatsGrid from "@/components/core/StatsGrid";
+import ExplanationText from "@/components/core/ExplanationText";
+
+
+import { formatINR } from "@/lib/format";
+import { calculateFD } from "../../../lib/formulas";
+import FixedDepositArticle from "../../content/finance/FixedDepositArticle";
 
 export default function FixedDepositCalculator() {
-  const [depositAmount, setDepositAmount] = useState("");
-  const [interestRate, setInterestRate] = useState("");
-  const [tenureYears, setTenureYears] = useState("");
-  const [frequency, setFrequency] = useState("4"); // Quarterly default
-  const [result, setResult] = useState(null);
-  const [error, setError] = useState("");
+  /* ================= STATE ================= */
 
-  /* ---------------- BASIC VALIDATION ---------------- */
-  function validate() {
-    if (!depositAmount || Number(depositAmount) <= 0) {
-      setError("Please enter a valid deposit amount.");
-      return false;
-    }
+  const [values, setValues] = useState({
+    amount: "",
+    rate: "",
+    years: "",
+    frequency: "4", // quarterly default
+  });
 
-    if (
-      interestRate === "" ||
-      Number(interestRate) < 0 ||
-      Number(interestRate) > 100
-    ) {
-      setError("Interest rate should be between 0% and 100%.");
-      return false;
-    }
+  /* ================= NORMALIZED ================= */
 
-    if (!tenureYears || Number(tenureYears) <= 0) {
-      setError("Deposit tenure must be greater than 0.");
-      return false;
-    }
+  const amount = Number(values.amount);
+  const rate = Number(values.rate);
+  const years = Number(values.years);
+  const frequency = Number(values.frequency);
 
-    setError("");
-    return true;
-  }
+  const isValid =
+    amount > 0 &&
+    rate >= 0 &&
+    years > 0 &&
+    frequency > 0;
 
-  /* ---------------- CALCULATION ---------------- */
-  function calculateFD(e) {
-    e.preventDefault();
+  /* ================= CALC ================= */
 
-    if (!validate()) {
-      setResult(null);
-      return;
-    }
+  const result = useMemo(() => {
+    if (!isValid) return null;
 
-    const P = Number(depositAmount);
-    const r = Number(interestRate) / 100;
-    const t = Number(tenureYears);
-    const n = Number(frequency);
+    return calculateFD(amount, rate, years, frequency);
+  }, [amount, rate, years, frequency, isValid]);
 
-    // Compound Interest formula for FD
-    const maturityAmount = P * Math.pow(1 + r / n, n * t);
-    const interestEarned = maturityAmount - P;
+  /* ================= INPUT CONFIG ================= */
 
-    setResult({
-      principal: Math.round(P),
-      interest: Math.round(interestEarned),
-      maturity: Math.round(maturityAmount),
-    });
-  }
+  const inputs = [
+    {
+      key: "amount",
+      label: "Deposit Amount",
+      type: "amount",
+      placeholder: "1,00,000",
+      hint: "Principal investment",
+    },
+    {
+      key: "rate",
+      label: "Interest Rate (%)",
+      type: "percent",
+      placeholder: "7.5",
+      hint: "Annual FD interest rate",
+    },
+    {
+      key: "years",
+      label: "Tenure (Years)",
+      type: "number",
+      placeholder: "5",
+      min: 1,
+      hint: "Deposit duration",
+    },
+    {
+      key: "frequency",
+      label: "Compounding Frequency",
+      type: "select",
+      options: [
+        { label: "Yearly", value: 1 },
+        { label: "Half-Yearly", value: 2 },
+        { label: "Quarterly", value: 4 },
+        { label: "Monthly", value: 12 },
+      ],
+      hint: "Most banks compound quarterly",
+    },
+  ];
+
+  /* ================= UI ================= */
 
   return (
-    <section
-      className="rounded-xl p-6 space-y-8"
-      style={{
-        backgroundColor: "var(--surface)",
-        border: "1px solid var(--border)",
-      }}
+    <CalculatorLayout
+      title="Fixed Deposit Calculator"
+      subtitle="Calculate FD maturity amount and interest earned with compound interest."
+      badges={[
+        "100% Free",
+        "Instant Results",
+        "Bank Formula Accurate",
+        "No Signup Required",
+      ]}
     >
-      {/* ================= HEADER ================= */}
-      <header>
-        <h1 className="text-2xl font-bold flex items-center gap-2">
-          <Banknote size={22} />
-          Fixed Deposit Calculator
-        </h1>
+      {/* INPUTS */}
+      <InputsGrid inputs={inputs} values={values} setValues={setValues} />
 
-        <p className="text-sm leading-relaxed">
-          Use this Fixed Deposit Calculator to estimate the maturity amount and
-          interest earned on your FD investment based on deposit amount,
-          interest rate, tenure, and compounding frequency.
-        </p>
-      </header>
-
-      {/* ================= FORM ================= */}
-      <form onSubmit={calculateFD} className="space-y-4">
-        <AmountInput
-          label="Deposit Amount"
-          value={depositAmount}
-          onChange={setDepositAmount}
-          placeholder="1,00,000"
-          hasError={error.toLowerCase().includes("deposit")}
-        />
-
-        <PercentageInput
-          label="Interest Rate (per annum)"
-          value={interestRate}
-          onChange={setInterestRate}
-          placeholder="7.5"
-          hasError={error.toLowerCase().includes("interest")}
-        />
-
-        <InputField
-          icon={<Calendar size={18} />}
-          label="Deposit Tenure (in years)"
-          value={tenureYears}
-          onChange={setTenureYears}
-          placeholder="5"
-          hasError={error.toLowerCase().includes("tenure")}
-        />
-
-        {/* Compounding Frequency */}
-        <label className="block space-y-1">
-          <span className="text-sm font-medium">
-            Compounding Frequency
-          </span>
-
-          <select
-            value={frequency}
-            onChange={e => setFrequency(e.target.value)}
-            className="w-full rounded-md px-3 py-2 border"
-            style={{
-              backgroundColor: "var(--surface-2)",
-              borderColor: "var(--border)",
-            }}
-          >
-            <option value="1">Yearly</option>
-            <option value="2">Half-Yearly</option>
-            <option value="4">Quarterly</option>
-            <option value="12">Monthly</option>
-          </select>
-        </label>
-
-        {/* Soft hint */}
-        <p className="text-xs text-gray-500">
-          Most bank FDs in India compound interest quarterly.
-        </p>
-
-        {error && (
-          <p className="text-sm text-red-500">
-            {error}
-          </p>
-        )}
-
-        <button
-          type="submit"
-          className="w-full py-2.5 rounded-md font-medium flex items-center justify-center gap-2"
-          style={{ backgroundColor: "var(--primary)", color: "#fff" }}
-        >
-          <Calculator size={18} />
-          Calculate FD Returns
-        </button>
-      </form>
-
-      {/* ================= RESULT ================= */}
+      {/* RESULTS */}
       {result && (
-        <div className="grid md:grid-cols-3 gap-4" aria-live="polite">
-          <ResultCard
-            variant="neutral"
-            icon={<IndianRupee size={20} />}
-            label="Deposit Amount"
-            value={`₹ ${result.principal.toLocaleString("en-IN")}`}
+        <>
+          {/* HERO */}
+          <ResultHero label="Maturity Amount" value={result.maturity} />
+
+          {/* BREAKDOWN */}
+          <DonutBreakdownChart
+            data={[
+              { name: "Principal", value: result.principal },
+              { name: "Interest", value: result.interest },
+            ]}
           />
 
-          <ResultCard
-            variant="warning"
-            icon={<TrendingUp size={20} />}
-            label="Total Interest Earned"
-            value={`₹ ${result.interest.toLocaleString("en-IN")}`}
+          {/* STATS */}
+          <StatsGrid
+            items={[
+              {
+                label: "Deposit Amount",
+                value: formatINR(result.principal),
+                variant: "neutral",
+              },
+              {
+                label: "Interest Earned",
+                value: formatINR(result.interest),
+                variant: "success",
+              },
+              {
+                label: "Maturity Amount",
+                value: formatINR(result.maturity),
+                variant: "primary",
+              },
+              {
+                label: "Total Months",
+                value: result.months,
+                variant: "info",
+              },
+            ]}
           />
 
-          <ResultCard
-            variant="primary"
-            icon={<Wallet size={20} />}
-            label="Maturity Amount"
-            value={`₹ ${result.maturity.toLocaleString("en-IN")}`}
+          {/* EXPLANATION */}
+          <ExplanationText
+            text={`A fixed deposit of ${formatINR(
+              amount
+            )} at ${rate}% interest compounded ${frequency} time(s) per year for ${years} years grows to ${formatINR(
+              result.maturity
+            )}.`}
           />
-        </div>
+        </>
       )}
-
-      {/* ================= INFO (SEO CONTENT) ================= */}
-      <article className="space-y-4 text-sm leading-relaxed">
-        <h2 className="font-semibold text-base">
-          How Fixed Deposit Interest is Calculated
-        </h2>
-
-        <p>
-          Fixed Deposit interest is calculated using compound interest,
-          where interest earned is reinvested at regular intervals based on
-          the chosen compounding frequency.
-        </p>
-
-        <p
-          className="font-mono text-xs p-3 rounded"
-          style={{ backgroundColor: "var(--surface-2)" }}
-        >
-          A = P × (1 + r / n)<sup>n × t</sup>
-        </p>
-
-        <ul className="list-disc pl-5">
-          <li><strong>P</strong> = Deposit amount</li>
-          <li><strong>r</strong> = Annual interest rate</li>
-          <li><strong>n</strong> = Compounding frequency</li>
-          <li><strong>t</strong> = Tenure in years</li>
-        </ul>
-
-        <p>
-          Fixed Deposits are considered low-risk investments and are widely
-          used for capital protection and predictable returns.
-        </p>
-      </article>
-
-      {/* ================= BENEFITS ================= */}
-      <aside className="text-sm space-y-2">
-        <h3 className="font-semibold">
-          Why use a Fixed Deposit Calculator?
-        </h3>
-        <ul className="list-disc pl-5">
-          <li>Estimate FD maturity amount instantly</li>
-          <li>Compare different interest rates and tenures</li>
-          <li>Understand impact of compounding frequency</li>
-          <li>Free, fast, and accurate</li>
-        </ul>
-      </aside>
-    </section>
+      <FixedDepositArticle/>
+    </CalculatorLayout>
   );
 }
