@@ -1,125 +1,155 @@
+import Link from "next/link";
+
 const HomeLoanEMIArticle = () => {
   return (
     <article className="max-w-4xl mx-auto space-y-12 leading-relaxed text-sm sm:text-base text-[var(--text-main)]">
-      {/* ================= HERO IMAGE ================= */}
-      <section className="space-y-6">
-        <div className="rounded-xl overflow-hidden">
-          <img
-            src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?q=80&w=1600&auto=format&fit=crop"
-            alt="Home loan planning with calculator and house model"
-            className="w-full h-auto"
-            loading="lazy"
-          />
-        </div>
 
+      {/* ================= HERO ================= */}
+      <section className="space-y-6">
         <h1 className="text-3xl font-bold">
-          Home Loan EMI Calculator – Calculate Monthly Payments Before You
-          Commit
+          Home Loan EMI Calculator – Calculate Monthly Payments Before You Commit
         </h1>
 
         <p>
-          Buying a home is one of the biggest financial decisions you will ever
-          make. A housing loan usually runs for 15 to 30 years, which means even
-          small mistakes in planning can cost you lakhs in extra interest. That
-          is why using a Home Loan EMI Calculator is not optional. It is a smart
-          first step before applying for any mortgage or housing finance.
+          A home loan is usually the biggest financial responsibility most people
+          ever take. Housing loans run for 15 to 30 years and involve lakhs or
+          crores of repayment. Even a small change in interest rate or tenure can
+          increase your total cost by several lakhs. That is why using a Home Loan
+          EMI Calculator before applying for a housing loan is extremely important.
         </p>
 
         <p>
-          Instead of guessing how much you can afford, this calculator tells you
-          the exact monthly EMI, total interest payable, and overall repayment
-          amount within seconds. You get complete clarity before signing any
-          loan agreement. Clear numbers lead to better decisions. Better
-          decisions save money.
+          This calculator instantly shows your monthly EMI, total interest payable,
+          and complete repayment schedule. Instead of guessing affordability, you
+          get exact numbers. Clear numbers help you borrow safely and avoid future
+          financial stress.
+        </p>
+
+        <p>
+          You can also try related tools like the{" "}
+          <Link href="/finance/emi-calculator" className="text-blue-600 underline">
+            EMI Calculator
+          </Link>
+          ,{" "}
+          <Link href="/finance/personal-loan-emi-calculator" className="text-blue-600 underline">
+            Personal Loan EMI Calculator
+          </Link>
+          , or{" "}
+          <Link href="/finance/car-loan-emi-calculator" className="text-blue-600 underline">
+            Car Loan EMI Calculator
+          </Link>{" "}
+          to compare different loan options.
         </p>
       </section>
+
 
       {/* ================= WHAT IS EMI ================= */}
       <section className="space-y-4">
-        <h2 className="text-2xl font-bold">
-          What Does EMI Mean in a Home Loan?
-        </h2>
+        <h2 className="text-2xl font-bold">What Does EMI Mean in a Home Loan?</h2>
 
         <p>
           EMI stands for Equated Monthly Installment. It is the fixed amount you
-          pay every month to your lender until your home loan is fully repaid.
-          Each EMI consists of two components.
+          pay every month to your lender until the loan is fully repaid. Every EMI
+          includes two parts.
         </p>
 
         <ul className="list-disc pl-6 space-y-2">
-          <li>Principal – the actual amount borrowed</li>
-          <li>Interest – the charge for borrowing money</li>
+          <li><strong>Principal</strong> – the actual money borrowed</li>
+          <li><strong>Interest</strong> – the bank’s charge for lending money</li>
         </ul>
 
         <p>
-          During the early years, most of your EMI goes toward interest. Later,
-          the principal share increases. Many borrowers misunderstand this and
-          assume they are reducing the loan faster than they actually are. A
-          calculator shows you the reality upfront.
+          During the early years, most of your EMI goes toward interest. Only a
+          small portion reduces the principal. Later, this changes. Many borrowers
+          are unaware of this distribution, which is why using an EMI calculator
+          gives better clarity from the beginning.
         </p>
       </section>
 
-      {/* ================= WHY CALCULATOR ================= */}
-      <section className="space-y-6">
-        <div className="rounded-xl overflow-hidden">
-          <img
-            src="https://images.unsplash.com/photo-1582407947304-fd86f028f716?q=80&w=1600&auto=format&fit=crop"
-            alt="Laptop displaying EMI calculator results"
-            className="w-full h-auto"
-            loading="lazy"
-          />
-        </div>
 
-        <h2 className="text-2xl font-bold">
-          Why You Should Always Calculate EMI First
-        </h2>
+      {/* ================= HOW TO USE ================= */}
+      <section className="space-y-4">
+        <h2 className="text-2xl font-bold">How to Use This Home Loan EMI Calculator</h2>
+
+        <ol className="list-decimal pl-6 space-y-2">
+          <li>Enter the total home loan amount</li>
+          <li>Add the annual interest rate offered by your bank</li>
+          <li>Select your preferred loan tenure in years</li>
+          <li>Instantly view EMI, interest, and total repayment</li>
+        </ol>
 
         <p>
-          Most people focus only on loan approval. They ignore whether the EMI
-          fits comfortably into their income. This approach creates pressure
-          later. If your EMI is too high, it affects savings, lifestyle, and
-          even mental peace.
+          Try different combinations of tenure and rates to find the most
+          affordable monthly EMI before committing to a loan.
         </p>
+      </section>
+
+
+      {/* ================= WHY CALCULATE ================= */}
+      <section className="space-y-4">
+        <h2 className="text-2xl font-bold">Why You Should Always Calculate EMI First</h2>
 
         <p>
-          A Home Loan EMI Calculator helps you plan responsibly. You know your
-          limits before committing. Financial discipline at this stage prevents
-          long term stress.
+          Getting a loan approval does not mean you can comfortably afford it.
+          Many borrowers accept the maximum eligible amount and later struggle
+          with heavy EMIs. Planning ahead prevents unnecessary pressure.
         </p>
 
         <ul className="list-disc pl-6 space-y-2">
-          <li>Know exact monthly payment instantly</li>
-          <li>Avoid borrowing more than necessary</li>
+          <li>Know exact monthly payments</li>
+          <li>Avoid over borrowing</li>
           <li>Compare banks easily</li>
-          <li>Choose best tenure</li>
-          <li>Reduce interest burden</li>
-          <li>Plan household expenses confidently</li>
+          <li>Choose better tenure</li>
+          <li>Reduce long-term interest</li>
+          <li>Maintain financial stability</li>
         </ul>
       </section>
+
+
+      {/* ================= FACTORS ================= */}
+      <section className="space-y-4">
+        <h2 className="text-2xl font-bold">Factors That Affect Your Home Loan EMI</h2>
+
+        <p>Your EMI depends on multiple factors, not just loan amount.</p>
+
+        <ul className="list-disc pl-6 space-y-2">
+          <li>Loan amount borrowed</li>
+          <li>Interest rate offered by the bank</li>
+          <li>Loan tenure</li>
+          <li>Credit score</li>
+          <li>Down payment size</li>
+          <li>Fixed vs floating interest rate</li>
+        </ul>
+
+        <p>
+          Even a small difference of 0.5 percent in interest rate can save lakhs
+          over the full tenure. Always compare lenders before deciding.
+        </p>
+      </section>
+
 
       {/* ================= FORMULA ================= */}
       <section className="space-y-4">
         <h2 className="text-2xl font-bold">How EMI is Calculated</h2>
 
-        <div className="p-4 rounded-lg border bg-[var(--surface-2)] font-mono text-sm overflow-x-auto">
+        <div className="p-4 rounded-lg border bg-[var(--surface-2)] font-mono text-sm">
           EMI = P × r × (1 + r)^n / ((1 + r)^n − 1)
         </div>
 
         <p>
-          Where P is the loan amount, r is the monthly interest rate, and n is
-          the total number of months. While this looks complex, the calculator
-          handles everything automatically and delivers accurate results
-          instantly.
+          Here P is principal, r is monthly interest rate, and n is number of
+          months. The calculator automatically applies this formula to produce
+          accurate results similar to bank systems.
         </p>
       </section>
+
 
       {/* ================= EXAMPLE ================= */}
       <section className="space-y-4">
         <h2 className="text-2xl font-bold">Example Home Loan Calculation</h2>
 
         <p>
-          Imagine you take a home loan of ₹50,00,000 at 8.5 percent annual
-          interest for 20 years.
+          Suppose you borrow ₹50,00,000 at 8.5 percent for 20 years.
         </p>
 
         <ul className="list-disc pl-6 space-y-2">
@@ -129,96 +159,67 @@ const HomeLoanEMIArticle = () => {
         </ul>
 
         <p>
-          Notice something important. You pay more in interest than half of your
-          original loan. That is why comparing tenure and rates before
-          finalizing is extremely important.
+          This example clearly shows how interest becomes a major part of the
+          total cost. Planning tenure wisely saves huge money.
         </p>
       </section>
 
-      {/* ================= TENURE IMPACT ================= */}
-      <section className="space-y-4">
-        <h2 className="text-2xl font-bold">How Tenure Impacts Your EMI</h2>
 
-        <p>
-          Your loan tenure directly changes how much you pay every month and how
-          much total interest you pay overall.
-        </p>
+      {/* ================= MISTAKES ================= */}
+      <section className="space-y-4">
+        <h2 className="text-2xl font-bold">Common Home Loan Mistakes to Avoid</h2>
 
         <ul className="list-disc pl-6 space-y-2">
-          <li>Short tenure → higher EMI but lower interest</li>
-          <li>Long tenure → lower EMI but higher interest</li>
+          <li>Choosing longest tenure blindly</li>
+          <li>Ignoring processing charges</li>
+          <li>Not comparing lenders</li>
+          <li>Taking EMI beyond 40% of income</li>
+          <li>Skipping prepayment opportunities</li>
         </ul>
-
-        <p>
-          If you can afford slightly higher monthly payments, choosing a shorter
-          tenure can save several lakhs in the long run. Always test different
-          combinations inside the calculator before deciding.
-        </p>
       </section>
+
 
       {/* ================= TIPS ================= */}
       <section className="space-y-4">
-        <h2 className="text-2xl font-bold">
-          Practical Tips to Reduce Home Loan EMI
-        </h2>
+        <h2 className="text-2xl font-bold">Tips to Reduce Home Loan EMI</h2>
 
         <ul className="list-disc pl-6 space-y-2">
           <li>Increase down payment</li>
           <li>Maintain high credit score</li>
-          <li>Negotiate lower interest rate</li>
-          <li>Make part prepayments yearly</li>
+          <li>Negotiate lower interest rates</li>
+          <li>Make regular part payments</li>
           <li>Transfer balance to cheaper lender</li>
-          <li>Avoid unnecessary long tenures</li>
         </ul>
-
-        <p>
-          These small actions combined can reduce your loan cost dramatically.
-          Smart borrowers focus on interest savings, not just EMI comfort.
-        </p>
       </section>
+
 
       {/* ================= FAQ ================= */}
       <section className="space-y-4">
         <h2 className="text-2xl font-bold">Frequently Asked Questions</h2>
 
-        <h3 className="font-semibold">Is EMI fixed every month?</h3>
-        <p>
-          Yes for fixed rate loans. Floating rate loans may vary with market
-          rates.
-        </p>
-
-        <h3 className="font-semibold">Can I prepay my home loan?</h3>
-        <p>
-          Yes. Paying extra reduces principal and saves significant interest.
-        </p>
-
-        <h3 className="font-semibold">Is this calculator accurate?</h3>
-        <p>Yes. It uses the same standard banking formula for calculations.</p>
-
-        <h3 className="font-semibold">
-          Should I choose longer tenure for comfort?
-        </h3>
-        <p>
-          Only if necessary. Longer tenure increases total interest heavily.
-          Shorter tenure is financially smarter when affordable.
-        </p>
+        <p><strong>Is EMI fixed every month?</strong> Yes for fixed loans. Floating rates may vary.</p>
+        <p><strong>Can I prepay my loan?</strong> Yes, it reduces interest significantly.</p>
+        <p><strong>Is this calculator accurate?</strong> Yes, it uses standard banking formulas.</p>
+        <p><strong>Does shorter tenure save money?</strong> Yes, it reduces total interest drastically.</p>
       </section>
 
-      {/* ================= CONCLUSION ================= */}
+
+      {/* ================= FINAL ================= */}
       <section className="space-y-4">
         <h2 className="text-2xl font-bold">Final Thoughts</h2>
 
         <p>
-          A home loan will stay with you for years. Walking into it without
-          planning is careless. Use the Home Loan EMI Calculator, test multiple
-          scenarios, understand the numbers clearly, and then borrow only what
-          you can comfortably repay.
+          A home loan is a long-term financial commitment. Never rely on rough
+          estimates. Always calculate EMI first, compare options carefully, and
+          borrow only what you can comfortably repay. Smart planning today saves
+          lakhs tomorrow.
         </p>
 
         <p className="font-medium">
           Calculate first. Commit later. Stay financially strong.
         </p>
       </section>
+
     </article>
   );
 };

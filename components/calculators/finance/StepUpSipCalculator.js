@@ -1,248 +1,175 @@
 "use client";
 
-import { useState } from "react";
-import {
-  Calendar,
-  Calculator,
-  Wallet,
-  TrendingUp,
-  IndianRupee,
-  ArrowUpRight,
-} from "lucide-react";
+import { useMemo, useState } from "react";
 
-import { AmountInput } from "../../inputs/AmountInput";
-import { PercentageInput } from "../../inputs/PercentageInput";
-import { InputField } from "../../inputs/InputField";
-import { ResultCard } from "../../ResultCard";
+import CalculatorLayout from "@/components/core/CalculatorLayout";
+import InputsGrid from "@/components/core/InputsGrid";
+import ResultHero from "@/components/core/ResultHero";
+import DonutBreakdownChart from "@/components/core/DonutBreakdownChart";
+import StatsGrid from "@/components/core/StatsGrid";
+import ComparisonMatrix from "@/components/core/ComparisonMatrix";
+import ExplanationText from "@/components/core/ExplanationText";
+
+import { formatINR } from "@/lib/format";
+import { calculateSip, calculateStepUpSip } from "@/lib/formulas";
+import StepUpSIPCalculatorArticle from "../../content/finance/StepUpSIPCalculatorArticle";
+
+/*
+  RULES FOLLOWED:
+  - page only orchestrates
+  - math in lib
+  - no logic in JSX
+  - memoized calculations
+  - clean scalable structure
+*/
 
 export default function StepUpSipCalculator() {
-  const [monthlyInvestment, setMonthlyInvestment] = useState("");
-  const [annualReturn, setAnnualReturn] = useState("");
-  const [stepUpRate, setStepUpRate] = useState("");
-  const [tenureYears, setTenureYears] = useState("");
-  const [result, setResult] = useState(null);
-  const [error, setError] = useState("");
+  /* ================= STATE ================= */
 
-  /* ---------------- VALIDATION (LOOSE) ---------------- */
-  function validate() {
-    if (!monthlyInvestment || Number(monthlyInvestment) <= 0) {
-      setError("Please enter a valid monthly investment amount.");
-      return false;
-    }
+  const [values, setValues] = useState({
+    monthly: "",
+    rate: "",
+    stepUp: "",
+    years: "",
+  });
 
-    if (
-      annualReturn === "" ||
-      Number(annualReturn) < 0 ||
-      Number(annualReturn) > 100
-    ) {
-      setError("Expected annual return should be between 0% and 100%.");
-      return false;
-    }
+  /* ================= NORMALIZED NUMBERS ================= */
 
-    if (
-      stepUpRate === "" ||
-      Number(stepUpRate) < 0 ||
-      Number(stepUpRate) > 100
-    ) {
-      setError("Step-up rate should be between 0% and 100%.");
-      return false;
-    }
+  const monthly = Number(values.monthly);
+  const rate = Number(values.rate);
+  const stepUp = Number(values.stepUp);
+  const years = Number(values.years);
 
-    if (!tenureYears || Number(tenureYears) <= 0) {
-      setError("Investment duration must be greater than 0.");
-      return false;
-    }
+  /* ================= VALIDATION ================= */
 
-    setError("");
-    return true;
-  }
+  const isValid =
+    monthly > 0 &&
+    rate >= 0 &&
+    stepUp >= 0 &&
+    years > 0;
 
-  /* ---------------- CALCULATION ---------------- */
-  function calculateStepUpSIP(e) {
-    e.preventDefault();
+  /* ================= CALCULATIONS ================= */
 
-    if (!validate()) {
-      setResult(null);
-      return;
-    }
+  const result = useMemo(() => {
+    if (!isValid) return null;
 
-    const monthlyRate = Number(annualReturn) / 12 / 100;
-    const stepUp = Number(stepUpRate) / 100;
-    const years = Number(tenureYears);
+    return calculateStepUpSip(monthly, rate, stepUp, years);
+  }, [monthly, rate, stepUp, years, isValid]);
 
-    let totalInvestment = 0;
-    let futureValue = 0;
-    let monthlyAmount = Number(monthlyInvestment);
+  const regularSip = useMemo(() => {
+    if (!isValid) return null;
 
-    for (let year = 1; year <= years; year++) {
-      for (let month = 1; month <= 12; month++) {
-        const remainingMonths = (years - year) * 12 + (12 - month + 1);
-        futureValue +=
-          monthlyAmount * Math.pow(1 + monthlyRate, remainingMonths);
-        totalInvestment += monthlyAmount;
-      }
+    return calculateSip(monthly, rate, years);
+  }, [monthly, rate, years, isValid]);
 
-      // Increase SIP amount at year end
-      monthlyAmount += monthlyAmount * stepUp;
-    }
+  /* ================= INPUT CONFIG ================= */
 
-    const totalGains = futureValue - totalInvestment;
+  const inputs = [
+    {
+      key: "monthly",
+      label: "Initial Monthly Investment",
+      type: "amount",
+      placeholder: "5,000",
+      hint: "Starting SIP amount",
+    },
+    {
+      key: "rate",
+      label: "Expected Annual Return (%)",
+      type: "percent",
+      placeholder: "12",
+      hint: "Estimated yearly return",
+    },
+    {
+      key: "stepUp",
+      label: "Annual Step-Up Rate (%)",
+      type: "percent",
+      placeholder: "10",
+      hint: "Yearly increase in SIP amount",
+    },
+    {
+      key: "years",
+      label: "Investment Duration (Years)",
+      type: "number",
+      placeholder: "15",
+      min: 1,
+      hint: "Longer duration increases compounding",
+    },
+  ];
 
-    setResult({
-      invested: Math.round(totalInvestment),
-      gains: Math.round(totalGains),
-      futureValue: Math.round(futureValue),
-    });
-  }
+  /* ================= UI ================= */
 
   return (
-    <section
-      className="rounded-xl p-6 space-y-8"
-      style={{
-        backgroundColor: "var(--surface)",
-        border: "1px solid var(--border)",
-      }}
+    <CalculatorLayout
+      title="Step-Up SIP Calculator"
+      subtitle="Estimate future value when your SIP increases every year and accelerate wealth creation through compounding."
+      badges={[
+        "100% Free",
+        "Instant Results",
+        "Compound Growth Accurate",
+        "No Signup Required",
+      ]}
     >
-      {/* ================= HEADER ================= */}
-      <header className="space-y-2">
-        <h1 className="text-2xl font-bold flex items-center gap-2">
-          <ArrowUpRight size={22} />
-          Step-Up SIP Calculator
-        </h1>
+      <InputsGrid inputs={inputs} values={values} setValues={setValues} />
 
-        <p className="text-sm leading-relaxed">
-          Use this Step-Up SIP Calculator to estimate the future value of your
-          investments when you increase your SIP amount every year. It helps
-          you plan long-term wealth creation more effectively.
-        </p>
-      </header>
-
-      {/* ================= FORM ================= */}
-      <form onSubmit={calculateStepUpSIP} className="space-y-4">
-        <AmountInput
-          label="Initial Monthly Investment"
-          value={monthlyInvestment}
-          onChange={setMonthlyInvestment}
-          placeholder="5,000"
-          hasError={error.toLowerCase().includes("investment")}
-        />
-
-        <PercentageInput
-          label="Expected Annual Return (%)"
-          value={annualReturn}
-          onChange={setAnnualReturn}
-          placeholder="12"
-          hasError={error.toLowerCase().includes("return")}
-        />
-
-        <PercentageInput
-          label="Annual Step-Up Rate (%)"
-          value={stepUpRate}
-          onChange={setStepUpRate}
-          placeholder="10"
-          hasError={error.toLowerCase().includes("step")}
-        />
-
-        <InputField
-          icon={<Calendar size={18} />}
-          label="Investment Duration (in years)"
-          value={tenureYears}
-          onChange={setTenureYears}
-          placeholder="15"
-          min={1}
-          hasError={error.toLowerCase().includes("duration")}
-        />
-
-        {/* Soft guidance */}
-        <p className="text-xs text-gray-500">
-          A step-up of 5–10% annually helps align investments with income growth.
-        </p>
-
-        {error && (
-          <p className="text-sm text-red-500">
-            {error}
-          </p>
-        )}
-
-        <button
-          type="submit"
-          className="w-full py-2.5 rounded-md font-medium flex items-center justify-center gap-2"
-          style={{ backgroundColor: "var(--primary)", color: "#fff" }}
-        >
-          <Calculator size={18} />
-          Calculate Step-Up SIP
-        </button>
-      </form>
-
-      {/* ================= RESULT ================= */}
       {result && (
-        <div className="grid md:grid-cols-3 gap-4" aria-live="polite">
-          <ResultCard
-            variant="neutral"
-            icon={<IndianRupee size={20} />}
-            label="Total Investment"
-            value={`₹ ${result.invested.toLocaleString("en-IN")}`}
+        <>
+          {/* HERO */}
+          <ResultHero label="Future Value" value={result.futureValue} />
+
+          {/* BREAKDOWN */}
+          <DonutBreakdownChart
+            data={[
+              { name: "Invested", value: result.invested },
+              { name: "Gains", value: result.gains },
+            ]}
           />
 
-          <ResultCard
-            variant="warning"
-            icon={<TrendingUp size={20} />}
-            label="Total Gains"
-            value={`₹ ${result.gains.toLocaleString("en-IN")}`}
+          {/* STATS */}
+          <StatsGrid
+            items={[
+              {
+                label: "Total Investment",
+                value: formatINR(result.invested),
+                variant: "neutral",
+              },
+              {
+                label: "Total Gains",
+                value: formatINR(result.gains),
+                variant: "success",
+              },
+              {
+                label: "Future Value",
+                value: formatINR(result.futureValue),
+                variant: "primary",
+              },
+              {
+                label: "Total Months",
+                value: result.months,
+                variant: "info",
+              },
+            ]}
           />
 
-          <ResultCard
-            variant="primary"
-            icon={<Wallet size={20} />}
-            label="Future Value"
-            value={`₹ ${result.futureValue.toLocaleString("en-IN")}`}
+          {/* EXPLANATION */}
+          <ExplanationText
+            text={`With a starting SIP of ${formatINR(
+              monthly
+            )} increasing ${stepUp}% yearly for ${years} years at ${rate}% returns, your corpus can grow to ${formatINR(
+              result.futureValue
+            )}.`}
           />
-        </div>
+
+          {/* COMPARISON */}
+          <ComparisonMatrix
+            columns={["Type", "Future Value"]}
+            rows={[
+              ["Regular SIP", formatINR(regularSip.futureValue)],
+              ["Step-Up SIP", formatINR(result.futureValue)],
+            ]}
+          />
+        </>
       )}
-
-      {/* ================= INFO (SEO CONTENT) ================= */}
-      <article className="space-y-4 text-sm leading-relaxed">
-        <h2 className="font-semibold text-base">
-          How Step-Up SIP is Calculated
-        </h2>
-
-        <p>
-          In a Step-Up SIP, your monthly investment amount increases by a fixed
-          percentage every year. Each monthly investment grows at the expected
-          rate of return until the end of the investment period.
-        </p>
-
-        <p
-          className="font-mono text-xs p-3 rounded"
-          style={{ backgroundColor: "var(--surface-2)" }}
-        >
-          FV = Σ [ SIP<sub>year</sub> × (1 + r)<sup>remaining months</sup> ]
-        </p>
-
-        <ul className="list-disc pl-5">
-          <li><strong>SIP</strong> = Monthly investment amount</li>
-          <li><strong>r</strong> = Monthly rate of return</li>
-          <li><strong>Step-Up</strong> = Annual increment percentage</li>
-        </ul>
-
-        <p>
-          Step-Up SIPs are ideal for investors expecting salary growth, as they
-          help accelerate wealth creation without a large initial investment.
-        </p>
-      </article>
-
-      {/* ================= BENEFITS ================= */}
-      <aside className="text-sm space-y-2">
-        <h3 className="font-semibold">
-          Why use this Step-Up SIP Calculator?
-        </h3>
-        <ul className="list-disc pl-5">
-          <li>Estimate returns with increasing SIP amounts</li>
-          <li>Plan investments aligned with income growth</li>
-          <li>Compare regular SIP vs Step-Up SIP</li>
-          <li>Free, fast, and accurate calculation</li>
-        </ul>
-      </aside>
-    </section>
+      <StepUpSIPCalculatorArticle/>
+    </CalculatorLayout>
   );
 }

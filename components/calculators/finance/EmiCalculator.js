@@ -110,7 +110,7 @@ export default function EmiCalculator() {
       {result && (
         <>
           {/* MAIN EMI */}
-          <ResultHero label="Monthly EMI" value={result.emi} />
+          <ResultHero label="Monthly EMI" value={result.emi} showPerDay/>
 
           {/* DONUT BREAKDOWN */}
           <DonutBreakdownChart
