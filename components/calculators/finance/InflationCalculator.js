@@ -1,194 +1,149 @@
 "use client";
 
-import { useState } from "react";
-import {
-  Calculator,
-  TrendingUp,
-  IndianRupee,
-  Wallet,
-} from "lucide-react";
+import { useMemo, useState } from "react";
 
-import { PercentageInput } from "../../inputs/PercentageInput";
-import { AmountInput } from "../../inputs/AmountInput";
-import { ResultCard } from "../../ResultCard";
+import CalculatorLayout from "@/components/core/CalculatorLayout";
+import InputsGrid from "@/components/core/InputsGrid";
+import ResultHero from "@/components/core/ResultHero";
+import StatsGrid from "@/components/core/StatsGrid";
+import ExplanationText from "@/components/core/ExplanationText";
+
+import { formatINR } from "@/lib/format";
+import InflationArticle from "../../content/finance/InflationArticle";
+import InflationCalculatorArticle from "../../content/finance/InflationArticle";
+
+/* =====================================================
+   PURE FORMULA
+   FV = P × (1 + r)^n
+===================================================== */
 
 export default function InflationCalculator() {
-  const [currentAmount, setCurrentAmount] = useState("");
-  const [inflationRate, setInflationRate] = useState("");
-  const [years, setYears] = useState("");
+  /* ================= STATE ================= */
 
-  const [result, setResult] = useState(null);
-  const [error, setError] = useState("");
+  const [values, setValues] = useState({
+    amount: "",
+    rate: "6",
+    years: "",
+  });
 
-  /* ---------------- VALIDATION ---------------- */
-  function validate() {
-    if (!currentAmount || Number(currentAmount) <= 0) {
-      setError("Please enter a valid current amount.");
-      return false;
-    }
+  /* ================= PARSE ONCE ================= */
 
-    if (
-      inflationRate === "" ||
-      Number(inflationRate) < 0 ||
-      Number(inflationRate) > 50
-    ) {
-      setError("Inflation rate should be between 0% and 50%.");
-      return false;
-    }
+  const parsed = useMemo(() => {
+    const P = Number(values.amount);
+    const r = Number(values.rate) / 100;
+    const n = Number(values.years);
 
-    if (!years || Number(years) <= 0) {
-      setError("Number of years must be greater than 0.");
-      return false;
-    }
+    return { P, r, n };
+  }, [values]);
 
-    setError("");
-    return true;
-  }
+  /* ================= VALIDATION ================= */
 
-  /* ---------------- CALCULATION ---------------- */
-  function calculateInflation(e) {
-    e.preventDefault();
+  const isValid = useMemo(() => {
+    const { P, r, n } = parsed;
+    return P > 0 && n > 0 && r >= 0;
+  }, [parsed]);
 
-    if (!validate()) {
-      setResult(null);
-      return;
-    }
+  /* ================= CALCULATION ================= */
 
-    const P = Number(currentAmount);
-    const r = Number(inflationRate) / 100;
-    const n = Number(years);
+  const result = useMemo(() => {
+    if (!isValid) return null;
+
+    const { P, r, n } = parsed;
 
     const futureValue = P * Math.pow(1 + r, n);
-    const lossInValue = futureValue - P;
+    const loss = futureValue - P;
 
-    setResult({
-      futureValue: Math.round(futureValue),
-      lossInValue: Math.round(lossInValue),
-      todayValue: Math.round(P),
-    });
-  }
+    return {
+      futureValue,
+      loss,
+      todayValue: P,
+    };
+  }, [parsed, isValid]);
+
+  /* ================= INPUT CONFIG ================= */
+
+  const inputs = useMemo(
+    () => [
+      {
+        key: "amount",
+        label: "Current Amount",
+        type: "amount",
+        placeholder: "1,00,000",
+      },
+      {
+        key: "rate",
+        label: "Expected Inflation Rate (%)",
+        type: "percent",
+      },
+      {
+        key: "years",
+        label: "Time Period (Years)",
+        type: "number",
+        min: 1,
+      },
+    ],
+    []
+  );
+
+  /* ================= UI ================= */
 
   return (
-    <section
-      className="rounded-xl p-6 space-y-8"
-      style={{
-        backgroundColor: "var(--surface)",
-        border: "1px solid var(--border)",
-      }}
+    <CalculatorLayout
+      title="Inflation Calculator"
+      subtitle="Estimate how inflation reduces the value of your money over time"
+      badges={[
+        "100% Free",
+        "Instant Results",
+        "Accurate Projection",
+        "No Signup Required",
+      ]}
     >
-      {/* HEADER */}
-      <header>
-        <h1 className="text-2xl font-bold mb-1">
-          Inflation Calculator
-        </h1>
+    
+      {/* INPUTS */}
+      <InputsGrid inputs={inputs} values={values} setValues={setValues} />
 
-        <p className="text-sm leading-relaxed">
-          Use this Inflation Calculator to find out how inflation reduces
-          the purchasing power of money over time. Know what today’s money
-          will be worth in the future.
-        </p>
-      </header>
-
-      {/* FORM */}
-      <form onSubmit={calculateInflation} className="space-y-4">
-        <AmountInput
-          label="Current Amount"
-          value={currentAmount}
-          onChange={setCurrentAmount}
-          placeholder="1,00,000"
-          hasError={error.toLowerCase().includes("amount")}
-        />
-
-        <PercentageInput
-          label="Expected Inflation Rate (%)"
-          value={inflationRate}
-          onChange={setInflationRate}
-          placeholder="6"
-          hasError={error.toLowerCase().includes("inflation")}
-        />
-
-        {/* Years – plain number input */}
-        <label className="block space-y-1">
-          <span className="text-sm font-medium">
-            Time Period (Years)
-          </span>
-          <input
-            type="number"
-            value={years}
-            onChange={e => setYears(e.target.value)}
-            placeholder="10"
-            className="w-full rounded-md px-3 py-2 border"
-            style={{
-              backgroundColor: "var(--surface-2)",
-              borderColor: "var(--border)",
-            }}
-          />
-        </label>
-
-        {error && (
-          <p className="text-sm text-red-500">
-            {error}
-          </p>
-        )}
-
-        <button
-          type="submit"
-          className="w-full py-2.5 rounded-md font-medium flex items-center justify-center gap-2"
-          style={{ backgroundColor: "var(--primary)", color: "#fff" }}
-        >
-          <Calculator size={18} />
-          Calculate Inflation Impact
-        </button>
-      </form>
-
-      {/* RESULT */}
       {result && (
-        <div className="grid md:grid-cols-3 gap-4" aria-live="polite">
-          <ResultCard
-            variant="primary"
-            icon={<IndianRupee size={20} />}
+        <>
+          {/* HERO RESULT */}
+          <ResultHero
             label="Future Value Needed"
-            value={`₹ ${result.futureValue.toLocaleString("en-IN")}`}
+            value={result.futureValue}
           />
 
-          <ResultCard
-            variant="warning"
-            icon={<TrendingUp size={20} />}
-            label="Loss of Purchasing Power"
-            value={`₹ ${result.lossInValue.toLocaleString("en-IN")}`}
+          {/* STATS GRID */}
+          <StatsGrid
+            items={[
+              {
+                label: "Loss of Purchasing Power",
+                value: formatINR(result.loss),
+                variant: "warning",
+              },
+              {
+                label: "Today's Value",
+                value: formatINR(result.todayValue),
+                variant: "neutral",
+              },
+              {
+                label: "Inflation Rate",
+                value: `${values.rate}%`,
+                variant: "info",
+              },
+            ]}
           />
 
-          <ResultCard
-            variant="neutral"
-            icon={<Wallet size={20} />}
-            label="Today's Value"
-            value={`₹ ${result.todayValue.toLocaleString("en-IN")}`}
+          {/* EXPLANATION */}
+          <ExplanationText
+            text={`₹${formatINR(parsed.P)} today becomes ₹${formatINR(
+              result.futureValue
+            )} after ${parsed.n} years at ${values.rate}% inflation. Your money effectively loses ₹${formatINR(
+              result.loss
+            )} of purchasing power.`}
           />
-        </div>
+        </>
       )}
 
-      {/* INFO SECTION (SEO) */}
-      <article className="space-y-4 text-sm leading-relaxed">
-        <h2 className="font-semibold text-base">
-          What is Inflation?
-        </h2>
-
-        <p>
-          Inflation refers to the gradual increase in prices of goods and
-          services over time. As inflation rises, the purchasing power of
-          money decreases.
-        </p>
-
-        <p>
-          This means you need more money in the future to buy the same
-          things you can afford today.
-        </p>
-
-        <p className="font-medium">
-          This calculator helps you understand how inflation affects
-          your savings, expenses, and long-term financial planning.
-        </p>
-      </article>
-    </section>
+      {/* SEO ARTICLE */}
+      <InflationCalculatorArticle />
+    </CalculatorLayout>
   );
 }

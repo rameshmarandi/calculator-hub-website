@@ -1,240 +1,157 @@
 "use client";
 
-import { useState } from "react";
-import {
-  Calculator,
-  Wallet,
-  TrendingUp,
-  IndianRupee,
-} from "lucide-react";
+import { useMemo, useState } from "react";
 
-import { AmountInput } from "../../inputs/AmountInput";
-import { PercentageInput } from "../../inputs/PercentageInput";
-import { ResultCard } from "../../ResultCard";
+import CalculatorLayout from "@/components/core/CalculatorLayout";
+import InputsGrid from "@/components/core/InputsGrid";
+import ResultHero from "@/components/core/ResultHero";
+import StatsGrid from "@/components/core/StatsGrid";
+import ExplanationText from "@/components/core/ExplanationText";
+import DonutBreakdownChart from "@/components/core/DonutBreakdownChart";
+import { formatINR } from "@/lib/format";
+
+import RetirementCalculatorArticle from "../../content/finance/RetirementCalculatorArticle";
+
+/* =====================================================
+   FORMULAS
+
+   Future Monthly = P × (1 + r)^n
+   Annual Expense = Monthly × 12
+   Corpus = Annual × 25
+===================================================== */
 
 export default function RetirementPlanningCalculator() {
-  const [currentExpense, setCurrentExpense] = useState("");
-  const [inflationRate, setInflationRate] = useState("");
-  const [yearsToRetire, setYearsToRetire] = useState("");
+  /* ================= STATE ================= */
 
-  const [result, setResult] = useState(null);
-  const [error, setError] = useState("");
+  const [values, setValues] = useState({
+    expense: "",
+    rate: "6",
+    years: "",
+  });
 
-  /* ---------------- VALIDATION ---------------- */
-  function validate() {
-    if (!currentExpense || Number(currentExpense) <= 0) {
-      setError("Please enter a valid current monthly expense.");
-      return false;
-    }
+  /* ================= PARSE ONCE ================= */
 
-    if (
-      inflationRate === "" ||
-      Number(inflationRate) < 0 ||
-      Number(inflationRate) > 20
-    ) {
-      setError("Please enter a realistic inflation rate (0–20%).");
-      return false;
-    }
+  const parsed = useMemo(() => {
+    return {
+      P: Number(values.expense),
+      r: Number(values.rate) / 100,
+      n: Number(values.years),
+    };
+  }, [values]);
 
-    if (!yearsToRetire || Number(yearsToRetire) <= 0) {
-      setError("Years to retirement must be greater than 0.");
-      return false;
-    }
+  /* ================= VALIDATION ================= */
 
-    setError("");
-    return true;
-  }
+  const isValid = useMemo(() => {
+    const { P, r, n } = parsed;
+    return P > 0 && n > 0 && r >= 0;
+  }, [parsed]);
 
-  /* ---------------- CALCULATION ---------------- */
-  function calculateRetirement(e) {
-    e.preventDefault();
+  /* ================= PURE CALC ================= */
 
-    if (!validate()) {
-      setResult(null);
-      return;
-    }
+  const result = useMemo(() => {
+    if (!isValid) return null;
 
-    const monthlyExpense = Number(currentExpense);
-    const inflation = Number(inflationRate) / 100;
-    const years = Number(yearsToRetire);
+    const { P, r, n } = parsed;
 
-    // Future value of monthly expenses
-    const futureMonthlyExpense =
-      monthlyExpense * Math.pow(1 + inflation, years);
+    const futureMonthly = P * Math.pow(1 + r, n);
+    const annualExpense = futureMonthly * 12;
+    const corpus = annualExpense * 25;
 
-    const annualExpenseAtRetirement = futureMonthlyExpense * 12;
+    return { futureMonthly, annualExpense, corpus };
+  }, [parsed, isValid]);
 
-    // Rule of 25
-    const retirementCorpus = annualExpenseAtRetirement * 25;
+  /* ================= INPUT CONFIG ================= */
 
-    setResult({
-      futureMonthlyExpense: Math.round(futureMonthlyExpense),
-      annualExpense: Math.round(annualExpenseAtRetirement),
-      corpus: Math.round(retirementCorpus),
-    });
-  }
+  const inputs = useMemo(
+    () => [
+      {
+        key: "expense",
+        label: "Current Monthly Expense",
+        type: "amount",
+        placeholder: "30,000",
+      },
+      {
+        key: "rate",
+        label: "Expected Inflation Rate (%)",
+        type: "percent",
+      },
+      {
+        key: "years",
+        label: "Years Left Until Retirement",
+        type: "number",
+        min: 1,
+      },
+    ],
+    [],
+  );
+
+  /* ================= UI ================= */
 
   return (
-    <section
-      className="rounded-xl p-6 space-y-10"
-      style={{
-        backgroundColor: "var(--surface)",
-        border: "1px solid var(--border)",
-      }}
+    <CalculatorLayout
+      title="Retirement Planning Calculator"
+      subtitle="Estimate how much money you need to retire comfortably"
+      badges={[
+        "100% Free",
+        "Instant Results",
+        "Accurate Projection",
+        "No Signup Required",
+      ]}
     >
-      {/* ================= HEADER ================= */}
-      <header className="space-y-2">
-        <h1 className="text-2xl font-bold">
-          Retirement Planning Calculator
-        </h1>
+      <InputsGrid inputs={inputs} values={values} setValues={setValues} />
 
-        <p className="text-sm leading-relaxed">
-          This Retirement Planning Calculator helps you estimate the amount
-          of money you will need to retire comfortably by considering your
-          current expenses, inflation rate, and years left until retirement.
-        </p>
-      </header>
-
-      {/* ================= FORM ================= */}
-      <form onSubmit={calculateRetirement} className="space-y-4">
-        <AmountInput
-          label="Current Monthly Expense"
-          value={currentExpense}
-          onChange={setCurrentExpense}
-          placeholder="30,000"
-          hasError={error.toLowerCase().includes("expense")}
-        />
-
-        <PercentageInput
-          label="Expected Inflation Rate (%)"
-          value={inflationRate}
-          onChange={setInflationRate}
-          placeholder="6"
-          hasError={error.toLowerCase().includes("inflation")}
-        />
-
-        <label className="block space-y-1">
-          <span className="text-sm font-medium">
-            Years Left Until Retirement
-          </span>
-          <input
-            type="number"
-            value={yearsToRetire}
-            onChange={e => setYearsToRetire(e.target.value)}
-            placeholder="25"
-            className="w-full rounded-md px-3 py-2 border"
-            style={{
-              backgroundColor: "var(--surface-2)",
-              borderColor: "var(--border)",
-            }}
-          />
-        </label>
-
-        {error && <p className="text-sm text-red-500">{error}</p>}
-
-        <button
-          type="submit"
-          className="w-full py-2.5 rounded-md font-medium flex items-center justify-center gap-2"
-          style={{ backgroundColor: "var(--primary)", color: "#fff" }}
-        >
-          <Calculator size={18} />
-          Calculate Retirement Corpus
-        </button>
-      </form>
-
-      {/* ================= RESULT ================= */}
       {result && (
-        <div className="grid md:grid-cols-3 gap-4" aria-live="polite">
-          <ResultCard
-            variant="primary"
-            icon={<Wallet size={20} />}
-            label="Monthly Expense at Retirement"
-            value={`₹ ${result.futureMonthlyExpense.toLocaleString("en-IN")}`}
-          />
-
-          <ResultCard
-            variant="warning"
-            icon={<TrendingUp size={20} />}
-            label="Annual Expense at Retirement"
-            value={`₹ ${result.annualExpense.toLocaleString("en-IN")}`}
-          />
-
-          <ResultCard
-            variant="neutral"
-            icon={<IndianRupee size={20} />}
+        <>
+          <ResultHero
             label="Required Retirement Corpus"
-            value={`₹ ${result.corpus.toLocaleString("en-IN")}`}
+            value={result.corpus}
           />
-        </div>
+          <DonutBreakdownChart
+          title="Today’s Value vs Inflation Impact"
+
+            data={[
+              {
+                name: "Today's Annual Cost",
+                value: parsed.P * 12,
+              },
+              {
+                name: "Inflation Added Cost",
+                value: result.annualExpense - parsed.P * 12,
+              },
+            ]}
+          />
+
+          <StatsGrid
+            items={[
+              {
+                label: "Monthly Expense at Retirement",
+                value: formatINR(result.futureMonthly),
+                variant: "warning",
+              },
+              {
+                label: "Annual Expense",
+                value: formatINR(result.annualExpense),
+                variant: "info",
+              },
+              {
+                label: "Years to Retirement",
+                value: parsed.n,
+                variant: "neutral",
+              },
+            ]}
+          />
+
+          <ExplanationText
+            text={`Your current expense of ${formatINR(parsed.P)} grows to ${formatINR(
+              result.futureMonthly,
+            )} per month after ${parsed.n} years at ${values.rate}% inflation. To sustain this using the 4% rule, you need approximately ${formatINR(
+              result.corpus,
+            )}.`}
+          />
+        </>
       )}
 
-      {/* ================= ARTICLE CONTENT ================= */}
-      <article className="space-y-6 text-sm leading-relaxed">
-        <h2 className="font-semibold text-base">
-          What is Retirement Planning?
-        </h2>
-
-        <p>
-          Retirement planning is the process of estimating future financial
-          needs after you stop working and creating a strategy to meet those
-          needs. It ensures that you can maintain your lifestyle without
-          depending on active income.
-        </p>
-
-        <h2 className="font-semibold text-base">
-          How This Retirement Calculator Works
-        </h2>
-
-        <p>
-          This calculator projects your future expenses by adjusting your
-          current monthly expenses for inflation. It then applies the
-          <strong> Rule of 25</strong> to estimate the retirement corpus.
-        </p>
-
-        <pre
-          className="text-xs p-3 rounded font-mono"
-          style={{ backgroundColor: "var(--surface-2)" }}
-        >
-Future Expense = Current Expense × (1 + Inflation) ^ Years  
-Retirement Corpus = Annual Expense × 25
-        </pre>
-
-        <h2 className="font-semibold text-base">
-          Retirement Planning Example
-        </h2>
-
-        <p>
-          If your current monthly expense is ₹30,000, inflation is 6%, and
-          retirement is 25 years away:
-        </p>
-
-        <ul className="list-disc pl-5">
-          <li>Future monthly expense ≈ ₹1,28,000</li>
-          <li>Annual expense ≈ ₹15.4 lakh</li>
-          <li>Required corpus ≈ ₹3.85 crore</li>
-        </ul>
-
-        <h2 className="font-semibold text-base">
-          Why Retirement Planning Is Important
-        </h2>
-
-        <ul className="list-disc pl-5 space-y-1">
-          <li>Protects against rising inflation</li>
-          <li>Ensures financial independence</li>
-          <li>Reduces stress after retirement</li>
-          <li>Helps plan investments early</li>
-        </ul>
-
-        <h2 className="font-semibold text-base">
-          Who Should Use This Calculator?
-        </h2>
-
-        <p>
-          This retirement planning calculator is useful for salaried
-          individuals, business owners, freelancers, and anyone who wants
-          to understand how much they need to save for a secure retirement.
-        </p>
-      </article>
-    </section>
+      <RetirementCalculatorArticle />
+    </CalculatorLayout>
   );
 }

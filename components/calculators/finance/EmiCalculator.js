@@ -110,10 +110,12 @@ export default function EmiCalculator() {
       {result && (
         <>
           {/* MAIN EMI */}
-          <ResultHero label="Monthly EMI" value={result.emi} />
+          <ResultHero label="Monthly EMI" value={result.emi} showPerDay/>
 
           {/* DONUT BREAKDOWN */}
           <DonutBreakdownChart
+          title="Principal vs Interest Split"
+
             data={[
               { name: "Principal", value: Number(values.loan) },
               { name: "Interest", value: result.totalInterest },

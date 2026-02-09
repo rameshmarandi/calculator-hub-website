@@ -5,7 +5,7 @@ import { formatINR } from "@/lib/format";
 
 const COLORS = ["#6366F1", "#EF4444", "#10B981", "#F59E0B"];
 
-export default function DonutBreakdownChart({ data }) {
+export default function DonutBreakdownChart({ data =[] , title}) {
   const total = data.reduce((a, b) => a + b.value, 0);
 
   return (
@@ -17,10 +17,12 @@ export default function DonutBreakdownChart({ data }) {
         bg-[var(--surface-2)]
         p-4
       ">
+
+        {title && <h3 className="text-sm font-medium text-center mb-4">
+       {title}
+      </h3>}
       {/* Title */}
-      <h3 className="text-sm font-medium text-center mb-4">
-        Payment Breakdown
-      </h3>
+      
 
       {/* Chart */}
       <div className="h-56 sm:h-64 md:h-72">

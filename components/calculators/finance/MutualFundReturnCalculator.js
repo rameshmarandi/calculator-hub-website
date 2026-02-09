@@ -1,252 +1,179 @@
 "use client";
 
-import { useState } from "react";
-import {
-  Calculator,
-  Wallet,
-  TrendingUp,
-  IndianRupee,
-  Calendar,
-  PieChart,
-} from "lucide-react";
+import { useMemo, useState } from "react";
 
-import { AmountInput } from "../../inputs/AmountInput";
-import { PercentageInput } from "../../inputs/PercentageInput";
-import { InputField } from "../../inputs/InputField";
-import { ResultCard } from "../../ResultCard";
+import CalculatorLayout from "@/components/core/CalculatorLayout";
+import InputsGrid from "@/components/core/InputsGrid";
+import ResultHero from "@/components/core/ResultHero";
+import DonutBreakdownChart from "@/components/core/DonutBreakdownChart";
+import StatsGrid from "@/components/core/StatsGrid";
+import ExplanationText from "@/components/core/ExplanationText";
+
+import { formatINR } from "@/lib/format";
+import { calculateSip, calculateLumpsum } from "../../../lib/formulas";
+import MutualFundReturnCalculatorArticle from "../../content/finance/MutualFundReturnCalculatorArticle";
+
+// import { calculateSip, calculateLumpsum } from "@/lib/formulas";
 
 export default function MutualFundReturnCalculator() {
-  const [mode, setMode] = useState("sip"); // sip | lumpsum
-  const [amount, setAmount] = useState("");
-  const [annualReturn, setAnnualReturn] = useState("12");
-  const [years, setYears] = useState("");
-  const [result, setResult] = useState(null);
-  const [error, setError] = useState("");
+  const [mode, setMode] = useState("sip");
 
-  /* ---------------- VALIDATION ---------------- */
-  function validate() {
-    if (!amount || Number(amount) <= 0) {
-      setError(
-        mode === "sip"
-          ? "Please enter a valid monthly SIP amount."
-          : "Please enter a valid lumpsum investment amount."
-      );
-      return false;
-    }
+  const [values, setValues] = useState({
+    amount: "",
+    rate: "",
+    years: "",
+  });
 
-    if (
-      annualReturn === "" ||
-      Number(annualReturn) < 0 ||
-      Number(annualReturn) > 100
-    ) {
-      setError("Expected return should be between 0% and 100%.");
-      return false;
-    }
+  const amount = Number(values.amount);
+  const rate = Number(values.rate);
+  const years = Number(values.years);
 
-    if (!years || Number(years) <= 0) {
-      setError("Investment duration must be greater than 0 years.");
-      return false;
-    }
+  const isValid = amount > 0 && rate >= 0 && years > 0;
 
-    setError("");
-    return true;
-  }
+  const result = useMemo(() => {
+    if (!isValid) return null;
 
-  /* ---------------- CALCULATION ---------------- */
-  function calculateReturns(e) {
-    e.preventDefault();
+    return mode === "sip"
+      ? calculateSip(amount, rate, years)
+      : calculateLumpsum(amount, rate, years);
+  }, [amount, rate, years, mode, isValid]);
 
-    if (!validate()) {
-      setResult(null);
-      return;
-    }
-
-    const P = Number(amount);
-    const r = Number(annualReturn) / 12 / 100;
-    const n = Number(years) * 12;
-
-    let invested = 0;
-    let finalValue = 0;
-
-    if (mode === "sip") {
-      invested = P * n;
-
-      finalValue =
-        r === 0
-          ? invested
-          : P * ((Math.pow(1 + r, n) - 1) / r) * (1 + r);
-    } else {
-      invested = P;
-
-      finalValue =
-        r === 0
-          ? invested
-          : P * Math.pow(1 + annualReturn / 100, years);
-    }
-
-    const gains = finalValue - invested;
-
-    setResult({
-      invested: Math.round(invested),
-      gains: Math.round(gains),
-      finalValue: Math.round(finalValue),
-    });
-  }
+  const inputs = [
+    {
+      key: "amount",
+      label: mode === "sip" ? "Monthly SIP Amount" : "Lumpsum Amount",
+      type: "amount",
+      placeholder: mode === "sip" ? "5,000" : "1,00,000",
+    },
+    {
+      key: "rate",
+      label: "Expected Annual Return (%)",
+      type: "percent",
+      placeholder: "12",
+    },
+    {
+      key: "years",
+      label: "Investment Duration (Years)",
+      type: "number",
+      placeholder: "Ex: 5",
+      min: 1,
+    },
+  ];
 
   return (
-    <section
-      className="rounded-xl p-6 space-y-8"
-      style={{
-        backgroundColor: "var(--surface)",
-        border: "1px solid var(--border)",
-      }}
+    <CalculatorLayout
+      title="Mutual Fund Return Calculator"
+      subtitle="Estimate future value using SIP or lumpsum investments with compounding."
+      badges={[
+        "100% Free",
+        "Instant Results",
+        "Compound Growth Accurate",
+        "No Signup Required",
+      ]}
     >
-      {/* ================= HEADER ================= */}
-      <header>
-        <h1 className="text-2xl font-bold flex items-center gap-2">
-          <PieChart size={22} />
-          Mutual Fund Return Calculator
-        </h1>
+      {/* MODE SWITCH */}
+      {/* MODE SWITCH */}
+      <div
+        className="
+    inline-flex
+    rounded-lg
+    p-1
+    bg-[var(--surface-2)]
+    border
+    border-[var(--border)]
+    w-fit
+    mb-4
+  "
+      >
+        {["sip", "lumpsum"].map((type) => {
+          const active = mode === type;
 
-        <p className="text-sm leading-relaxed">
-          Calculate expected returns from mutual fund investments using SIP
-          or lumpsum method. This calculator helps you estimate future value,
-          total investment, and wealth gained.
-        </p>
-      </header>
+          return (
+            <button
+              key={type}
+              type="button"
+              onClick={() => setMode(type)}
+              className={`
+          px-5 py-2
+          text-sm
+          font-medium
+          rounded-md
+          transition-all
+          duration-200
 
-      {/* ================= MODE TOGGLE ================= */}
-      <div className="flex gap-2">
-        <button
-          type="button"
-          onClick={() => setMode("sip")}
-          className={`px-4 py-2 rounded-md text-sm font-medium ${
-            mode === "sip"
-              ? "bg-[var(--primary)] text-white"
-              : "bg-[var(--surface-2)]"
-          }`}
-        >
-          SIP
-        </button>
-
-        <button
-          type="button"
-          onClick={() => setMode("lumpsum")}
-          className={`px-4 py-2 rounded-md text-sm font-medium ${
-            mode === "lumpsum"
-              ? "bg-[var(--primary)] text-white"
-              : "bg-[var(--surface-2)]"
-          }`}
-        >
-          Lumpsum
-        </button>
+          ${
+            active
+              ? "bg-[var(--primary)] text-white shadow-sm"
+              : "text-[var(--text-muted)] hover:bg-[var(--surface)]"
+          }
+        `}
+            >
+              {type === "sip" ? "SIP" : "Lumpsum"}
+            </button>
+          );
+        })}
       </div>
 
-      {/* ================= FORM ================= */}
-      <form onSubmit={calculateReturns} className="space-y-4">
-        <AmountInput
-          label={
-            mode === "sip"
-              ? "Monthly SIP Amount"
-              : "Lumpsum Investment Amount"
-          }
-          value={amount}
-          onChange={setAmount}
-          placeholder={mode === "sip" ? "5,000" : "1,00,000"}
-          hasError={error.toLowerCase().includes("amount")}
-        />
+      <InputsGrid inputs={inputs} values={values} setValues={setValues} />
 
-        <PercentageInput
-          label="Expected Annual Return (%)"
-          value={annualReturn}
-          onChange={setAnnualReturn}
-          placeholder="12"
-          hasError={error.toLowerCase().includes("return")}
-        />
-
-        <InputField
-          icon={<Calendar size={18} />}
-          label="Investment Duration (in years)"
-          value={years}
-          onChange={setYears}
-          placeholder="10"
-          hasError={error.toLowerCase().includes("duration")}
-        />
-
-        {error && (
-          <p className="text-sm text-red-500">
-            {error}
-          </p>
-        )}
-
-        <button
-          type="submit"
-          className="w-full py-2.5 rounded-md font-medium flex items-center justify-center gap-2"
-          style={{ backgroundColor: "var(--primary)", color: "#fff" }}
-        >
-          <Calculator size={18} />
-          Calculate Returns
-        </button>
-      </form>
-
-      {/* ================= RESULT ================= */}
       {result && (
-        <div className="grid md:grid-cols-3 gap-4" aria-live="polite">
-          <ResultCard
-            variant="neutral"
-            icon={<IndianRupee size={20} />}
-            label="Total Investment"
-            value={`₹ ${result.invested.toLocaleString("en-IN")}`}
+        <>
+          {/* <ResultHero label="Final Value" value={result.finalValue} /> */}
+          <ResultHero label="Final Value" value={result.futureValue} />
+          <DonutBreakdownChart
+          title="Investment vs Profit"
+
+            data={[
+              { name: "Investment", value: result.invested },
+              { name: "Returns", value: result.gains },
+            ]}
           />
 
-          <ResultCard
-            variant="warning"
-            icon={<TrendingUp size={20} />}
-            label="Total Returns"
-            value={`₹ ${result.gains.toLocaleString("en-IN")}`}
+          {/* <StatsGrid
+            items={[
+              { label: "Total Investment", value: formatINR(result.invested) },
+              {
+                label: "Total Returns",
+                value: formatINR(result.gains),
+                variant: "success",
+              },
+              {
+                label: "Final Value",
+                value: formatINR(result.finalValue),
+                variant: "primary",
+              },
+              { label: "Total Months", value: result.months, variant: "info" },
+            ]}
+          /> */}
+
+          <StatsGrid
+            items={[
+              { label: "Total Investment", value: formatINR(result.invested) },
+              {
+                label: "Total Returns",
+                value: formatINR(result.gains),
+                variant: "success",
+              },
+              {
+                label: "Final Value",
+                value: formatINR(result.futureValue),
+                variant: "primary",
+              },
+              { label: "Total Months", value: result.months, variant: "info" },
+            ]}
           />
 
-          <ResultCard
-            variant="primary"
-            icon={<Wallet size={20} />}
-            label="Final Value"
-            value={`₹ ${result.finalValue.toLocaleString("en-IN")}`}
+          <ExplanationText
+            text={`Investing ${formatINR(amount)} ${
+              mode === "sip" ? "monthly" : "once"
+            } for ${years} years at ${rate}% can grow to ${formatINR(
+              result.futureValue,
+            )}.`}
           />
-        </div>
+        </>
       )}
 
-      {/* ================= INFO (SEO) ================= */}
-      <article className="space-y-4 text-sm leading-relaxed">
-        <h2 className="font-semibold text-base">
-          How Mutual Fund Returns are Calculated
-        </h2>
-
-        <p>
-          Mutual fund returns depend on the investment amount, duration, and
-          expected rate of return. SIP investments benefit from rupee cost
-          averaging, while lumpsum investments benefit from early compounding.
-        </p>
-
-        <p
-          className="font-mono text-xs p-3 rounded"
-          style={{ backgroundColor: "var(--surface-2)" }}
-        >
-          SIP Future Value = P × ((1 + r)<sup>n</sup> − 1) / r × (1 + r)
-        </p>
-      </article>
-
-      {/* ================= BENEFITS ================= */}
-      <aside className="text-sm space-y-2">
-        <h3 className="font-semibold">
-          Why use a Mutual Fund Calculator?
-        </h3>
-        <ul className="list-disc pl-5">
-          <li>Estimate future wealth easily</li>
-          <li>Compare SIP vs Lumpsum returns</li>
-          <li>Plan long-term financial goals</li>
-          <li>Free, fast, and accurate</li>
-        </ul>
-      </aside>
-    </section>
+      <MutualFundReturnCalculatorArticle/>
+    </CalculatorLayout>
   );
 }

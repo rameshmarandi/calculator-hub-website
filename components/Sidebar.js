@@ -64,9 +64,11 @@ export default function Sidebar() {
           {/* CALCULATOR LIST */}
           <ul className="space-y-1">
             {items.map((calc) => {
-              const href = `/${categoryKey}/${calc.slug}`;
-              const isActive = pathname === href;
+              // const href = `/${categoryKey}/${calc.slug}`;
+              // const isActive = pathname === href;
 
+              const href = `/${categoryKey}/${calc.slug}`;
+              const isActive = pathname.includes(`/${calc.slug}`);
               return (
                 <li key={calc.slug}>
                   <Link
@@ -77,9 +79,7 @@ export default function Sidebar() {
                       backgroundColor: isActive
                         ? "var(--active-bg)"
                         : "transparent",
-                      color: isActive
-                        ? "var(--primary)"
-                        : "var(--text-main)",
+                      color: isActive ? "var(--primary)" : "var(--text-main)",
                       fontWeight: isActive ? 500 : 400,
                     }}
                     onMouseEnter={(e) => {

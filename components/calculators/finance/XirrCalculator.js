@@ -1,76 +1,66 @@
 "use client";
 
 import { useState } from "react";
-import {
-  Calculator,
-  TrendingUp,
-  Percent,
-  Plus,
-  Trash2,
-  Calendar,
-} from "lucide-react";
+import CalculatorLayout from "@/components/core/CalculatorLayout";
+import StatsGrid from "@/components/core/StatsGrid";
+import ResultHero from "@/components/core/ResultHero";
+import DonutBreakdownChart from "@/components/core/DonutBreakdownChart";
+import { AmountInput } from "@/components/inputs/AmountInput";
+import { calculateXirr } from "../../../lib/formulas";
+import { formatINR } from "@/lib/format";
+import ComparisonMatrix from "@/components/core/ComparisonMatrix";
+import ExplanationText from "@/components/core/ExplanationText";
+import XirrCalculatorArticle from "../../content/finance/XirrCalculatorArticle";
 
-import { AmountInput } from "../../inputs/AmountInput";
-import { ResultCard } from "../../ResultCard";
-
-/* ---------------- XIRR HELPERS ---------------- */
-function daysBetween(d1, d2) {
-  return (d2.getTime() - d1.getTime()) / (1000 * 60 * 60 * 24);
-}
-
-function computeXIRR(cashFlows) {
-  let rate = 0.1; // initial guess 10%
-
-  for (let i = 0; i < 100; i++) {
-    let f = 0;
-    let df = 0;
-
-    for (let j = 0; j < cashFlows.length; j++) {
-      const days = daysBetween(cashFlows[0].date, cashFlows[j].date) / 365;
-      const amount = cashFlows[j].amount;
-
-      f += amount / Math.pow(1 + rate, days);
-      df += (-days * amount) / Math.pow(1 + rate, days + 1);
-    }
-
-    const newRate = rate - f / df;
-    if (Math.abs(newRate - rate) < 0.000001) {
-      return newRate * 100;
-    }
-    rate = newRate;
-  }
-
-  return rate * 100;
-}
+const DAY = 1000 * 60 * 60 * 24;
 
 export default function XirrCalculator() {
-  const [cashFlows, setCashFlows] = useState([
+  /* ================= STATE ================= */
+
+  const [flows, setFlows] = useState([
     { amount: "", date: "" },
     { amount: "", date: "" },
   ]);
 
   const [result, setResult] = useState(null);
   const [error, setError] = useState("");
+  const [warning, setWarning] = useState("");
 
-  /* ---------------- VALIDATION ---------------- */
+  /* ================= HELPERS ================= */
+
+  function update(i, key, value) {
+    const copy = [...flows];
+    copy[i][key] = value;
+    setFlows(copy);
+  }
+
+  function addRow() {
+    setFlows((p) => [...p, { amount: "", date: "" }]);
+  }
+
+  function removeRow(i) {
+    if (flows.length <= 2) return;
+    setFlows((p) => p.filter((_, idx) => idx !== i));
+  }
+
+  /* ================= VALIDATION ================= */
+
   function validate() {
-    let hasNegative = false;
-    let hasPositive = false;
+    let hasNeg = false;
+    let hasPos = false;
 
-    for (const flow of cashFlows) {
-      if (!flow.amount || !flow.date) {
-        setError("Please enter amount and date for all cash flows.");
+    for (const f of flows) {
+      if (!f.amount || !f.date) {
+        setError("Enter amount and date for all rows.");
         return false;
       }
 
-      if (Number(flow.amount) < 0) hasNegative = true;
-      if (Number(flow.amount) > 0) hasPositive = true;
+      if (Number(f.amount) < 0) hasNeg = true;
+      if (Number(f.amount) > 0) hasPos = true;
     }
 
-    if (!hasNegative || !hasPositive) {
-      setError(
-        "XIRR requires at least one investment (negative) and one return (positive)."
-      );
+    if (!hasNeg || !hasPos) {
+      setError("Add at least one negative and one positive cash flow.");
       return false;
     }
 
@@ -78,168 +68,194 @@ export default function XirrCalculator() {
     return true;
   }
 
-  /* ---------------- CALCULATION ---------------- */
-  function calculateXirr(e) {
-    e.preventDefault();
+  /* ================= CALCULATION ================= */
 
+  function handleCalculate() {
     if (!validate()) {
       setResult(null);
       return;
     }
 
-    const flows = cashFlows
-      .map(f => ({
+    const normalized = flows
+      .map((f) => ({
         amount: Number(f.amount),
         date: new Date(f.date),
       }))
       .sort((a, b) => a.date - b.date);
 
-    const xirr = computeXIRR(flows);
+    const firstDate = normalized[0].date;
+    const lastDate = normalized.at(-1).date;
+
+    const days = (lastDate - firstDate) / DAY;
+
+    const invested = Math.abs(
+      normalized.filter(f => f.amount < 0).reduce((s, f) => s + f.amount, 0)
+    );
+
+    const returned = normalized
+      .filter(f => f.amount > 0)
+      .reduce((s, f) => s + f.amount, 0);
+
+    const profit = returned - invested;
+
+    const absolutePercent = (profit / invested) * 100;
+
+    let xirr = null;
+
+    /* ---------- guard ---------- */
+    if (days >= 90) {
+      const val = calculateXirr(normalized);
+
+      if (Number.isFinite(val)) xirr = val;
+    } else {
+      setWarning("XIRR requires at least 3 months of data");
+    }
 
     setResult({
-      xirr: xirr.toFixed(2),
+      invested,
+      returned,
+      profit,
+      absolutePercent,
+      xirr,
     });
   }
 
-  function addRow() {
-    setCashFlows([...cashFlows, { amount: "", date: "" }]);
-  }
-
-  function removeRow(index) {
-    if (cashFlows.length <= 2) return;
-    setCashFlows(cashFlows.filter((_, i) => i !== index));
-  }
+  /* ================= UI ================= */
 
   return (
-    <section
-      className="rounded-xl p-6 space-y-8"
-      style={{
-        backgroundColor: "var(--surface)",
-        border: "1px solid var(--border)",
-      }}
+    <CalculatorLayout
+      title="XIRR Calculator"
+      subtitle="Calculate annualized return for irregular cash flows."
+      badges={[
+        "100% Free",
+        "Instant Results",
+        "Accurate Returns",
+        "No Signup Required",
+      ]}
     >
-      {/* ================= HEADER ================= */}
-      <header>
-        <h1 className="text-2xl font-bold flex items-center gap-2">
-          <Percent size={22} />
-          XIRR Calculator
-        </h1>
-
-        <p className="text-sm leading-relaxed">
-          Calculate XIRR (Extended Internal Rate of Return) for investments
-          with irregular cash flows such as SIPs, mutual funds, stocks,
-          and real-world investments.
-        </p>
-      </header>
-
-      {/* ================= FORM ================= */}
-      <form onSubmit={calculateXirr} className="space-y-4">
-        {cashFlows.map((flow, index) => (
-          <div
-            key={index}
-            className="grid md:grid-cols-3 gap-3 items-end"
-          >
-            {/* Amount */}
+      {/* FLOWS */}
+      <div className="space-y-4">
+        {flows.map((f, i) => (
+          <div key={i} className="grid md:grid-cols-3 gap-3 items-end">
             <AmountInput
-              label={index === 0 ? "Cash Flow Amount" : undefined}
-              value={flow.amount}
-              onChange={val => {
-                const updated = [...cashFlows];
-                updated[index].amount = val;
-                setCashFlows(updated);
-              }}
+              label={i === 0 ? "Cash Flow Amount" : undefined}
+              value={f.amount}
+              onChange={(v) => update(i, "amount", v)}
+              allowNegative
               placeholder="-10,000 or 15,000"
             />
 
-            {/* ✅ Native Date Input ONLY */}
-            <label className="block space-y-1">
-              {index === 0 && (
-                <span className="text-sm font-medium flex items-center gap-1">
-                  <Calendar size={14} />
-                  Date
-                </span>
-              )}
-              <input
-                type="date"
-                value={flow.date}
-                onChange={e => {
-                  const updated = [...cashFlows];
-                  updated[index].date = e.target.value;
-                  setCashFlows(updated);
-                }}
-                className="w-full rounded-md px-3 py-2 border"
-                style={{
-                  backgroundColor: "var(--surface-2)",
-                  borderColor: "var(--border)",
-                  color: "var(--text-main)",
-                }}
-              />
-            </label>
+            <input
+              type="date"
+              value={f.date}
+              onChange={(e) => update(i, "date", e.target.value)}
+              className="rounded-lg border px-3 py-2"
+            />
 
-            {/* Remove */}
-            <button
-              type="button"
-              onClick={() => removeRow(index)}
-              className="text-red-500"
-              disabled={cashFlows.length <= 2}
-            >
-              <Trash2 size={18} />
+            <button onClick={() => removeRow(i)} className="text-red-500">
+              Remove
             </button>
           </div>
         ))}
 
-        <button
-          type="button"
-          onClick={addRow}
-          className="flex items-center gap-2 text-sm text-blue-600"
-        >
-          <Plus size={16} />
-          Add Cash Flow
+        <button onClick={addRow} className="text-blue-600 text-sm">
+          + Add Cash Flow
         </button>
+      </div>
 
-        {error && (
-          <p className="text-sm text-red-500">
-            {error}
-          </p>
-        )}
+      {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
+      {warning && <p className="text-yellow-600 text-sm mt-2">{warning}</p>}
 
-        <button
-          type="submit"
-          className="w-full py-2.5 rounded-md font-medium flex items-center justify-center gap-2"
-          style={{ backgroundColor: "var(--primary)", color: "#fff" }}
-        >
-          <Calculator size={18} />
-          Calculate XIRR
-        </button>
-      </form>
+      <button
+        onClick={handleCalculate}
+        className="w-full py-2.5 rounded-lg bg-[var(--primary)] text-white mt-4"
+      >
+        Calculate XIRR
+      </button>
 
-      {/* ================= RESULT ================= */}
-      {result && (
-        <ResultCard
-          variant="primary"
-          icon={<TrendingUp size={20} />}
-          label="XIRR (Annualized Return)"
-          value={`${result.xirr}%`}
-        />
-      )}
+      {/* RESULTS */}
+     {/* ================= RESULTS ================= */}
+{result && (
+  <>
+    {/* HERO */}
+    {result.xirr !== null && (
+      <ResultHero
+        label="XIRR (Annualized Return)"
+        value={result.xirr}
+      />
+    )}
 
-      {/* ================= SEO INFO ================= */}
-      <article className="space-y-4 text-sm leading-relaxed">
-        <h2 className="font-semibold text-base">
-          What is XIRR?
-        </h2>
+    {/* DONUT BREAKDOWN */}
+    <DonutBreakdownChart
+      data={[
+        { name: "Investment", value: result.invested },
+        { name: "Returns", value: result.returned },
+      ]}
+    />
 
-        <p>
-          XIRR (Extended Internal Rate of Return) measures the annualized
-          return of investments made at different dates. It is more accurate
-          than CAGR for SIPs and irregular cash flows.
-        </p>
+    {/* STATS */}
+    <StatsGrid
+      items={[
+        {
+          label: "Total Investment",
+          value: formatINR(result.invested),
+        },
+        {
+          label: "Total Returns",
+          value: formatINR(result.returned),
+        },
+        {
+          label: result.profit >= 0 ? "Profit" : "Loss",
+          value: formatINR(Math.abs(result.profit)),
+          variant: result.profit >= 0 ? "success" : "danger",
+        },
+        {
+          label: "Absolute Return %",
+          value: `${result.absolutePercent.toFixed(2)}%`,
+        },
+        ...(result.xirr !== null
+          ? [
+              {
+                label: "XIRR %",
+                value: `${result.xirr.toFixed(2)}%`,
+                variant: "primary",
+              },
+            ]
+          : []),
+      ]}
+    />
 
-        <p>
-          XIRR is widely used by mutual fund investors, financial advisors,
-          and chartered accountants to evaluate real investment performance.
-        </p>
-      </article>
-    </section>
+    {/* EXPLANATION */}
+    <ExplanationText
+      text={`You invested ${formatINR(
+        result.invested
+      )} and received ${formatINR(
+        result.returned
+      )}. Your net ${
+        result.profit >= 0 ? "profit" : "loss"
+      } is ${formatINR(Math.abs(result.profit))}. ${
+        result.xirr !== null
+          ? `Your annualized return (XIRR) is ${result.xirr.toFixed(2)}%.`
+          : "XIRR requires at least 3 months of data for meaningful calculation."
+      }`}
+    />
+
+    {/* COMPARISON */}
+    <ComparisonMatrix
+      columns={["Metric", "Value"]}
+      rows={[
+        ["Absolute Return", `${result.absolutePercent.toFixed(2)}%`],
+        [
+          "Annualized (XIRR)",
+          result.xirr !== null
+            ? `${result.xirr.toFixed(2)}%`
+            : "Not available",
+        ],
+      ]}
+    />
+  </>
+)}
+<XirrCalculatorArticle/>
+    </CalculatorLayout>
   );
 }

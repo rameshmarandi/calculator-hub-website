@@ -101,10 +101,12 @@ export default function HomeLoanEmiCalculator() {
       {result && (
         <>
           {/* MAIN HERO RESULT */}
-          <ResultHero label="Monthly EMI" value={result.emi} />
+          <ResultHero label="Monthly EMI" value={result.emi} showPerDay/>
 
           {/* DONUT BREAKDOWN */}
           <DonutBreakdownChart
+          title="Principal vs Interest Split"
+
             data={[
               {
                 name: "Principal",
