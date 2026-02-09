@@ -105,6 +105,8 @@ export default function HomeLoanEmiCalculator() {
 
           {/* DONUT BREAKDOWN */}
           <DonutBreakdownChart
+          title="Principal vs Interest Split"
+
             data={[
               {
                 name: "Principal",

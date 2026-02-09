@@ -106,6 +106,8 @@ export default function EducationLoanEmiCalculator() {
 
           {/* BREAKDOWN */}
           <DonutBreakdownChart
+          title="Principal vs Interest Split"
+
             data={[
               { name: "Principal", value: Number(values.loan) },
               { name: "Interest", value: result.totalInterest },

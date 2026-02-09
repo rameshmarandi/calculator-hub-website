@@ -96,6 +96,8 @@ export default function NpsCalculator() {
           <ResultHero label="Retirement Corpus" value={result.corpus} />
 
           <DonutBreakdownChart
+          title="Invested Amount vs Interest Earned"
+
             data={[
               { name: "Investment", value: result.invested },
               { name: "Returns", value: result.gains },

@@ -87,6 +87,8 @@ export default function RecurringDepositCalculator() {
           <ResultHero label="Maturity Amount" value={result.maturity} />
 
           <DonutBreakdownChart
+          title="Invested Amount vs Interest Earned"
+
             data={[
               { name: "Invested", value: result.invested },
               { name: "Interest", value: result.interest },

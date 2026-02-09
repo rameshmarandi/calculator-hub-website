@@ -121,6 +121,8 @@ export default function MutualFundReturnCalculator() {
           {/* <ResultHero label="Final Value" value={result.finalValue} /> */}
           <ResultHero label="Final Value" value={result.futureValue} />
           <DonutBreakdownChart
+          title="Investment vs Profit"
+
             data={[
               { name: "Investment", value: result.invested },
               { name: "Returns", value: result.gains },

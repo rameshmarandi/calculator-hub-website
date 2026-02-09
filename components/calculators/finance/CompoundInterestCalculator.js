@@ -112,6 +112,8 @@ export default function CompoundInterestCalculator() {
 
           {/* BREAKDOWN */}
           <DonutBreakdownChart
+          title="Principal vs Interest Earned"
+
             data={[
               { name: "Principal", value: result.invested },
               { name: "Interest", value: result.gains },

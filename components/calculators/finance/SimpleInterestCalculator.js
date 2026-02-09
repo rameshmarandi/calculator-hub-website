@@ -71,6 +71,8 @@ export default function SimpleInterestCalculator() {
           <ResultHero label="Total Amount" value={result.finalValue} />
 
           <DonutBreakdownChart
+          title="Principal vs Interest Earned"
+
             data={[
               { name: "Principal", value: result.invested },
               { name: "Interest", value: result.interest },

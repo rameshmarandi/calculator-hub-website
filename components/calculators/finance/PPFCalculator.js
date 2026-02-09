@@ -92,6 +92,8 @@ export default function PPFCalculator() {
 
           {/* BREAKDOWN */}
           <DonutBreakdownChart
+          title="Invested Amount vs Interest Earned"
+
             data={[
               { name: "Investment", value: result.invested },
               { name: "Interest", value: result.interest },

@@ -118,6 +118,8 @@ export default function StepUpSipCalculator() {
 
           {/* BREAKDOWN */}
           <DonutBreakdownChart
+          title="Investment vs Returns"
+
             data={[
               { name: "Invested", value: result.invested },
               { name: "Gains", value: result.gains },

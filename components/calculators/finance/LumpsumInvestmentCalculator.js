@@ -88,6 +88,8 @@ export default function LumpsumInvestmentCalculator() {
 
           {/* BREAKDOWN */}
           <DonutBreakdownChart
+          title="Principal vs Growth"
+
             data={[
               { name: "Invested", value: result.invested },
               { name: "Gains", value: result.gains },

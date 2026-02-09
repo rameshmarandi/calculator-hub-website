@@ -1,269 +1,196 @@
 "use client";
 
-import { useState } from "react";
-import {
-  Calculator,
-  Wallet,
-  TrendingUp,
-  IndianRupee,
-  MinusCircle,
-  PlusCircle,
-  AlertTriangle,
-} from "lucide-react";
+import { useMemo, useState } from "react";
 
-import { AmountInput } from "../../inputs/AmountInput";
-import { ResultCard } from "../../ResultCard";
+import CalculatorLayout from "@/components/core/CalculatorLayout";
+import InputsGrid from "@/components/core/InputsGrid";
+import ResultHero from "@/components/core/ResultHero";
+import StatsGrid from "@/components/core/StatsGrid";
+import DonutBreakdownChart from "@/components/core/DonutBreakdownChart";
+import ExplanationText from "@/components/core/ExplanationText";
+
+import { formatINR } from "@/lib/format";
+
+import NetWorthCalculatorArticle from "../../content/finance/NetWorthCalculatorArticle";
+
+/* =====================================================
+   FORMULA
+   Net Worth = Assets − Liabilities
+===================================================== */
 
 export default function NetWorthCalculator() {
-  /* ---------------- ASSETS ---------------- */
-  const [cash, setCash] = useState("");
-  const [investments, setInvestments] = useState("");
-  const [property, setProperty] = useState("");
-  const [otherAssets, setOtherAssets] = useState("");
+  /* ================= STATE ================= */
 
-  /* ---------------- LIABILITIES ---------------- */
-  const [loans, setLoans] = useState("");
-  const [creditCards, setCreditCards] = useState("");
-  const [otherLiabilities, setOtherLiabilities] = useState("");
+  const [values, setValues] = useState({
+    cash: "",
+    investments: "",
+    property: "",
+    otherAssets: "",
+    loans: "",
+    creditCards: "",
+    otherLiabilities: "",
+  });
 
-  const [result, setResult] = useState(null);
-  const [error, setError] = useState("");
+  /* ================= PARSE ONCE ================= */
 
-  /* ---------------- VALIDATION ---------------- */
-  function validate() {
-    const allValues = [
-      cash,
-      investments,
-      property,
-      otherAssets,
-      loans,
-      creditCards,
-      otherLiabilities,
-    ];
+  const parsed = useMemo(() => {
+    return {
+      cash: Number(values.cash || 0),
+      investments: Number(values.investments || 0),
+      property: Number(values.property || 0),
+      otherAssets: Number(values.otherAssets || 0),
+      loans: Number(values.loans || 0),
+      creditCards: Number(values.creditCards || 0),
+      otherLiabilities: Number(values.otherLiabilities || 0),
+    };
+  }, [values]);
 
-    const hasAnyValue = allValues.some(
-      v => v !== "" && Number(v) > 0
-    );
+  /* ================= PURE CALCULATION ================= */
 
-    if (!hasAnyValue) {
-      setError("Please enter at least one asset or liability value.");
-      return false;
-    }
+  const result = useMemo(() => {
+    const assets =
+      parsed.cash + parsed.investments + parsed.property + parsed.otherAssets;
 
-    setError("");
-    return true;
-  }
+    const liabilities =
+      parsed.loans + parsed.creditCards + parsed.otherLiabilities;
 
-  /* ---------------- CALCULATION ---------------- */
-  function calculateNetWorth(e) {
-    e.preventDefault();
+    const netWorth = assets - liabilities;
 
-    if (!validate()) {
-      setResult(null);
-      return;
-    }
+    return { assets, liabilities, netWorth };
+  }, [parsed]);
 
-    const totalAssets =
-      Number(cash || 0) +
-      Number(investments || 0) +
-      Number(property || 0) +
-      Number(otherAssets || 0);
+  /* ================= SHOW DONUT ONLY IF MEANINGFUL ================= */
 
-    const totalLiabilities =
-      Number(loans || 0) +
-      Number(creditCards || 0) +
-      Number(otherLiabilities || 0);
+  const showBreakdown = useMemo(() => {
+    if (result.assets === 0) return false;
 
-    const netWorth = totalAssets - totalLiabilities;
+    const ratio = result.liabilities / result.assets;
 
-    setResult({
-      assets: Math.round(totalAssets),
-      liabilities: Math.round(totalLiabilities),
-      netWorth: Math.round(netWorth),
-    });
-  }
+    // hide if liabilities < 1%
+    return ratio > 0.01;
+  }, [result]);
+
+  /* ================= INPUT CONFIG ================= */
+
+  const inputs = useMemo(
+    () => [
+      /* Assets */
+      {
+        key: "cash",
+        label: "Cash & Bank Balance",
+        type: "amount",
+        group: "Assets",
+      },
+      {
+        key: "investments",
+        label: "Investments",
+        type: "amount",
+        group: "Assets",
+      },
+      {
+        key: "property",
+        label: "Property Value",
+        type: "amount",
+        group: "Assets",
+      },
+      {
+        key: "otherAssets",
+        label: "Other Assets",
+        type: "amount",
+        group: "Assets",
+      },
+
+      /* Liabilities */
+      { key: "loans", label: "Loans", type: "amount", group: "Liabilities" },
+      {
+        key: "creditCards",
+        label: "Credit Card Dues",
+        type: "amount",
+        group: "Liabilities",
+      },
+      {
+        key: "otherLiabilities",
+        label: "Other Liabilities",
+        type: "amount",
+        group: "Liabilities",
+      },
+    ],
+    [],
+  );
+
+  /* ================= UI ================= */
 
   return (
-    <section
-      className="rounded-xl p-6 space-y-12"
-      style={{
-        backgroundColor: "var(--surface)",
-        border: "1px solid var(--border)",
-      }}
+    <CalculatorLayout
+      title="Net Worth Calculator"
+      subtitle="Calculate your total assets, liabilities and net worth instantly"
+      badges={[
+        "100% Free",
+        "Instant Results",
+        "Accurate Snapshot",
+        "No Signup Required",
+      ]}
     >
-      {/* ================= HEADER ================= */}
-      <header className="space-y-2">
-        <h1 className="text-2xl font-bold">
-          Net Worth Calculator
-        </h1>
+      {/* INPUTS */}
+      <InputsGrid inputs={inputs} values={values} setValues={setValues} />
 
-        <p className="text-sm leading-relaxed">
-          This Net Worth Calculator helps you calculate your total assets,
-          liabilities, and overall net worth. It gives a clear snapshot
-          of your current financial health.
-        </p>
-      </header>
+      {/* RESULTS */}
+      <>
+        {/* HERO */}
+        <ResultHero label="Your Net Worth" value={result.netWorth} />
 
-      {/* ================= FORM ================= */}
-      <form onSubmit={calculateNetWorth} className="space-y-10">
-        {/* -------- ASSETS -------- */}
-        <div className="space-y-4">
-          <h2 className="font-semibold flex items-center gap-2">
-            <PlusCircle size={18} />
-            Assets
-          </h2>
+        {/* NET WORTH BREAKDOWN */}
+        {showBreakdown && (
+          <div className="space-y-3">
+            <p className="text-sm font-medium text-center opacity-70">
+              Net Worth Breakdown
+            </p>
 
-          <AmountInput
-            label="Cash & Bank Balance"
-            value={cash}
-            onChange={setCash}
-            placeholder="2,00,000"
-          />
-
-          <AmountInput
-            label="Investments (MFs, Stocks, FD, PPF)"
-            value={investments}
-            onChange={setInvestments}
-            placeholder="10,00,000"
-          />
-
-          <AmountInput
-            label="Property / Real Estate Value"
-            value={property}
-            onChange={setProperty}
-            placeholder="50,00,000"
-          />
-
-          <AmountInput
-            label="Other Assets"
-            value={otherAssets}
-            onChange={setOtherAssets}
-            placeholder="1,00,000"
-          />
-        </div>
-
-        {/* -------- LIABILITIES -------- */}
-        <div className="space-y-4">
-          <h2 className="font-semibold flex items-center gap-2">
-            <MinusCircle size={18} />
-            Liabilities
-          </h2>
-
-          <AmountInput
-            label="Loans (Home, Car, Personal)"
-            value={loans}
-            onChange={setLoans}
-            placeholder="20,00,000"
-          />
-
-          <AmountInput
-            label="Credit Card Dues"
-            value={creditCards}
-            onChange={setCreditCards}
-            placeholder="50,000"
-          />
-
-          <AmountInput
-            label="Other Liabilities"
-            value={otherLiabilities}
-            onChange={setOtherLiabilities}
-            placeholder="25,000"
-          />
-        </div>
-
-        {error && (
-          <p className="text-sm text-red-500 flex items-center gap-2">
-            <AlertTriangle size={14} />
-            {error}
-          </p>
+            <DonutBreakdownChart
+              title="Assets vs Liabilities"
+              data={[
+                { name: "Assets", value: result.assets },
+                { name: "Liabilities", value: result.liabilities },
+              ]}
+            />
+          </div>
         )}
 
-        <button
-          type="submit"
-          className="w-full py-2.5 rounded-md font-medium flex items-center justify-center gap-2"
-          style={{ backgroundColor: "var(--primary)", color: "#fff" }}
-        >
-          <Calculator size={18} />
-          Calculate Net Worth
-        </button>
-      </form>
+        {/* STATS */}
+        <StatsGrid
+          items={[
+            {
+              label: "Total Assets",
+              value: formatINR(result.assets),
+              variant: "primary",
+            },
+            {
+              label: "Total Liabilities",
+              value: formatINR(result.liabilities),
+              variant: "warning",
+            },
+            {
+              label: "Net Worth",
+              value: formatINR(result.netWorth),
+              variant: result.netWorth >= 0 ? "success" : "danger",
+            },
+          ]}
+        />
 
-      {/* ================= RESULT ================= */}
-      {result && (
-        <div className="grid md:grid-cols-3 gap-4" aria-live="polite">
-          <ResultCard
-            variant="primary"
-            icon={<Wallet size={20} />}
-            label="Total Assets"
-            value={`₹ ${result.assets.toLocaleString("en-IN")}`}
-          />
+        {/* EXPLANATION */}
+        <ExplanationText
+          text={`You own assets worth ${formatINR(
+            result.assets,
+          )} and owe ${formatINR(
+            result.liabilities,
+          )}. This results in a net worth of ${formatINR(
+            result.netWorth,
+          )}. Positive net worth indicates strong financial health.`}
+        />
+      </>
 
-          <ResultCard
-            variant="warning"
-            icon={<TrendingUp size={20} />}
-            label="Total Liabilities"
-            value={`₹ ${result.liabilities.toLocaleString("en-IN")}`}
-          />
-
-          <ResultCard
-            variant={result.netWorth >= 0 ? "success" : "danger"}
-            icon={<IndianRupee size={20} />}
-            label="Net Worth"
-            value={`₹ ${result.netWorth.toLocaleString("en-IN")}`}
-          />
-        </div>
-      )}
-
-      {/* ================= ARTICLE (SEO) ================= */}
-      <article className="space-y-6 text-sm leading-relaxed">
-        <h2 className="font-semibold text-base">
-          What is Net Worth?
-        </h2>
-
-        <p>
-          Net worth is the difference between what you own (assets) and
-          what you owe (liabilities). It is one of the most important
-          indicators of your overall financial health.
-        </p>
-
-        <pre
-          className="text-xs p-3 rounded font-mono"
-          style={{ backgroundColor: "var(--surface-2)" }}
-        >
-Net Worth = Total Assets − Total Liabilities
-        </pre>
-
-        <h2 className="font-semibold text-base">
-          Why Net Worth Matters
-        </h2>
-
-        <ul className="list-disc pl-5 space-y-1">
-          <li>Shows true financial position</li>
-          <li>Helps track progress over time</li>
-          <li>Guides investment and saving decisions</li>
-          <li>Essential for FIRE and retirement planning</li>
-        </ul>
-
-        <h2 className="font-semibold text-base">
-          Positive vs Negative Net Worth
-        </h2>
-
-        <p>
-          A <strong>positive net worth</strong> means your assets are greater
-          than your liabilities, indicating financial stability.
-          A <strong>negative net worth</strong> suggests higher debt and
-          signals the need for better debt management.
-        </p>
-
-        <h2 className="font-semibold text-base">
-          How Often Should You Calculate Net Worth?
-        </h2>
-
-        <p>
-          Financial experts recommend tracking net worth at least once
-          every 6–12 months to measure progress and adjust financial goals.
-        </p>
-      </article>
-    </section>
+      {/* SEO ARTICLE */}
+      <NetWorthCalculatorArticle />
+    </CalculatorLayout>
   );
 }

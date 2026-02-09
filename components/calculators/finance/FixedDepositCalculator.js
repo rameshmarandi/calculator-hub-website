@@ -108,6 +108,8 @@ export default function FixedDepositCalculator() {
 
           {/* BREAKDOWN */}
           <DonutBreakdownChart
+          title="Invested Amount vs Interest Earned"
+
             data={[
               { name: "Principal", value: result.principal },
               { name: "Interest", value: result.interest },
