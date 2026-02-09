@@ -1,229 +1,139 @@
 "use client";
 
-import { useState } from "react";
-import {
-  Calculator,
-  IndianRupee,
-  Wallet,
-  TrendingUp,
-  Scale,
-} from "lucide-react";
+import { useMemo, useState } from "react";
 
-import { AmountInput } from "../../inputs/AmountInput";
-import { ResultCard } from "../../ResultCard";
+import CalculatorLayout from "@/components/core/CalculatorLayout";
+import InputsGrid from "@/components/core/InputsGrid";
+import ResultHero from "@/components/core/ResultHero";
+import StatsGrid from "@/components/core/StatsGrid";
+import ExplanationText from "@/components/core/ExplanationText";
+
+import { formatINR } from "@/lib/format";
+import IncomeTaxCalculatorArticle from "../../content/finance/IncomeTaxCalculatorArticle";
+
+/* ======================================================
+   TAX ENGINE (PRODUCTION SAFE)
+====================================================== */
+
+const STANDARD_DEDUCTION = 50000;
+
+function calculateTaxNew(taxable) {
+  let tax = 0;
+
+  if (taxable <= 300000) tax = 0;
+  else if (taxable <= 600000) tax = (taxable - 300000) * 0.05;
+  else if (taxable <= 900000) tax = 15000 + (taxable - 600000) * 0.1;
+  else if (taxable <= 1200000) tax = 45000 + (taxable - 900000) * 0.15;
+  else if (taxable <= 1500000) tax = 90000 + (taxable - 1200000) * 0.2;
+  else tax = 150000 + (taxable - 1500000) * 0.3;
+
+  // ✅ rebate 87A
+  if (taxable <= 700000) tax = 0;
+
+  return tax;
+}
+
+function calculateTaxOld(taxable) {
+  let tax = 0;
+
+  if (taxable <= 250000) tax = 0;
+  else if (taxable <= 500000) tax = (taxable - 250000) * 0.05;
+  else if (taxable <= 1000000) tax = 12500 + (taxable - 500000) * 0.2;
+  else tax = 112500 + (taxable - 1000000) * 0.3;
+
+  return tax;
+}
+
+/* ======================================================
+   COMPONENT
+====================================================== */
 
 export default function IncomeTaxCalculator() {
-  const [annualIncome, setAnnualIncome] = useState("");
-  const [regime, setRegime] = useState("new");
-  const [result, setResult] = useState(null);
-  const [error, setError] = useState("");
+  const [values, setValues] = useState({
+    income: "",
+    regime: "new",
+  });
 
-  /* ---------------- VALIDATION ---------------- */
-  function validate() {
-    if (!annualIncome || Number(annualIncome) <= 0) {
-      setError("Please enter a valid annual income.");
-      return false;
-    }
+  const income = Number(values.income);
 
-    setError("");
-    return true;
-  }
+  const result = useMemo(() => {
+    if (!income || income <= 0) return null;
 
-  /* ---------------- TAX LOGIC ---------------- */
-  function calculateTax(e) {
-    e.preventDefault();
+    const taxable = Math.max(0, income - STANDARD_DEDUCTION);
 
-    if (!validate()) {
-      setResult(null);
-      return;
-    }
+    const baseTax =
+      values.regime === "new"
+        ? calculateTaxNew(taxable)
+        : calculateTaxOld(taxable);
 
-    const income = Number(annualIncome);
-    let tax = 0;
-
-    if (regime === "new") {
-      // New Tax Regime (FY 2024–25 simplified slabs)
-      if (income <= 300000) tax = 0;
-      else if (income <= 600000) tax = (income - 300000) * 0.05;
-      else if (income <= 900000) tax = 15000 + (income - 600000) * 0.1;
-      else if (income <= 1200000) tax = 45000 + (income - 900000) * 0.15;
-      else if (income <= 1500000) tax = 90000 + (income - 1200000) * 0.2;
-      else tax = 150000 + (income - 1500000) * 0.3;
-    } else {
-      // Old Tax Regime
-      if (income <= 250000) tax = 0;
-      else if (income <= 500000) tax = (income - 250000) * 0.05;
-      else if (income <= 1000000)
-        tax = 12500 + (income - 500000) * 0.2;
-      else
-        tax = 112500 + (income - 1000000) * 0.3;
-    }
-
-    const cess = tax * 0.04;
-    const totalTax = tax + cess;
+    const cess = baseTax * 0.04;
+    const totalTax = baseTax + cess;
     const netIncome = income - totalTax;
 
-    setResult({
-      income,
-      tax: Math.round(tax),
+    return {
+      taxable,
+      tax: Math.round(baseTax),
       cess: Math.round(cess),
       totalTax: Math.round(totalTax),
-      netIncome: Math.round(netIncome),
-    });
-  }
+      net: Math.round(netIncome),
+    };
+  }, [income, values.regime]);
+
+  const inputs = [
+    {
+      key: "income",
+      label: "Annual Income",
+      type: "amount",
+      placeholder: "10,00,000",
+    },
+    {
+      key: "regime",
+      label: "Tax Regime",
+      type: "select",
+      options: [
+        { label: "New Regime", value: "new" },
+        { label: "Old Regime", value: "old" },
+      ],
+    },
+  ];
 
   return (
-    <section
-      className="rounded-xl p-6 space-y-12"
-      style={{
-        backgroundColor: "var(--surface)",
-        border: "1px solid var(--border)",
-      }}
-    >
-      {/* ================= HEADER ================= */}
-      <header className="space-y-2">
-        <h1 className="text-2xl font-bold">
-          Income Tax Calculator (India)
-        </h1>
+    <CalculatorLayout
+      title="Income Tax Calculator"
+      subtitle="Estimate tax liability under Indian tax slabs instantly."
+      badges={[
+        "100% Free",
+        "Instant Results",
+        "Accurate",
+        "No Signup Required",
+      ]}>
+      <InputsGrid inputs={inputs} values={values} setValues={setValues} />
 
-        <p className="text-sm leading-relaxed">
-          Use this Income Tax Calculator to estimate your income tax
-          liability under the new and old tax regimes. This calculator
-          helps you understand how much tax you need to pay and your
-          take-home income after tax.
-        </p>
-      </header>
-
-      {/* ================= FORM ================= */}
-      <form onSubmit={calculateTax} className="space-y-4">
-        <AmountInput
-          label="Annual Income"
-          value={annualIncome}
-          onChange={setAnnualIncome}
-          placeholder="10,00,000"
-          hasError={error.toLowerCase().includes("income")}
-        />
-
-        {/* Regime selector */}
-        <label className="block space-y-1">
-          <span className="text-sm font-medium">Tax Regime</span>
-          <select
-            value={regime}
-            onChange={e => setRegime(e.target.value)}
-            className="w-full rounded-md px-3 py-2 border"
-            style={{
-              backgroundColor: "var(--surface-2)",
-              borderColor: "var(--border)",
-            }}
-          >
-            <option value="new">New Tax Regime</option>
-            <option value="old">Old Tax Regime</option>
-          </select>
-        </label>
-
-        {error && <p className="text-sm text-red-500">{error}</p>}
-
-        <button
-          type="submit"
-          className="w-full py-2.5 rounded-md font-medium flex items-center justify-center gap-2"
-          style={{ backgroundColor: "var(--primary)", color: "#fff" }}
-        >
-          <Calculator size={18} />
-          Calculate Income Tax
-        </button>
-      </form>
-
-      {/* ================= RESULT ================= */}
       {result && (
-        <div className="grid md:grid-cols-3 gap-4" aria-live="polite">
-          <ResultCard
-            variant="primary"
-            icon={<Scale size={20} />}
-            label="Income Tax"
-            value={`₹ ${result.tax.toLocaleString("en-IN")}`}
+        <>
+          <ResultHero label="Total Tax Payable" value={result.totalTax} />
+
+          <StatsGrid
+            items={[
+              { label: "Taxable Income", value: formatINR(result.taxable) },
+              { label: "Income Tax", value: formatINR(result.tax) },
+              { label: "Cess (4%)", value: formatINR(result.cess) },
+              {
+                label: "Net Income",
+                value: formatINR(result.net),
+                variant: "success",
+              },
+            ]}
           />
 
-          <ResultCard
-            variant="warning"
-            icon={<TrendingUp size={20} />}
-            label="Health & Education Cess (4%)"
-            value={`₹ ${result.cess.toLocaleString("en-IN")}`}
+          <ExplanationText
+            text={`After ₹50,000 standard deduction, your taxable income becomes ${formatINR(
+              result.taxable,
+            )}. Total tax including cess is ${formatINR(result.totalTax)}.`}
           />
-
-          <ResultCard
-            variant="neutral"
-            icon={<IndianRupee size={20} />}
-            label="Total Tax Payable"
-            value={`₹ ${result.totalTax.toLocaleString("en-IN")}`}
-          />
-
-          <ResultCard
-            variant="success"
-            icon={<Wallet size={20} />}
-            label="Net Income After Tax"
-            value={`₹ ${result.netIncome.toLocaleString("en-IN")}`}
-          />
-        </div>
+        </>
       )}
-
-      {/* ================= ARTICLE (SEO) ================= */}
-      <article className="space-y-6 text-sm leading-relaxed">
-        <h2 className="font-semibold text-base">
-          What is an Income Tax Calculator?
-        </h2>
-
-        <p>
-          An income tax calculator helps you estimate the tax payable on
-          your annual income based on the prevailing income tax slabs.
-          It provides a quick way to understand how much tax you need
-          to pay and your net income after taxes.
-        </p>
-
-        <h2 className="font-semibold text-base">
-          Old vs New Tax Regime
-        </h2>
-
-        <p>
-          The old tax regime allows deductions such as HRA, 80C, and 80D,
-          while the new tax regime offers lower tax rates but removes
-          most deductions. Choosing the right regime depends on your
-          income structure and investments.
-        </p>
-
-        <h2 className="font-semibold text-base">
-          How Income Tax is Calculated
-        </h2>
-
-        <pre
-          className="text-xs p-3 rounded font-mono"
-          style={{ backgroundColor: "var(--surface-2)" }}
-        >
-Tax = Slab-wise calculation  
-Cess = Tax × 4%  
-Total Tax = Tax + Cess
-        </pre>
-
-        <h2 className="font-semibold text-base">
-          Why Use This Income Tax Calculator?
-        </h2>
-
-        <ul className="list-disc pl-5 space-y-1">
-          <li>Instant tax estimation</li>
-          <li>Compare old and new tax regimes</li>
-          <li>Helps in salary and investment planning</li>
-          <li>Free, accurate, and easy to use</li>
-        </ul>
-
-        <h2 className="font-semibold text-base">
-          Who Should Use This Calculator?
-        </h2>
-
-        <p>
-          This calculator is useful for salaried employees, freelancers,
-          business owners, and anyone who wants to estimate income tax
-          before filing returns.
-        </p>
-      </article>
-    </section>
+      <IncomeTaxCalculatorArticle />
+    </CalculatorLayout>
   );
 }
