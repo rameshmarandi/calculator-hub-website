@@ -13,9 +13,13 @@ jobs:
       - name: Deploy to VPS
         uses: appleboy/ssh-action@v1.0.3
         with:
-          host: 147.93.155.240
+          host: ${{ secrets.VPS_HOST }}
           username: ramesh
           key: ${{ secrets.VPS_SSH_KEY }}
+          port: 22
+          script_stop: true
           script: |
+            set -e
             cd /var/www/swiftcalcfy
+            chmod +x deploy.sh
             ./deploy.sh
