@@ -13,10 +13,17 @@ export default function ContactPage() {
         You can contact us via email:
       </p>
 
-      <p className="font-medium mb-6">
-        📧 support@Swiftcalcfy.com
+     <p className="font-medium mb-6">
+        📧{" "}
+         <a
+         href="https://mail.google.com/mail/?view=cm&fs=1&to=swiftcalcfy@gmail.com&su=Feedback%20for%20Swiftcalcfy"
+  target="_blank"
+  rel="noopener noreferrer"
+  className="font-medium text-indigo-600 hover:underline"
+      >
+        swiftcalcfy@gmail.com
+      </a>
       </p>
-
       <p>
         We aim to respond to all inquiries as quickly as possible. Please note
         that we do not provide personalized financial, medical, or legal advice.

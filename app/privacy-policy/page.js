@@ -152,7 +152,14 @@ export default function PrivacyPolicyPage() {
       <p>
         If you have any questions about this policy, contact us at:
         <br />
-        <span className="font-medium">support@swiftcalcfy.com</span>
+       <a
+         href="https://mail.google.com/mail/?view=cm&fs=1&to=swiftcalcfy@gmail.com&su=Feedback%20for%20Swiftcalcfy"
+  target="_blank"
+  rel="noopener noreferrer"
+  className="font-medium text-indigo-600 hover:underline"
+      >
+        swiftcalcfy@gmail.com
+      </a>
       </p>
     </main>
   );

@@ -79,13 +79,24 @@ export default function AboutPage() {
 
       <h2 className="text-xl font-semibold mt-8 mb-2">Get in Touch</h2>
 
-      <p>
-        Have suggestions, feedback, or feature requests? We are always
-        improving.
-        <br />
-        Contact us at:{" "}
-        <span className="font-medium">support@swiftcalcfy.com</span>
-      </p>
+     
+   <p>
+  Have suggestions, feedback, or feature requests? We are always improving.
+  <br />
+  Contact us at{" "}
+ 
+  <a
+
+    href="https://mail.google.com/mail/?view=cm&fs=1&to=swiftcalcfy@gmail.com&su=Feedback%20for%20Swiftcalcfy"
+  target="_blank"
+  rel="noopener noreferrer"
+  className="font-medium text-indigo-600 hover:underline"
+>
+  swiftcalcfy@gmail.com
+</a>
+
+</p>
+
     </main>
   );
 }

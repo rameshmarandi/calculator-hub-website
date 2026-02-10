@@ -22,7 +22,7 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <body
         //  className="bg-gray-100 text-gray-900"
-        className={inter.className}
+        // className={inter.className}
       >
         <Header />
 
