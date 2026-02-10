@@ -1,165 +1,103 @@
 "use client";
 
-import { useState } from "react";
-import { Calculator, Award } from "lucide-react";
+import { useMemo, useState } from "react";
 
-import { PercentageInput } from "../../inputs/PercentageInput";
-import { ResultCard } from "../../ResultCard";
+import CalculatorLayout from "@/components/core/CalculatorLayout";
+import StatsGrid from "@/components/core/StatsGrid";
+import ExplanationText from "@/components/core/ExplanationText";
+
+import { PercentageInput } from "@/components/inputs/PercentageInput";
+import GradeCalculatorArticle from "../../content/education/GradeCalculatorArticle";
+
+/* ======================================================
+   PURE FUNCTION
+====================================================== */
+
+function getGrade(marks) {
+  if (marks >= 90) return ["A+", "Outstanding"];
+  if (marks >= 80) return ["A", "Excellent"];
+  if (marks >= 70) return ["B+", "Very Good"];
+  if (marks >= 60) return ["B", "Good"];
+  if (marks >= 50) return ["C", "Average"];
+  if (marks >= 40) return ["D", "Pass"];
+  return ["F", "Fail"];
+}
+
+/* ======================================================
+   COMPONENT
+====================================================== */
 
 export default function GradeCalculator() {
   const [marks, setMarks] = useState("");
-  const [result, setResult] = useState(null);
-  const [error, setError] = useState("");
 
-  /* ---------------- VALIDATION ---------------- */
-  function validate() {
-    if (!marks || isNaN(marks)) {
-      setError("Please enter valid marks.");
-      return false;
-    }
+  const numeric = Number(marks);
 
-    if (Number(marks) < 0 || Number(marks) > 100) {
-      setError("Marks must be between 0 and 100.");
-      return false;
-    }
+  /* ---------- AUTO RESULT ---------- */
+  const result = useMemo(() => {
+    if (marks === "" || Number.isNaN(numeric)) return null;
+    if (numeric < 0 || numeric > 100) return null;
 
-    setError("");
-    return true;
-  }
+    const [grade, remark] = getGrade(numeric);
 
-  /* ---------------- CALCULATION ---------------- */
-  function calculateGrade(e) {
-    e.preventDefault();
-    if (!validate()) return;
+    return { marks: numeric, grade, remark };
+  }, [marks, numeric]);
 
-    const m = Number(marks);
-    let grade = "";
-    let remark = "";
-
-    if (m >= 90) {
-      grade = "A+";
-      remark = "Outstanding";
-    } else if (m >= 80) {
-      grade = "A";
-      remark = "Excellent";
-    } else if (m >= 70) {
-      grade = "B+";
-      remark = "Very Good";
-    } else if (m >= 60) {
-      grade = "B";
-      remark = "Good";
-    } else if (m >= 50) {
-      grade = "C";
-      remark = "Average";
-    } else if (m >= 40) {
-      grade = "D";
-      remark = "Pass";
-    } else {
-      grade = "F";
-      remark = "Fail";
-    }
-
-    setResult({
-      marks: m,
-      grade,
-      remark,
-    });
-  }
+  /* ======================================================
+     UI
+  ====================================================== */
 
   return (
-    <section
-      className="rounded-xl p-6 space-y-10"
-      style={{
-        backgroundColor: "var(--surface)",
-        border: "1px solid var(--border)",
-      }}>
-      {/* ================= HEADER ================= */}
-      <header>
-        <h1 className="text-2xl font-bold mb-1">Grade Calculator</h1>
-        <p className="text-sm leading-relaxed">
-          Use this Grade Calculator to convert your marks or percentage into
-          academic grades instantly based on standard grading systems.
-        </p>
-      </header>
+    <CalculatorLayout
+      title="Grade Calculator"
+      subtitle="Convert marks or percentage into academic grade instantly."
+      badges={[
+        "100% Free",
+        "Instant Results",
+        "Standard Scale",
+        "No Signup Required",
+      ]}
+    >
+      {/* INPUT */}
+      <PercentageInput
+        label="Marks / Percentage"
+        value={marks}
+        onChange={setMarks}
+        placeholder="85"
+      />
 
-      {/* ================= FORM ================= */}
-      <form onSubmit={calculateGrade} className="space-y-4">
-        <PercentageInput
-          label="Marks / Percentage"
-          value={marks}
-          onChange={setMarks}
-          placeholder="85"
-        />
-
-        {error && <p className="text-sm text-red-500">{error}</p>}
-
-        <button
-          type="submit"
-          className="w-full py-2.5 rounded-md font-medium flex items-center justify-center gap-2"
-          style={{
-            backgroundColor: "var(--primary)",
-            color: "#fff",
-          }}>
-          <Calculator size={18} />
-          Calculate Grade
-        </button>
-      </form>
-
-      {/* ================= RESULT ================= */}
+      {/* RESULT (AUTO) */}
       {result && (
-        <div aria-live="polite">
-          <ResultCard
-            variant="primary"
-            icon={<Award size={20} />}
-            label={`Grade for ${result.marks}%`}
-            value={`${result.grade} (${result.remark})`}
+        <>
+          {/* HERO */}
+          <div className="text-center py-8 rounded-2xl border bg-[var(--surface-2)]">
+            <p className="text-xs uppercase text-gray-500 tracking-wider">
+              Final Grade
+            </p>
+
+            <p className="text-5xl font-extrabold mt-2 text-indigo-600">
+              {result.grade}
+            </p>
+
+            <p className="text-sm text-gray-500 mt-2">
+              {result.remark}
+            </p>
+          </div>
+
+          {/* STATS */}
+          <StatsGrid
+            items={[
+              { label: "Marks", value: `${result.marks}%`, variant: "info" },
+              { label: "Remark", value: result.remark, variant: "success" },
+            ]}
           />
-        </div>
+
+          <ExplanationText
+            text={`With ${result.marks}% marks, your grade is ${result.grade} (${result.remark}).`}
+          />
+        </>
       )}
 
-      {/* ================= SEO BLOG CONTENT ================= */}
-      <article className="space-y-4 text-sm leading-relaxed">
-        <h2 className="font-semibold text-base">How Grades Are Calculated</h2>
-
-        <p>
-          Academic grades are used to evaluate student performance based on
-          marks or percentage obtained in exams. Different institutions may
-          follow slightly different grading scales.
-        </p>
-
-        <h3 className="font-semibold">Standard Grade Scale</h3>
-
-        <ul className="list-disc pl-5">
-          <li>90–100% → A+ (Outstanding)</li>
-          <li>80–89% → A (Excellent)</li>
-          <li>70–79% → B+ (Very Good)</li>
-          <li>60–69% → B (Good)</li>
-          <li>50–59% → C (Average)</li>
-          <li>40–49% → D (Pass)</li>
-          <li>Below 40% → F (Fail)</li>
-        </ul>
-
-        <h3 className="font-semibold">Why Use a Grade Calculator?</h3>
-
-        <ul className="list-disc pl-5">
-          <li>Instant grade conversion</li>
-          <li>Eliminates confusion in grading</li>
-          <li>Useful for students and teachers</li>
-          <li>Helps track academic performance</li>
-        </ul>
-
-        <p>
-          This grade calculator uses a commonly accepted grading scale. Always
-          refer to your institution’s official grading policy for final
-          evaluation.
-        </p>
-      </article>
-
-      {/* ================= DISCLAIMER ================= */}
-      <aside className="text-xs text-muted">
-        ⚠️ Grading systems may vary by school, board, or university. This
-        calculator provides an estimated grade for reference only.
-      </aside>
-    </section>
+      <GradeCalculatorArticle />
+    </CalculatorLayout>
   );
 }

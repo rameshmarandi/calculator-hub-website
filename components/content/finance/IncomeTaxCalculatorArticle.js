@@ -208,7 +208,7 @@ const IncomeTaxCalculatorArticle = () => {
           </li>
           <li>
             <Link
-              href="/finance/retirement-calculator"
+              href="/finance/retirement-planning-calculator"
               className="text-blue-600 underline">
               Retirement Planning Calculator
             </Link>
