@@ -4,6 +4,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import Sidebar from "@/components/Sidebar";
 import RightSidebar from "@/components/RightSidebar";
+import Script from "next/script";
 
 export const metadata = {
   title: `Swiftcalcfy - Free Online Calculators`,
@@ -44,16 +45,16 @@ export default function RootLayout({ children }) {
               {children}
             </main> */}
 
-             {/* ⚠️ ONLY CONTENT GOES HERE */}
-            <main className="rounded-xl p-5 min-h-[70vh]"
+            {/* ⚠️ ONLY CONTENT GOES HERE */}
+            <main
+              className="rounded-xl p-5 min-h-[70vh]"
               style={{
                 backgroundColor: "var(--surface)",
-                border: "1px solid var(--border)"
+                border: "1px solid var(--border)",
               }}
             >
               {children}
             </main>
-
 
             {/* RIGHT SIDEBAR */}
             <aside className="hidden md:block">
@@ -62,6 +63,20 @@ export default function RootLayout({ children }) {
           </div>
         </div>
         <Footer />
+        {/* <!-- Google tag (gtag.js) --> */}
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-GKJDZ488MR"
+          strategy="afterInteractive"
+        />
+
+        <Script id="ga-init" strategy="afterInteractive">
+          {`
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-GKJDZ488MR');
+  `}
+        </Script>
       </body>
     </html>
   );
