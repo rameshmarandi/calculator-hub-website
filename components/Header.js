@@ -12,11 +12,19 @@ import DarkModeToggle from "./DarkModeToggle";
    NAV LINKS
 ========================================= */
 
+// const NAV_LINKS = [
+//   { href: "/", label: "Calculators" },
+//   // { href: "/blog", label: "Blog" },
+//   { href: "/about", label: "About" },
+//   { href: "/contact", label: "Contact" },
+// ];
+
 const NAV_LINKS = [
-  { href: "/calculators", label: "Calculators" },
-  { href: "/blog", label: "Blog" },
-  { href: "/about", label: "About" },
-  { href: "/contact", label: "Contact" },
+  { href: "/finance", label: "Finance" },
+  { href: "/construction", label: "Construction" },
+  { href: "/health", label: "Health" },
+  { href: "/education", label: "Education" },
+  { href: "/utility", label: "Utilities" },
 ];
 
 /* =========================================
@@ -32,15 +40,12 @@ export default function Navbar() {
       style={{
         backgroundColor: "var(--surface)",
         borderColor: "var(--border)",
-      }}
-    >
+      }}>
       <div className="max-w-7xl mx-auto px-4 py-3">
-
         {/* ==================================================
            DESKTOP
         ================================================== */}
         <div className="hidden lg:flex items-center gap-6">
-
           {/* LOGO */}
           <Link href="/" className="flex items-center gap-2 shrink-0">
             <Image
@@ -53,8 +58,7 @@ export default function Navbar() {
 
             <span
               className="text-xl font-bold"
-              style={{ color: "var(--primary)" }}
-            >
+              style={{ color: "var(--primary)" }}>
               Swiftcalcfy
             </span>
           </Link>
@@ -77,8 +81,7 @@ export default function Navbar() {
                 }
                 onMouseLeave={(e) =>
                   (e.currentTarget.style.backgroundColor = "transparent")
-                }
-              >
+                }>
                 {link.label}
               </Link>
             ))}
@@ -92,10 +95,8 @@ export default function Navbar() {
            MOBILE
         ================================================== */}
         <div className="lg:hidden space-y-3">
-
           {/* TOP BAR */}
           <div className="flex items-center justify-between">
-
             {/* LOGO */}
             <Link href="/" className="flex items-center gap-2">
               <Image
@@ -108,8 +109,7 @@ export default function Navbar() {
 
               <span
                 className="text-base font-bold"
-                style={{ color: "var(--primary)" }}
-              >
+                style={{ color: "var(--primary)" }}>
                 Swiftcalcfy
               </span>
             </Link>
@@ -122,8 +122,7 @@ export default function Navbar() {
                 aria-label="Toggle Menu"
                 onClick={() => setOpen(!open)}
                 className="p-2 rounded-md"
-                style={{ border: "1px solid var(--border)" }}
-              >
+                style={{ border: "1px solid var(--border)" }}>
                 {open ? <X size={18} /> : <Menu size={18} />}
               </button>
             </div>
@@ -139,16 +138,14 @@ export default function Navbar() {
               style={{
                 backgroundColor: "var(--surface)",
                 border: "1px solid var(--border)",
-              }}
-            >
+              }}>
               {NAV_LINKS.map((link) => (
                 <Link
                   key={link.href}
                   href={link.href}
                   onClick={() => setOpen(false)}
                   className="block px-3 py-2 rounded text-sm"
-                  style={{ color: "var(--text-main)" }}
-                >
+                  style={{ color: "var(--text-main)" }}>
                   {link.label}
                 </Link>
               ))}
