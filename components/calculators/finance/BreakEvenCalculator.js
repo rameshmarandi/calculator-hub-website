@@ -1,230 +1,116 @@
 "use client";
 
-import { useState } from "react";
-import {
-  Calculator,
-  BarChart,
-  IndianRupee,
-} from "lucide-react";
+import { useMemo, useState } from "react";
 
-import { AmountInput } from "../../inputs/AmountInput";
-import { ResultCard } from "../../ResultCard";
+import InputsGrid from "@/components/core/InputsGrid";
+import StatsGrid from "@/components/core/StatsGrid";
+import ResultHero from "@/components/core/ResultHero";
+import ExplanationText from "@/components/core/ExplanationText";
+import CalculatorLayout from "@/components/core/CalculatorLayout";
+
+import { formatINR } from "@/lib/format";
+
+
+import { calculateBreakEven } from "../../../lib/formulas";
+import BreakEvenCalculatorArticle from "../../content/finance/BreakEvenCalculatorArticle";
+
+
+
 
 export default function BreakEvenCalculator() {
-  const [fixedCost, setFixedCost] = useState("");
-  const [sellingPrice, setSellingPrice] = useState("");
-  const [variableCost, setVariableCost] = useState("");
+  /* ---------------- STATE ---------------- */
 
-  const [result, setResult] = useState(null);
-  const [error, setError] = useState("");
+  const [values, setValues] = useState({
+    fixed: "",
+    price: "",
+    variable: "",
+  });
 
-  /* ---------------- VALIDATION ---------------- */
-  function validate() {
-    if (!fixedCost || Number(fixedCost) <= 0) {
-      setError("Please enter valid fixed costs.");
-      return false;
-    }
+  /* ---------------- SHOW ONLY WHEN COMPLETE ---------------- */
 
-    if (!sellingPrice || Number(sellingPrice) <= 0) {
-      setError("Please enter a valid selling price.");
-      return false;
-    }
+  const isComplete =
+    values.fixed !== "" &&
+    values.price !== "" &&
+    values.variable !== "";
 
-    if (variableCost === "" || Number(variableCost) < 0) {
-      setError("Please enter a valid variable cost.");
-      return false;
-    }
+  /* ---------------- DERIVED RESULT ---------------- */
 
-    if (Number(variableCost) >= Number(sellingPrice)) {
-      setError(
-        "Selling price must be greater than variable cost."
-      );
-      return false;
-    }
+  const result = useMemo(() => {
+    if (!isComplete) return null;
 
-    setError("");
-    return true;
-  }
-
-  /* ---------------- CALCULATION ---------------- */
-  function calculateBreakEven(e) {
-    e.preventDefault();
-    if (!validate()) return;
-
-    const fixed = Number(fixedCost);
-    const price = Number(sellingPrice);
-    const variable = Number(variableCost);
-
-    const contributionMargin = price - variable;
-    const breakEvenUnits = fixed / contributionMargin;
-    const breakEvenRevenue = breakEvenUnits * price;
-
-    setResult({
-      units: Math.ceil(breakEvenUnits),
-      revenue: Math.round(breakEvenRevenue),
+    return calculateBreakEven({
+      fixedCost: values.fixed,
+      sellingPrice: values.price,
+      variableCost: values.variable,
     });
-  }
+  }, [values, isComplete]);
+
+  /* ---------------- INPUT CONFIG ---------------- */
+
+  const inputs = [
+    {
+      key: "fixed",
+      label: "Fixed Costs",
+      type: "amount",
+      placeholder: "1,00,000",
+    },
+    {
+      key: "price",
+      label: "Selling Price per Unit",
+      type: "amount",
+      placeholder: "500",
+    },
+    {
+      key: "variable",
+      label: "Variable Cost per Unit",
+      type: "amount",
+      placeholder: "300",
+    },
+  ];
+
+  /* ---------------- UI ---------------- */
 
   return (
-    <section
-      className="rounded-xl p-6 space-y-10"
-      style={{
-        backgroundColor: "var(--surface)",
-        border: "1px solid var(--border)",
-      }}
+    <CalculatorLayout
+      title="Break Even Calculator"
+      subtitle="Find how many units you must sell to cover all costs."
+      badges={[
+        "Instant Results",
+        "Business Accurate",
+        "100% Free",
+        "No Signup Required",
+      ]}
     >
-      {/* ================= HEADER ================= */}
-      <header>
-        <h1 className="text-2xl font-bold mb-1">
-          Break Even Calculator
-        </h1>
-        <p className="text-sm leading-relaxed">
-          Use this Break Even Calculator to find the minimum number of
-          units you need to sell to cover all your business costs.
-        </p>
-      </header>
+      <InputsGrid inputs={inputs} values={values} setValues={setValues} />
 
-      {/* ================= FORM ================= */}
-      <form onSubmit={calculateBreakEven} className="space-y-4">
-        <AmountInput
-          label="Fixed Costs"
-          value={fixedCost}
-          onChange={setFixedCost}
-          placeholder="1,00,000"
-        />
+      {result?.impossible && (
+  <ExplanationText
+    variant="danger"
+    text="Break even is not possible because variable cost is greater than or equal to selling price. You lose money on every unit."
+  />
+)}
 
-        <AmountInput
-          label="Selling Price per Unit"
-          value={sellingPrice}
-          onChange={setSellingPrice}
-          placeholder="500"
-        />
+{result && !result.impossible && (
+  <>
+    <ResultHero label="Break Even Units" value={result.units} />
 
-        <AmountInput
-          label="Variable Cost per Unit"
-          value={variableCost}
-          onChange={setVariableCost}
-          placeholder="300"
-        />
-
-        {error && (
-          <p className="text-sm text-red-500">{error}</p>
-        )}
-
-        <button
-          type="submit"
-          className="w-full py-2.5 rounded-md font-medium flex items-center justify-center gap-2"
-          style={{
-            backgroundColor: "var(--primary)",
-            color: "#fff",
-          }}
-        >
-          <Calculator size={18} />
-          Calculate Break Even Point
-        </button>
-      </form>
-
-      {/* ================= RESULT ================= */}
-      {result && (
-        <div className="grid md:grid-cols-2 gap-4" aria-live="polite">
-          <ResultCard
-            variant="primary"
-            icon={<BarChart size={20} />}
-            label="Break Even Units"
-            value={`${result.units.toLocaleString(
-              "en-IN"
-            )} units`}
-          />
-
-          <ResultCard
-            variant="neutral"
-            icon={<IndianRupee size={20} />}
-            label="Break Even Revenue"
-            value={`₹ ${result.revenue.toLocaleString(
-              "en-IN"
-            )}`}
-          />
-        </div>
-      )}
-
-      {/* ================= SEO BLOG CONTENT ================= */}
-      <article className="space-y-4 text-sm leading-relaxed">
-        <h2 className="font-semibold text-base">
-          What is Break Even Point?
-        </h2>
-
-        <p>
-          The break-even point is the stage where a business’s total
-          revenue equals its total costs. At this point, the business
-          neither makes a profit nor incurs a loss.
-        </p>
-
-        <p>
-          Understanding your break-even point helps you make better
-          decisions related to pricing, cost control, and sales
-          targets.
-        </p>
-
-        <h3 className="font-semibold">
-          Break Even Formula
-        </h3>
-
-        <p
-          className="font-mono text-xs p-3 rounded"
-          style={{ backgroundColor: "var(--surface-2)" }}
-        >
-          Break Even Units = Fixed Costs ÷ (Selling Price − Variable Cost)
-        </p>
-
-        <ul className="list-disc pl-5">
-          <li>
-            <strong>Fixed Costs</strong> – Expenses that do not change
-            with production (rent, salaries, software, etc.)
-          </li>
-          <li>
-            <strong>Variable Costs</strong> – Costs that vary per unit
-            (materials, packaging, delivery)
-          </li>
-          <li>
-            <strong>Selling Price</strong> – Price at which one unit is
-            sold
-          </li>
-        </ul>
-
-        <h3 className="font-semibold">
-          Why Break Even Analysis Is Important
-        </h3>
-
-        <ul className="list-disc pl-5">
-          <li>Helps set realistic sales targets</li>
-          <li>Improves pricing decisions</li>
-          <li>Identifies cost inefficiencies</li>
-          <li>Essential for startups & small businesses</li>
-        </ul>
-
-        <h3 className="font-semibold">
-          Who Should Use This Break Even Calculator?
-        </h3>
-
-        <p>
-          This calculator is ideal for entrepreneurs, startups, small
-          business owners, and anyone planning a new product or
-          service.
-        </p>
-
-        <p>
-          By knowing your break-even point, you can clearly understand
-          how much you need to sell before your business starts making
-          profit.
-        </p>
-      </article>
-
-      {/* ================= DISCLAIMER ================= */}
-      <aside className="text-xs text-muted">
-        ⚠️ This calculator provides an estimate only. Actual break-even
-        figures may vary based on market conditions and business
-        operations.
-      </aside>
-    </section>
+    <StatsGrid
+      items={[
+        {
+          label: "Break Even Revenue",
+          value: formatINR(result.revenue),
+          variant: "info",
+        },
+        {
+          label: "Contribution Margin",
+          value: formatINR(result.contribution),
+          variant: "neutral",
+        },
+      ]}
+    />
+  </>
+)}
+<BreakEvenCalculatorArticle/>
+    </CalculatorLayout>
   );
 }

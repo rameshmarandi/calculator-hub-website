@@ -1,218 +1,135 @@
 "use client";
 
-import { useState } from "react";
-import {
-  Calculator,
-  IndianRupee,
-  TrendingUp,
-  TrendingDown,
-} from "lucide-react";
+import { useMemo, useState } from "react";
 
-import { AmountInput } from "../../inputs/AmountInput";
-import { PercentageInput } from "../../inputs/PercentageInput";
-import { ResultCard } from "../../ResultCard";
+import InputsGrid from "@/components/core/InputsGrid";
+import StatsGrid from "@/components/core/StatsGrid";
+import ResultHero from "@/components/core/ResultHero";
+import ExplanationText from "@/components/core/ExplanationText";
+import CalculatorLayout from "@/components/core/CalculatorLayout";
+
+import { formatINR } from "@/lib/format";
+import { calculateGST } from "../../../lib/formulas";
+import GSTCalculatorArticle from "../../content/finance/GSTCalculatorArticle";
+
 
 export default function GSTCalculator() {
-  const [amount, setAmount] = useState("");
-  const [gstRate, setGstRate] = useState("18");
-  const [calculationType, setCalculationType] = useState("add");
+  const [values, setValues] = useState({
+    amount: "",
+    rate: "18",
+  });
 
-  const [result, setResult] = useState(null);
-  const [error, setError] = useState("");
+  const [type, setType] = useState("add");
 
-  /* ---------------- VALIDATION ---------------- */
-  function validate() {
-    if (!amount || Number(amount) <= 0) {
-      setError("Please enter a valid amount.");
-      return false;
-    }
+  /* ---------- show only when filled ---------- */
 
-    if (Number(gstRate) <= 0) {
-      setError("Please enter a valid GST rate.");
-      return false;
-    }
+  const isComplete =
+    values.amount !== "" &&
+    values.rate !== "";
 
-    setError("");
-    return true;
-  }
+  /* ---------- derived result ---------- */
 
-  /* ---------------- CALCULATION ---------------- */
-  function calculateGST(e) {
-    e.preventDefault();
-    if (!validate()) return;
+  const result = useMemo(() => {
+    if (!isComplete) return null;
 
-    const baseAmount = Number(amount);
-    const rate = Number(gstRate);
-
-    let gstAmount = 0;
-    let finalAmount = 0;
-
-    if (calculationType === "add") {
-      gstAmount = (baseAmount * rate) / 100;
-      finalAmount = baseAmount + gstAmount;
-    } else {
-      gstAmount = (baseAmount * rate) / (100 + rate);
-      finalAmount = baseAmount - gstAmount;
-    }
-
-    setResult({
-      gstAmount: Math.round(gstAmount),
-      finalAmount: Math.round(finalAmount),
+    return calculateGST({
+      amount: values.amount,
+      rate: values.rate,
+      type,
     });
-  }
+  }, [values, type, isComplete]);
+
+  /* ---------- inputs ---------- */
+
+  const inputs = [
+    {
+      key: "amount",
+      label:
+        type === "add"
+          ? "Amount (Excluding GST)"
+          : "Amount (Including GST)",
+      type: "amount",
+      placeholder: "10,000",
+    },
+    {
+      key: "rate",
+      label: "GST Rate (%)",
+      type: "percent",
+      placeholder: "18",
+    },
+  ];
+
+  /* ---------- UI ---------- */
 
   return (
-    <section
-      className="rounded-xl p-6 space-y-10"
-      style={{
-        backgroundColor: "var(--surface)",
-        border: "1px solid var(--border)",
-      }}
+    <CalculatorLayout
+      title="GST Calculator"
+      subtitle="Add or remove GST instantly for accurate pricing."
+      badges={[
+        "Instant Results",
+        "Accurate Formula",
+        "100% Free",
+        "No Signup Required",
+      ]}
     >
-      {/* HEADER */}
-      <header>
-        <h1 className="text-2xl font-bold mb-1">
-          GST Calculator
-        </h1>
-        <p className="text-sm leading-relaxed">
-          Calculate GST amount and final price by adding or removing
-          GST at applicable tax rates in India.
-        </p>
-      </header>
+      <InputsGrid inputs={inputs} values={values} setValues={setValues} />
 
-      {/* FORM */}
-      <form onSubmit={calculateGST} className="space-y-4">
-        <AmountInput
-          label={
-            calculationType === "add"
-              ? "Amount (Excluding GST)"
-              : "Amount (Including GST)"
-          }
-          value={amount}
-          onChange={setAmount}
-          placeholder="10,000"
-        />
-
-        <PercentageInput
-          label="GST Rate (%)"
-          value={gstRate}
-          onChange={setGstRate}
-          placeholder="18"
-        />
-
-        {/* TYPE TOGGLE */}
-        <div className="flex gap-3">
-          <button
-            type="button"
-            onClick={() => setCalculationType("add")}
-            className={`flex-1 py-2 rounded-md text-sm font-medium ${
-              calculationType === "add"
-                ? "bg-primary text-white"
-                : "border"
-            }`}
-          >
-            Add GST
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setCalculationType("remove")}
-            className={`flex-1 py-2 rounded-md text-sm font-medium ${
-              calculationType === "remove"
-                ? "bg-primary text-white"
-                : "border"
-            }`}
-          >
-            Remove GST
-          </button>
-        </div>
-
-        {error && (
-          <p className="text-sm text-red-500">{error}</p>
-        )}
+      {/* toggle buttons */}
+      <div className="flex gap-3">
+        <button
+          onClick={() => setType("add")}
+          className={`flex-1 py-2 rounded-md text-sm font-medium ${
+            type === "add"
+              ? "bg-[var(--primary)] text-white"
+              : "border"
+          }`}
+        >
+          Add GST
+        </button>
 
         <button
-          type="submit"
-          className="w-full py-2.5 rounded-md font-medium flex items-center justify-center gap-2"
-          style={{
-            backgroundColor: "var(--primary)",
-            color: "#fff",
-          }}
+          onClick={() => setType("remove")}
+          className={`flex-1 py-2 rounded-md text-sm font-medium ${
+            type === "remove"
+              ? "bg-[var(--primary)] text-white"
+              : "border"
+          }`}
         >
-          <Calculator size={18} />
-          Calculate GST
+          Remove GST
         </button>
-      </form>
+      </div>
 
-      {/* RESULT */}
       {result && (
-        <div className="grid md:grid-cols-2 gap-4" aria-live="polite">
-          <ResultCard
-            variant="neutral"
-            icon={<IndianRupee size={20} />}
+        <>
+          <ResultHero
             label="GST Amount"
-            value={`₹ ${result.gstAmount.toLocaleString("en-IN")}`}
+            value={result.gstAmount}
           />
 
-          <ResultCard
-            variant="primary"
-            icon={
-              calculationType === "add" ? (
-                <TrendingUp size={20} />
-              ) : (
-                <TrendingDown size={20} />
-              )
-            }
-            label={
-              calculationType === "add"
-                ? "Total Amount (Including GST)"
-                : "Original Amount (Excluding GST)"
-            }
-            value={`₹ ${result.finalAmount.toLocaleString(
-              "en-IN"
-            )}`}
+          <StatsGrid
+            items={[
+              {
+                label:
+                  type === "add"
+                    ? "Total Amount (Including GST)"
+                    : "Original Amount (Excluding GST)",
+                value: formatINR(result.finalAmount),
+                variant: type === "add" ? "warning" : "info",
+              },
+            ]}
           />
-        </div>
+
+          <ExplanationText
+            text={`GST of ${formatINR(
+              result.gstAmount
+            )} is ${
+              type === "add" ? "added to" : "removed from"
+            } the base amount.`}
+          />
+        </>
       )}
 
-      {/* SEO CONTENT */}
-      <article className="space-y-4 text-sm leading-relaxed">
-        <h2 className="font-semibold text-base">
-          What is GST and How is it Calculated?
-        </h2>
-
-        <p>
-          GST (Goods and Services Tax) is an indirect tax levied on the
-          supply of goods and services in India. It has replaced
-          multiple indirect taxes like VAT, service tax, and excise
-          duty.
-        </p>
-
-        <p
-          className="font-mono text-xs p-3 rounded"
-          style={{ backgroundColor: "var(--surface-2)" }}
-        >
-          GST Amount = (Original Amount × GST Rate) ÷ 100
-        </p>
-
-        <ul className="list-disc pl-5">
-          <li>Common GST slabs: 5%, 12%, 18%, 28%</li>
-          <li>Add GST to find final selling price</li>
-          <li>Remove GST to find base price</li>
-          <li>GST applies to most goods & services</li>
-        </ul>
-
-        <p>
-          This GST calculator helps businesses and individuals quickly
-          compute GST payable or reverse-calculate the original price.
-        </p>
-      </article>
-
-      {/* DISCLAIMER */}
-      <aside className="text-xs text-muted">
-        ⚠️ This calculator provides an estimate only. Actual GST
-        liability may vary based on applicable rules and notifications.
-      </aside>
-    </section>
+      <GSTCalculatorArticle/>
+    </CalculatorLayout>
   );
 }

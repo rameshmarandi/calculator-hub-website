@@ -129,9 +129,9 @@ const CALCULATOR_MAP = {
     import("../components/calculators/finance/GSTCalculator")
   ),
 
-  "currency-converter": dynamic(() =>
-    import("../components/calculators/finance/CurrencyConverter")
-  ),
+  // "currency-converter": dynamic(() =>
+  //   import("../components/calculators/finance/CurrencyConverter")
+  // ),
 
   "break-even-calculator": dynamic(() =>
     import("../components/calculators/finance/BreakEvenCalculator")

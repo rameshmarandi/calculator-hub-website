@@ -41,7 +41,7 @@ const calculators = {
 
     { slug: "credit-card-emi-calculator", name: "Credit Card EMI Calculator", ui: "emi" },
     { slug: "gst-calculator", name: "GST Calculator", ui: "tax" },
-    { slug: "currency-converter", name: "Currency Converter", ui: "converter" },
+    // { slug: "currency-converter", name: "Currency Converter", ui: "converter" },
     { slug: "break-even-calculator", name: "Break Even Calculator", ui: "business" },
     { slug: "roi-calculator", name: "ROI Calculator", ui: "business" },
     { slug: "business-loan-calculator", name: "Business Loan Calculator", ui: "loan" },

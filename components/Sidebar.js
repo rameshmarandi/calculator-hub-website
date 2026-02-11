@@ -45,12 +45,33 @@ export default function Sidebar() {
       {Object.entries(calculators).map(([categoryKey, items]) => (
         <div key={categoryKey} className="mb-6">
           {/* CATEGORY TITLE */}
-          <h3
+          {/* <h3
             className="text-sm font-semibold mb-2"
             style={{ color: "var(--text-main)" }}
           >
             {CATEGORY_LABELS[categoryKey] || categoryKey}
-          </h3>
+          </h3> */}
+
+          <h3
+  className="
+    sticky top-0 z-10
+    text-xs
+    font-semibold
+    uppercase
+    tracking-wider
+    px-3
+    py-2
+    mb-2
+    rounded-lg
+    bg-[var(--surface)]
+    border-b
+    border-[var(--border)]
+    text-[var(--primary)]
+  "
+>
+  {CATEGORY_LABELS[categoryKey] || categoryKey}
+</h3>
+
 
           {/* subtle divider */}
           <div

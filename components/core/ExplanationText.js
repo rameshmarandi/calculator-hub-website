@@ -1,3 +1,7 @@
 export default function ExplanationText({ text }) {
-  return <p className="text-sm text-gray-600">{text}</p>;
+  return (
+    <p className="text-sm leading-relaxed text-[var(--text-muted)]">
+      {text}
+    </p>
+  );
 }
