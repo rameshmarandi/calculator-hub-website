@@ -1,217 +1,117 @@
 "use client";
 
-import { useState } from "react";
-import { Calculator, BarChart } from "lucide-react";
+import { useMemo, useState } from "react";
 
-import { AmountInput } from "../../inputs/AmountInput";
-import { PercentageInput } from "../../inputs/PercentageInput";
-import { ResultCard } from "../../ResultCard";
+import CalculatorLayout from "@/components/core/CalculatorLayout";
+import InputsGrid from "@/components/core/InputsGrid";
+import ResultHero from "@/components/core/ResultHero";
+import StatsGrid from "@/components/core/StatsGrid";
+import ExplanationText from "@/components/core/ExplanationText";
+
+
+
+import { calculateSand, toNumber } from "../../../lib/formulas";
+import SandQuantityArticle from "../../content/construction/SandQuantityArticle";
 
 export default function SandQuantityCalculator() {
-  const [length, setLength] = useState("");
-  const [width, setWidth] = useState("");
-  const [thickness, setThickness] = useState("");
-  const [mixRatio, setMixRatio] = useState("1:4");
+  const [values, setValues] = useState({
+    length: "",
+    width: "",
+    thickness: "",
+    ratio: "1:4",
+  });
 
-  const [result, setResult] = useState(null);
-  const [error, setError] = useState("");
+  /* ---------- COMPLETE CHECK ---------- */
 
-  /* ---------------- VALIDATION ---------------- */
-  function validate() {
-    if (!length || Number(length) <= 0) {
-      setError("Please enter valid length.");
-      return false;
-    }
+  const isComplete =
+    values.length !== "" &&
+    values.width !== "" &&
+    values.thickness !== "";
 
-    if (!width || Number(width) <= 0) {
-      setError("Please enter valid width.");
-      return false;
-    }
+  /* ---------- DERIVED RESULT ---------- */
 
-    if (!thickness || Number(thickness) <= 0) {
-      setError("Please enter valid thickness.");
-      return false;
-    }
+  const result = useMemo(() => {
+    if (!isComplete) return null;
 
-    if (!mixRatio.includes(":")) {
-      setError("Please enter a valid mix ratio (e.g. 1:4).");
-      return false;
-    }
-
-    setError("");
-    return true;
-  }
-
-  /* ---------------- CALCULATION ---------------- */
-  function calculateSand(e) {
-    e.preventDefault();
-    if (!validate()) return;
-
-    const l = Number(length);
-    const w = Number(width);
-    const t = Number(thickness) / 1000; // mm → meter
-
-    const wetVolume = l * w * t;
-    const dryVolume = wetVolume * 1.54;
-
-    const [cementPart, sandPart] = mixRatio
-      .split(":")
-      .map(Number);
-
-    const totalParts = cementPart + sandPart;
-
-    const sandVolume =
-      (sandPart / totalParts) * dryVolume;
-
-    const sandBrass = sandVolume / 2.83;
-
-    setResult({
-      volume: sandVolume.toFixed(3),
-      brass: sandBrass.toFixed(2),
+    return calculateSand({
+      length: toNumber(values.length),
+      width: toNumber(values.width),
+      thickness: toNumber(values.thickness),
+      mixRatio: values.ratio,
     });
-  }
+  }, [values, isComplete]);
+
+  /* ---------- INPUT CONFIG ---------- */
+
+  const inputs = [
+    {
+      key: "length",
+      label: "Length (meters)",
+      type: "amount",
+      placeholder: "5",
+    },
+    {
+      key: "width",
+      label: "Width (meters)",
+      type: "amount",
+      placeholder: "4",
+    },
+    {
+      key: "thickness",
+      label: "Thickness (mm)",
+      type: "amount",
+      placeholder: "100",
+    },
+    {
+      key: "ratio",
+      label: "Cement : Sand Ratio",
+      type: "select",
+      options: [
+  { value: "1:3", label: "1:3" },
+  { value: "1:4", label: "1:4" },
+  { value: "1:5", label: "1:5" },
+]
+
+    },
+  ];
+
+  /* ---------- UI ---------- */
 
   return (
-    <section
-      className="rounded-xl p-6 space-y-10"
-      style={{
-        backgroundColor: "var(--surface)",
-        border: "1px solid var(--border)",
-      }}
+    <CalculatorLayout
+      title="Sand Quantity Calculator"
+      subtitle="Estimate sand required for slabs, plastering or flooring."
+      badges={[
+        "Instant Results",
+        "Construction Accurate",
+        "100% Free",
+        "No Signup Required",
+      ]}
     >
-      {/* ================= HEADER ================= */}
-      <header>
-        <h1 className="text-2xl font-bold mb-1">
-          Sand Quantity Calculator
-        </h1>
-        <p className="text-sm leading-relaxed">
-          Use this Sand Quantity Calculator to estimate the amount of
-          sand required for slab, plastering, or flooring work.
-        </p>
-      </header>
+      <InputsGrid inputs={inputs} values={values} setValues={setValues} />
 
-      {/* ================= FORM ================= */}
-      <form onSubmit={calculateSand} className="space-y-4">
-        <AmountInput
-          label="Length (meters)"
-          value={length}
-          onChange={setLength}
-          placeholder="5"
-        />
-
-        <AmountInput
-          label="Width (meters)"
-          value={width}
-          onChange={setWidth}
-          placeholder="4"
-        />
-
-        <AmountInput
-          label="Thickness (mm)"
-          value={thickness}
-          onChange={setThickness}
-          placeholder="100"
-        />
-
-        <PercentageInput
-          label="Cement : Sand Ratio"
-          value={mixRatio}
-          onChange={setMixRatio}
-          placeholder="1:4"
-        />
-
-        {error && (
-          <p className="text-sm text-red-500">{error}</p>
-        )}
-
-        <button
-          type="submit"
-          className="w-full py-2.5 rounded-md font-medium flex items-center justify-center gap-2"
-          style={{
-            backgroundColor: "var(--primary)",
-            color: "#fff",
-          }}
-        >
-          <Calculator size={18} />
-          Calculate Sand Quantity
-        </button>
-      </form>
-
-      {/* ================= RESULT ================= */}
       {result && (
-        <div className="grid md:grid-cols-2 gap-4" aria-live="polite">
-          <ResultCard
-            variant="neutral"
-            icon={<BarChart size={20} />}
-            label="Sand Volume"
-            value={`${result.volume} m³`}
+        <>
+          <ResultHero
+            label="Sand Required"
+            value={`${result.brass.toFixed(2)} brass`}
           />
 
-          <ResultCard
-            variant="primary"
-            icon={<BarChart size={20} />}
-            label="Sand Required (Brass)"
-            value={`${result.brass} brass`}
+          <StatsGrid
+            items={[
+              {
+                label: "Sand Volume",
+                value: `${result.volume.toFixed(3)} m³`,
+                variant: "neutral",
+              },
+            ]}
           />
-        </div>
+        </>
       )}
 
-      {/* ================= SEO BLOG CONTENT ================= */}
-      <article className="space-y-4 text-sm leading-relaxed">
-        <h2 className="font-semibold text-base">
-          How to Calculate Sand Quantity
-        </h2>
+      <ExplanationText text="Uses wet volume → dry volume (1.54 factor) → mix ratio distribution to compute sand requirement accurately." />
 
-        <p>
-          Sand quantity calculation is an essential step in
-          construction work such as concrete mixing, plastering, and
-          masonry. Accurate estimation helps avoid shortages and
-          material wastage.
-        </p>
-
-        <h3 className="font-semibold">
-          Sand Quantity Formula
-        </h3>
-
-        <p
-          className="font-mono text-xs p-3 rounded"
-          style={{ backgroundColor: "var(--surface-2)" }}
-        >
-          Wet Volume = Length × Width × Thickness  
-          Dry Volume = Wet Volume × 1.54  
-          Sand Volume = (Sand Ratio ÷ Total Ratio) × Dry Volume  
-          Sand (Brass) = Sand Volume ÷ 2.83
-        </p>
-
-        <ul className="list-disc pl-5">
-          <li>1 brass = 2.83 cubic meters</li>
-          <li>Dry volume factor = 1.54</li>
-          <li>Common mix ratios: 1:3, 1:4, 1:5</li>
-        </ul>
-
-        <h3 className="font-semibold">
-          Why Use a Sand Quantity Calculator?
-        </h3>
-
-        <ul className="list-disc pl-5">
-          <li>Ensures accurate sand estimation</li>
-          <li>Helps control construction costs</li>
-          <li>Reduces material wastage</li>
-          <li>Useful for contractors & homeowners</li>
-        </ul>
-
-        <p>
-          This sand quantity calculator gives a quick and reliable
-          estimate for most residential and commercial construction
-          projects.
-        </p>
-      </article>
-
-      {/* ================= DISCLAIMER ================= */}
-      <aside className="text-xs text-muted">
-        ⚠️ This calculator provides an estimate only. Actual sand
-        requirement may vary based on workmanship and site conditions.
-      </aside>
-    </section>
+      <SandQuantityArticle/>
+    </CalculatorLayout>
   );
 }

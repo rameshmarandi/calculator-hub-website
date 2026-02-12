@@ -1,222 +1,110 @@
 "use client";
 
-import { useState } from "react";
-import { Calculator, BarChart } from "lucide-react";
+import { useMemo, useState } from "react";
 
-import { AmountInput } from "../../inputs/AmountInput";
-import { PercentageInput } from "../../inputs/PercentageInput";
-import { ResultCard } from "../../ResultCard";
+import CalculatorLayout from "@/components/core/CalculatorLayout";
+import InputsGrid from "@/components/core/InputsGrid";
+import ResultHero from "@/components/core/ResultHero";
+import StatsGrid from "@/components/core/StatsGrid";
+import ExplanationText from "@/components/core/ExplanationText";
+
+import { calculateAggregate, toNumber } from "../../../lib/formulas";
+import AggregateQuantityArticle from "../../content/construction/AggregateQuantityArticle";
 
 export default function AggregateQuantityCalculator() {
-  const [length, setLength] = useState("");
-  const [width, setWidth] = useState("");
-  const [thickness, setThickness] = useState("");
-  const [mixRatio, setMixRatio] = useState("1:1.5:3");
+  const [values, setValues] = useState({
+    length: "",
+    width: "",
+    thickness: "",
+    ratio: "1:1.5:3",
+  });
 
-  const [result, setResult] = useState(null);
-  const [error, setError] = useState("");
+  /* ---------- COMPLETE CHECK ---------- */
 
-  /* ---------------- VALIDATION ---------------- */
-  function validate() {
-    if (!length || Number(length) <= 0) {
-      setError("Please enter valid length.");
-      return false;
-    }
+  const isComplete =
+    values.length !== "" && values.width !== "" && values.thickness !== "";
 
-    if (!width || Number(width) <= 0) {
-      setError("Please enter valid width.");
-      return false;
-    }
+  /* ---------- DERIVED RESULT ---------- */
 
-    if (!thickness || Number(thickness) <= 0) {
-      setError("Please enter valid thickness.");
-      return false;
-    }
+  const result = useMemo(() => {
+    if (!isComplete) return null;
 
-    if (!mixRatio.includes(":")) {
-      setError(
-        "Please enter a valid mix ratio (e.g. 1:1.5:3)."
-      );
-      return false;
-    }
-
-    setError("");
-    return true;
-  }
-
-  /* ---------------- CALCULATION ---------------- */
-  function calculateAggregate(e) {
-    e.preventDefault();
-    if (!validate()) return;
-
-    const l = Number(length);
-    const w = Number(width);
-    const t = Number(thickness) / 1000; // mm → meter
-
-    const wetVolume = l * w * t;
-    const dryVolume = wetVolume * 1.54;
-
-    const parts = mixRatio.split(":").map(Number);
-    const cementPart = parts[0];
-    const aggregatePart = parts[2]; // Cement : Sand : Aggregate
-
-    const totalParts = parts.reduce(
-      (sum, val) => sum + val,
-      0
-    );
-
-    const aggregateVolume =
-      (aggregatePart / totalParts) * dryVolume;
-
-    const aggregateBrass = aggregateVolume / 2.83;
-
-    setResult({
-      volume: aggregateVolume.toFixed(3),
-      brass: aggregateBrass.toFixed(2),
+    return calculateAggregate({
+      length: toNumber(values.length),
+      width: toNumber(values.width),
+      thickness: toNumber(values.thickness),
+      mixRatio: values.ratio,
     });
-  }
+  }, [values, isComplete]);
+
+  /* ---------- INPUT CONFIG ---------- */
+
+  const inputs = [
+    {
+      key: "length",
+      label: "Length (meters)",
+      type: "amount",
+      placeholder: "5",
+    },
+    {
+      key: "width",
+      label: "Width (meters)",
+      type: "amount",
+      placeholder: "4",
+    },
+    {
+      key: "thickness",
+      label: "Thickness (mm)",
+      type: "amount",
+      placeholder: "100",
+    },
+    {
+      key: "ratio",
+      label: "Concrete Mix Ratio (Cement : Sand : Aggregate)",
+      type: "select",
+      options: [
+        { label: "M20 (1 : 1.5 : 3)", value: "1:1.5:3" },
+        { label: "M15 (1 : 2 : 4)", value: "1:2:4" },
+      ],
+    },
+  ];
+
+  /* ---------- UI ---------- */
 
   return (
-    <section
-      className="rounded-xl p-6 space-y-10"
-      style={{
-        backgroundColor: "var(--surface)",
-        border: "1px solid var(--border)",
-      }}
+    <CalculatorLayout
+      title="Aggregate Quantity Calculator"
+      subtitle="Estimate coarse aggregate required for slabs, beams and concrete works."
+      badges={[
+        "Instant Results",
+        "Construction Accurate",
+        "100% Free",
+        "No Signup Required",
+      ]}
     >
-      {/* ================= HEADER ================= */}
-      <header>
-        <h1 className="text-2xl font-bold mb-1">
-          Aggregate Quantity Calculator
-        </h1>
-        <p className="text-sm leading-relaxed">
-          Use this Aggregate Quantity Calculator to estimate the amount
-          of coarse aggregate required for concrete works like slab,
-          beam, and column.
-        </p>
-      </header>
+      <InputsGrid inputs={inputs} values={values} setValues={setValues} />
 
-      {/* ================= FORM ================= */}
-      <form onSubmit={calculateAggregate} className="space-y-4">
-        <AmountInput
-          label="Length (meters)"
-          value={length}
-          onChange={setLength}
-          placeholder="5"
-        />
-
-        <AmountInput
-          label="Width (meters)"
-          value={width}
-          onChange={setWidth}
-          placeholder="4"
-        />
-
-        <AmountInput
-          label="Thickness (mm)"
-          value={thickness}
-          onChange={setThickness}
-          placeholder="100"
-        />
-
-        <PercentageInput
-          label="Concrete Mix Ratio (Cement : Sand : Aggregate)"
-          value={mixRatio}
-          onChange={setMixRatio}
-          placeholder="1:1.5:3"
-        />
-
-        {error && (
-          <p className="text-sm text-red-500">{error}</p>
-        )}
-
-        <button
-          type="submit"
-          className="w-full py-2.5 rounded-md font-medium flex items-center justify-center gap-2"
-          style={{
-            backgroundColor: "var(--primary)",
-            color: "#fff",
-          }}
-        >
-          <Calculator size={18} />
-          Calculate Aggregate Quantity
-        </button>
-      </form>
-
-      {/* ================= RESULT ================= */}
       {result && (
-        <div className="grid md:grid-cols-2 gap-4" aria-live="polite">
-          <ResultCard
-            variant="neutral"
-            icon={<BarChart size={20} />}
-            label="Aggregate Volume"
-            value={`${result.volume} m³`}
+        <>
+          <ResultHero
+            label="Aggregate Required"
+            value={`${result.brass.toFixed(2)} brass`}
           />
 
-          <ResultCard
-            variant="primary"
-            icon={<BarChart size={20} />}
-            label="Aggregate Required (Brass)"
-            value={`${result.brass} brass`}
+          <StatsGrid
+            items={[
+              {
+                label: "Aggregate Volume",
+                value: `${result.volume.toFixed(3)} m³`,
+                variant: "neutral",
+              },
+            ]}
           />
-        </div>
+        </>
       )}
 
-      {/* ================= SEO BLOG CONTENT ================= */}
-      <article className="space-y-4 text-sm leading-relaxed">
-        <h2 className="font-semibold text-base">
-          How to Calculate Aggregate Quantity
-        </h2>
-
-        <p>
-          Aggregate is a major component of concrete and plays a vital
-          role in strength and durability. Accurate aggregate quantity
-          calculation is essential for concrete slabs, beams, columns,
-          and footings.
-        </p>
-
-        <h3 className="font-semibold">
-          Aggregate Quantity Formula
-        </h3>
-
-        <p
-          className="font-mono text-xs p-3 rounded"
-          style={{ backgroundColor: "var(--surface-2)" }}
-        >
-          Wet Volume = Length × Width × Thickness  
-          Dry Volume = Wet Volume × 1.54  
-          Aggregate Volume = (Aggregate Ratio ÷ Total Ratio) × Dry Volume  
-          Aggregate (Brass) = Aggregate Volume ÷ 2.83
-        </p>
-
-        <ul className="list-disc pl-5">
-          <li>1 brass = 2.83 cubic meters</li>
-          <li>Dry volume factor = 1.54</li>
-          <li>Common concrete ratios: 1:1.5:3, 1:2:4</li>
-        </ul>
-
-        <h3 className="font-semibold">
-          Why Use an Aggregate Quantity Calculator?
-        </h3>
-
-        <ul className="list-disc pl-5">
-          <li>Ensures accurate aggregate estimation</li>
-          <li>Prevents material shortage</li>
-          <li>Controls construction cost</li>
-          <li>Essential for structural concrete work</li>
-        </ul>
-
-        <p>
-          This aggregate quantity calculator provides a quick and
-          reliable estimate for most construction projects.
-        </p>
-      </article>
-
-      {/* ================= DISCLAIMER ================= */}
-      <aside className="text-xs text-muted">
-        ⚠️ This calculator provides an estimate only. Actual aggregate
-        requirement may vary based on site conditions and compaction.
-      </aside>
-    </section>
+      <ExplanationText text="Uses wet volume → dry volume (1.54 factor) → concrete mix ratio distribution to compute aggregate requirement accurately." />
+    <AggregateQuantityArticle/>
+    </CalculatorLayout>
   );
 }

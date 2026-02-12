@@ -10,12 +10,8 @@ import CalculatorLayout from "@/components/core/CalculatorLayout";
 
 import { formatINR } from "@/lib/format";
 
-
 import { calculateBreakEven } from "../../../lib/formulas";
 import BreakEvenCalculatorArticle from "../../content/finance/BreakEvenCalculatorArticle";
-
-
-
 
 export default function BreakEvenCalculator() {
   /* ---------------- STATE ---------------- */
@@ -29,9 +25,7 @@ export default function BreakEvenCalculator() {
   /* ---------------- SHOW ONLY WHEN COMPLETE ---------------- */
 
   const isComplete =
-    values.fixed !== "" &&
-    values.price !== "" &&
-    values.variable !== "";
+    values.fixed !== "" && values.price !== "" && values.variable !== "";
 
   /* ---------------- DERIVED RESULT ---------------- */
 
@@ -84,33 +78,33 @@ export default function BreakEvenCalculator() {
       <InputsGrid inputs={inputs} values={values} setValues={setValues} />
 
       {result?.impossible && (
-  <ExplanationText
-    variant="danger"
-    text="Break even is not possible because variable cost is greater than or equal to selling price. You lose money on every unit."
-  />
-)}
+        <ExplanationText
+          variant="danger"
+          text="Break even is not possible because variable cost is greater than or equal to selling price. You lose money on every unit."
+        />
+      )}
 
-{result && !result.impossible && (
-  <>
-    <ResultHero label="Break Even Units" value={result.units} />
+      {result && !result.impossible && (
+        <>
+          <ResultHero label="Break Even Units" value={result.units} />
 
-    <StatsGrid
-      items={[
-        {
-          label: "Break Even Revenue",
-          value: formatINR(result.revenue),
-          variant: "info",
-        },
-        {
-          label: "Contribution Margin",
-          value: formatINR(result.contribution),
-          variant: "neutral",
-        },
-      ]}
-    />
-  </>
-)}
-<BreakEvenCalculatorArticle/>
+          <StatsGrid
+            items={[
+              {
+                label: "Break Even Revenue",
+                value: formatINR(result.revenue),
+                variant: "info",
+              },
+              {
+                label: "Contribution Margin",
+                value: formatINR(result.contribution),
+                variant: "neutral",
+              },
+            ]}
+          />
+        </>
+      )}
+      <BreakEvenCalculatorArticle />
     </CalculatorLayout>
   );
 }

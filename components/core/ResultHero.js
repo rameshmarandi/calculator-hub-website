@@ -1,14 +1,13 @@
-
-
-import { formatINR } from "@/lib/format";
-
 export default function ResultHero({
   label,
   value,
-  showPerDay = false,   // default OFF
-  days = 30,            // configurable
+  showPerDay = false,
+  days = 30,
 }) {
-  const perDay = showPerDay ? Math.round(value / days) : null;
+  const perDay =
+    showPerDay && typeof value === "number"
+      ? Math.round(value / days)
+      : null;
 
   return (
     <div
@@ -30,7 +29,7 @@ export default function ResultHero({
         {label}
       </p>
 
-      {/* MAIN VALUE */}
+      {/* VALUE (NO AUTO FORMATTING) */}
       <p
         className="
           text-4xl md:text-5xl
@@ -40,13 +39,13 @@ export default function ResultHero({
           dark:text-indigo-400
         "
       >
-        {formatINR(value)}
+        {value}
       </p>
 
-      {/* PER DAY (optional) */}
-      {showPerDay && (
+      {/* PER DAY */}
+      {showPerDay && perDay !== null && (
         <p className="text-xs text-gray-500 mt-3">
-          ≈ {formatINR(perDay)} per day
+          ≈ {perDay} per day
         </p>
       )}
     </div>

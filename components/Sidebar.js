@@ -18,7 +18,6 @@ export default function Sidebar() {
   const pathname = usePathname();
   const activeRef = useRef(null);
 
-  // Auto-scroll active item into view
   useEffect(() => {
     if (activeRef.current) {
       activeRef.current.scrollIntoView({
@@ -32,89 +31,81 @@ export default function Sidebar() {
     <aside
       className="
         h-[calc(100vh-64px)]
-        overflow-y-auto
         sticky top-16
-        rounded-xl
-        p-3
+        overflow-y-auto
+        bg-[var(--surface)]
+        border-r border-[var(--border)]
+        px-3 py-3
       "
-      style={{
-        backgroundColor: "var(--surface)",
-        border: "1px solid var(--border)",
-      }}
     >
       {Object.entries(calculators).map(([categoryKey, items]) => (
-        <div key={categoryKey} className="mb-6">
-          {/* CATEGORY TITLE */}
-          {/* <h3
-            className="text-sm font-semibold mb-2"
-            style={{ color: "var(--text-main)" }}
+        <div key={categoryKey} className="mt-6 first:mt-0">
+          {/* ===== Sticky Header ===== */}
+          <h3
+            className="
+              sticky top-0 z-20
+              px-3 py-2
+              text-xs font-bold uppercase tracking-widest
+
+              bg-[color-mix(in_srgb,var(--primary)_8%,var(--surface))]
+              text-[var(--primary)]
+
+              border-b border-[var(--border)]
+              border-l-4 border-l-[var(--primary)]
+            "
           >
             {CATEGORY_LABELS[categoryKey] || categoryKey}
-          </h3> */}
+          </h3>
 
-          <h3
-  className="
-    sticky top-0 z-10
-    text-xs
-    font-semibold
-    uppercase
-    tracking-wider
-    px-3
-    py-2
-    mb-2
-    rounded-lg
-    bg-[var(--surface)]
-    border-b
-    border-[var(--border)]
-    text-[var(--primary)]
-  "
->
-  {CATEGORY_LABELS[categoryKey] || categoryKey}
-</h3>
-
-
-          {/* subtle divider */}
-          <div
-            className="mb-2"
-            style={{
-              height: "1px",
-              backgroundColor: "var(--border)",
-            }}
-          />
-
-          {/* CALCULATOR LIST */}
-          <ul className="space-y-1">
+          {/* ===== List ===== */}
+          <ul className="mt-2 space-y-1">
             {items.map((calc) => {
-              // const href = `/${categoryKey}/${calc.slug}`;
-              // const isActive = pathname === href;
-
               const href = `/${categoryKey}/${calc.slug}`;
               const isActive = pathname.includes(`/${calc.slug}`);
+
               return (
-                <li key={calc.slug}>
+                <li key={calc.slug} className="relative">
                   <Link
                     href={href}
                     ref={isActive ? activeRef : null}
-                    className="block px-3 py-2 rounded text-sm transition-colors"
-                    style={{
-                      backgroundColor: isActive
-                        ? "var(--active-bg)"
-                        : "transparent",
-                      color: isActive ? "var(--primary)" : "var(--text-main)",
-                      fontWeight: isActive ? 500 : 400,
-                    }}
-                    onMouseEnter={(e) => {
-                      if (!isActive) {
-                        e.currentTarget.style.backgroundColor =
-                          "var(--hover-bg)";
+                    className={`
+                      relative block
+                      px-3 py-2
+                      rounded-lg
+                      text-sm
+                      no-underline
+
+                      transition-all duration-200 ease-out
+
+                      ${
+                        isActive
+                          ? `
+                            bg-[color-mix(in_srgb,var(--primary)_15%,transparent)]
+                            text-[var(--primary)]
+                            font-semibold
+                            translate-x-1
+                          `
+                          : `
+                            text-[var(--text-main)]
+                            hover:bg-[var(--hover-bg)]
+                            hover:translate-x-1
+                          `
                       }
-                    }}
-                    onMouseLeave={(e) => {
-                      if (!isActive) {
-                        e.currentTarget.style.backgroundColor = "transparent";
-                      }
-                    }}
+                    `}
                   >
+                    {/* Left active indicator */}
+                    {isActive && (
+                      <span
+                        className="
+                          absolute left-0 top-1/2
+                          -translate-y-1/2
+                          h-5 w-1.5
+                          rounded-r-md
+                          bg-[var(--primary)]
+                        "
+                      />
+                    )}
+
                     {calc.name}
                   </Link>
                 </li>
