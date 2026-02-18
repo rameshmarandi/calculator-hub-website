@@ -68,8 +68,22 @@ export default function RootLayout({ children }) {
           src="https://www.googletagmanager.com/gtag/js?id=G-GKJDZ488MR"
           strategy="afterInteractive"
         />
-
-        <Script id="ga-init" strategy="afterInteractive">
+        {/* Vignette Ad Script */}
+<Script
+  id="vignette-ad"
+  strategy="afterInteractive"
+  dangerouslySetInnerHTML={{
+    __html: `
+      (function() {
+        var s = document.createElement('script');
+        s.dataset.zone = '10625640';
+        s.src = 'https://gizokraijaw.net/vignette.min.js';
+        document.body.appendChild(s);
+      })();
+    `,
+  }}
+/>
+ <Script id="ga-init" strategy="afterInteractive">
           {`
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
