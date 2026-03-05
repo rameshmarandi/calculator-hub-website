@@ -700,48 +700,6 @@ const HomeLoanEMIArticle = () => {
           on market conditions and risk preference.
         </p>
       </section>
-
-      {/* FINAL */}
-      <section className="space-y-4">
-        <h2 className="text-2xl font-bold">Final Thoughts</h2>
-
-        <p>
-          A home loan is one of the most significant financial commitments most
-          people will make in their lifetime. Because housing loans often extend
-          for decades, even small decisions about loan amount, interest rate, or
-          repayment tenure can have a major impact on your long-term financial
-          stability.
-        </p>
-
-        <p>
-          Using a Home Loan EMI Calculator before applying for a loan helps you
-          understand exactly what you are committing to. It provides a clear
-          estimate of monthly payments, total interest costs, and the complete
-          repayment structure. With this information, borrowers can evaluate
-          whether a loan fits comfortably within their income and financial
-          goals.
-        </p>
-
-        <p>
-          Instead of relying on assumptions or rough estimates, taking a few
-          minutes to calculate EMI allows you to compare loan scenarios, adjust
-          tenure options, and choose a repayment plan that is both affordable
-          and financially responsible.
-        </p>
-
-        <p>
-          Smart financial planning begins with understanding your obligations. A
-          well-planned home loan not only makes property ownership possible but
-          also ensures that your monthly repayments remain manageable throughout
-          the life of the loan.
-        </p>
-
-        <p className="font-medium">
-          Always calculate your EMI first, compare multiple loan options, and
-          borrow within your repayment capacity to maintain long-term financial
-          stability.
-        </p>
-      </section>
     </article>
   );
 };

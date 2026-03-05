@@ -701,23 +701,6 @@ const EMIArticle = () => {
           interest.
         </p>
       </section>
-
-      {/* 19 CONCLUSION */}
-      <section className="space-y-4">
-        <h2 className="text-2xl font-bold">Final Thoughts</h2>
-
-        <p>
-          Loans can help achieve important life goals, but they must be planned
-          carefully. Understanding your EMI before borrowing ensures that your
-          loan remains affordable and does not create long term financial
-          stress.
-        </p>
-
-        <p className="font-semibold">
-          Always calculate before you borrow and make informed financial
-          decisions.
-        </p>
-      </section>
     </article>
   );
 };
