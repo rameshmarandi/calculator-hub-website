@@ -59,7 +59,7 @@ export function InputField({
 
   return (
     <label className="block space-y-1">
-      <span className="text-sm flex items-center gap-2">
+      <span className="text-sm flex items-center mb-1 gap-2">
         {icon}
         {label}
       </span>

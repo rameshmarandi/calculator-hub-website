@@ -27,7 +27,10 @@ export function PercentageInput ({
 
   return (
     <label className='block space-y-1'>
-      <span className='text-sm font-medium text-[var(--text-main)]'>
+      {/* <span className='text-sm font-medium text-[var(--text-main)]'>
+        {label}
+      </span> */}
+      <span className='text-sm font-medium text-[var(--text-main)] mb-1 block'>
         {label}
       </span>
 

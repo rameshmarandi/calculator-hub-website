@@ -1,15 +1,12 @@
 "use client";
 
-export default function SelectInput({
-  label,
-  value,
-  onChange,
-  options = [],
-}) {
+export default function SelectInput({ label, value, onChange, options = [] }) {
   return (
     <label className="block space-y-1">
-      <span className="text-sm font-medium">{label}</span>
-
+      {/* <span className="text-sm font-medium">{label}</span> */}
+      <span className="text-sm font-medium text-[var(--text-main)] mb-1 block">
+        {label}
+      </span>
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
@@ -22,8 +19,7 @@ export default function SelectInput({
           border-[var(--border)]
           text-sm
           focus:outline-none
-        "
-      >
+        ">
         {options.map((o) => (
           <option key={o.value} value={o.value}>
             {o.label}
