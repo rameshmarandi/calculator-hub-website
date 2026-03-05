@@ -5,6 +5,7 @@ import EDUCATION_CALCULATOR_MAP from "../../../data/education";
 import calculators from "@/data/calculators";
 import { buildCalculatorMetadata } from "@/lib/seo";
 import { FULL_BASE_URL } from "@/lib/constant";
+import CalculatorPager from "../../../components/CalculatorPager";
 
 /* =================================================
    STATIC PARAMS (SSG for all calculators)
@@ -96,6 +97,11 @@ export default async function CalculatorPage({ params }) {
       />
 
       <CalculatorComponent />
+      <CalculatorPager
+        list={calculators.education}
+        currentSlug={calculator}
+        basePath="/education"
+      />
     </>
   );
 }

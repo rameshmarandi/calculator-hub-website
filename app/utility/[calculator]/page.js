@@ -5,6 +5,7 @@ import UTILITY_CALCULATOR_MAP from "../../../data/utility";
 import calculators from "@/data/calculators";
 import { buildCalculatorMetadata } from "@/lib/seo";
 import { FULL_BASE_URL } from "@/lib/constant";
+import CalculatorPager from "../../../components/CalculatorPager";
 /* ===============================================
    STATIC PARAMS (MANDATORY FOR output: "export")
    
@@ -100,6 +101,11 @@ export default async function CalculatorPage({ params }) {
       />
 
       <CalculatorComponent />
+      <CalculatorPager
+        list={calculators.utility}
+        currentSlug={calculator}
+        basePath="/utility"
+      />
     </>
   );
 }

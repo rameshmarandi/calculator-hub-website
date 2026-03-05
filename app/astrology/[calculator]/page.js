@@ -3,6 +3,7 @@ import Script from "next/script";
 import ASTROLOGY_CALCULATOR_MAP from "../../../data/astrology";
 import calculators from "@/data/calculators";
 import { buildCalculatorMetadata } from "@/lib/seo";
+import CalculatorPager from "../../../components/CalculatorPager";
 
 /* =====================================
    STATIC PARAMS (REQUIRED FOR EXPORT)
@@ -94,6 +95,11 @@ export default async function CalculatorPage({ params }) {
       />
 
       <CalculatorComponent />
+      <CalculatorPager
+        list={calculators.astrology}
+        currentSlug={calculator}
+        basePath="/astrology"
+      />
     </>
   );
 }

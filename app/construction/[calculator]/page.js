@@ -3,6 +3,7 @@ import Script from "next/script";
 import CONSTRUCTION_CALCULATOR_MAP from "../../../data/construction";
 import calculators from "@/data/calculators";
 import { buildCalculatorMetadata } from "@/lib/seo";
+import CalculatorPager from "../../../components/CalculatorPager";
 
 /* =====================================
    ✅ SEO META
@@ -93,6 +94,11 @@ export default async function CalculatorPage({ params }) {
       />
 
       <CalculatorComponent />
+      <CalculatorPager
+        list={calculators.construction}
+        currentSlug={calculator}
+        basePath="/construction"
+      />
     </>
   );
 }

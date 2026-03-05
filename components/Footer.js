@@ -5,12 +5,13 @@ export default function Footer() {
 
   return (
     <footer className="mt-16 border-t bg-[var(--surface)] border-[var(--border)]">
-      <div className="max-w-7xl mx-auto px-4 py-10 grid gap-10 sm:grid-cols-2 md:grid-cols-4 text-sm">
+      <div className="max-w-7xl mx-auto px-4 py-10 grid grid-cols-2 md:grid-cols-4 gap-8 text-sm">
         {/* BRAND */}
-        <div className="space-y-3">
+        <div className="space-y-3 col-span-2 md:col-span-1">
           <h3 className="text-base font-semibold text-[var(--primary)]">
             Swiftcalcfy
           </h3>
+
           <p className="text-[var(--text-muted)] leading-relaxed">
             Free online calculators for finance, construction, health,
             education, and everyday productivity. Fast, accurate, and no signup
@@ -21,6 +22,7 @@ export default function Footer() {
         {/* PRODUCT */}
         <div>
           <h4 className="font-semibold mb-3">Product</h4>
+
           <ul className="space-y-2 text-[var(--text-muted)]">
             <li>
               <Link href="/" className="hover:text-[var(--primary)]">
@@ -60,6 +62,7 @@ export default function Footer() {
         {/* COMPANY */}
         <div>
           <h4 className="font-semibold mb-3">Company</h4>
+
           <ul className="space-y-2 text-[var(--text-muted)]">
             <li>
               <Link href="/about" className="hover:text-[var(--primary)]">
@@ -77,6 +80,7 @@ export default function Footer() {
         {/* LEGAL */}
         <div>
           <h4 className="font-semibold mb-3">Legal</h4>
+
           <ul className="space-y-2 text-[var(--text-muted)]">
             <li>
               <Link
@@ -99,7 +103,7 @@ export default function Footer() {
         </div>
       </div>
 
-      {/* BOTTOM BAR */}
+      {/* Bottom Bar */}
       <div className="border-t border-[var(--border)] text-center text-xs py-4 text-[var(--text-muted)]">
         © {year} Swiftcalcfy. All rights reserved.
       </div>

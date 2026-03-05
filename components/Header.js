@@ -24,6 +24,7 @@ const NAV_LINKS = [
   { href: "/construction", label: "Construction" },
   { href: "/health", label: "Health" },
   { href: "/education", label: "Education" },
+  { href: "/astrology", label: "Astrology" },
   { href: "/utility", label: "Utilities" },
 ];
 

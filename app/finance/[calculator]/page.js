@@ -6,6 +6,8 @@ import calculators from "@/data/calculators";
 import { buildCalculatorMetadata } from "@/lib/seo";
 import { FULL_BASE_URL } from "@/lib/constant";
 
+import CalculatorPager from "../../../components/CalculatorPager";
+
 /* =================================================
    1. STATIC GENERATION
    Prebuild all finance calculators
@@ -92,6 +94,7 @@ export default async function CalculatorPage({ params }) {
   };
 
   const schemas = [appSchema, breadcrumbSchema];
+
   return (
     <>
       <Script
@@ -104,6 +107,12 @@ export default async function CalculatorPage({ params }) {
       />
 
       <CalculatorComponent />
+      {/* MOBILE NEXT / PREVIOUS NAVIGATION */}
+      <CalculatorPager
+        list={calculators.finance}
+        currentSlug={calculator}
+        basePath="/finance"
+      />
     </>
   );
 }
