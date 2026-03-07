@@ -4,6 +4,21 @@ export default function ResultHero({
   showPerDay = false,
   days = 30,
 }) {
+
+  const formatNumber = (num) => {
+    if (num === null || num === undefined) return "-";
+
+    const n = Number(num);
+
+    if (!Number.isFinite(n)) return "-";
+
+    const rounded = Math.round(n * 100) / 100;
+
+    return rounded.toLocaleString("en-IN", {
+      maximumFractionDigits: 2,
+    });
+  };
+
   const perDay =
     showPerDay && typeof value === "number"
       ? Math.round(value / days)
@@ -24,12 +39,13 @@ export default function ResultHero({
         shadow-sm
       "
     >
+
       {/* LABEL */}
       <p className="text-xs uppercase tracking-wider text-gray-500">
         {label}
       </p>
 
-      {/* VALUE (NO AUTO FORMATTING) */}
+      {/* VALUE */}
       <p
         className="
           text-4xl md:text-5xl
@@ -39,13 +55,13 @@ export default function ResultHero({
           dark:text-indigo-400
         "
       >
-        {value}
+        {formatNumber(value)}
       </p>
 
       {/* PER DAY */}
       {showPerDay && perDay !== null && (
         <p className="text-xs text-gray-500 mt-3">
-          ≈ {perDay} per day
+          ≈ {formatNumber(perDay)} per day
         </p>
       )}
     </div>
