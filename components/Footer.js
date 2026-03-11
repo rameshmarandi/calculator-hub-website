@@ -33,7 +33,7 @@ export default function Footer() {
             <p className="text-xs uppercase tracking-wide text-[var(--text-muted)]">
               Our Product
             </p>
-            <a
+            {/* <a
               href="https://hisabtracker.com"
               target="_blank"
               rel="noopener noreferrer"
@@ -56,30 +56,30 @@ export default function Footer() {
                 Track expenses, manage budgets, and monitor daily spending with
                 the HisabTracker personal finance app.
               </p>
+            </a> */}
+            <a
+              href="https://hisabtracker.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-3 hover:opacity-90 transition"
+            >
+              <Image
+                src="https://res.cloudinary.com/dvhjtth5f/image/upload/v1763839566/hisabTrackerOnlyImage_eyqbuq.png"
+                alt="HisabTracker Expense Tracker App"
+                width={34}
+                height={34}
+                className="rounded"
+              />
+
+              <span className="font-medium text-[var(--primary)]">
+                HisabTracker – Expense Tracker
+              </span>
             </a>
-            {/* <a
-    href="https://hisabtracker.com"
-    target="_blank"
-    rel="noopener noreferrer"
-    className="flex items-center gap-3 hover:opacity-90 transition"
-  >
-    <Image
-      src="https://res.cloudinary.com/dvhjtth5f/image/upload/v1763839566/hisabTrackerOnlyImage_eyqbuq.png"
-      alt="HisabTracker Expense Tracker App"
-      width={34}
-      height={34}
-      className="rounded"
-    />
 
-    <span className="font-medium text-[var(--primary)]">
-      HisabTracker – Expense Tracker
-    </span>
-  </a> */}
-
-            {/* <p className="text-xs text-[var(--text-muted)] leading-relaxed">
-    Track expenses, manage budgets, and monitor daily spending
-    with the HisabTracker personal finance app.
-  </p> */}
+            <p className="text-xs text-[var(--text-muted)] leading-relaxed">
+              Track expenses, manage budgets, and monitor daily spending with
+              the HisabTracker personal finance app.
+            </p>
           </div>
 
           {/* SOCIAL */}
