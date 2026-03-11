@@ -38,33 +38,35 @@ export default function CementQuantityCalculator() {
 
   /* ---------------- INPUT CONFIG ---------------- */
 
-  const inputs = [
-    {
-      key: "length",
-      label: "Length (meters)",
-      type: "amount",
-      placeholder: "5",
-    },
-    {
-      key: "width",
-      label: "Width (meters)",
-      type: "amount",
-      placeholder: "4",
-    },
-    {
-      key: "thickness",
-      label: "Thickness (mm)",
-      type: "amount",
-      placeholder: "100",
-    },
-    {
-      key: "ratio",
-      label: "Mix Ratio (Cement : Sand)",
-      type: "text",
-      placeholder: "1:4",
-    },
-  ];
-
+ const inputs = [
+  {
+    key: "length",
+    label: "Length (meters)",
+    type: "amount",
+    placeholder: "5",
+    prefix: ""   // no currency
+  },
+  {
+    key: "width",
+    label: "Width (meters)",
+    type: "amount",
+    placeholder: "4",
+    prefix: ""
+  },
+  {
+    key: "thickness",
+    label: "Thickness (mm)",
+    type: "amount",
+    placeholder: "100",
+    prefix: ""
+  },
+  {
+    key: "ratio",
+    label: "Mix Ratio (Cement : Sand)",
+    type: "text",
+    placeholder: "1:4"
+  }
+]
   /* ---------------- UI ---------------- */
 
   return (
@@ -82,12 +84,11 @@ export default function CementQuantityCalculator() {
 
       {result && (
         <>
-         <ResultHero
-  label="Cement Bags Required"
-  value={`${result.cementBags} bags`}
-  bags
-/>
-
+          <ResultHero
+            label="Cement Bags Required"
+            value={`${result.cementBags} bags`}
+            bags
+          />
 
           <StatsGrid
             items={[
@@ -102,7 +103,7 @@ export default function CementQuantityCalculator() {
       )}
 
       <ExplanationText text="Uses wet volume → dry volume (1.54 factor) → mix ratio distribution to compute cement requirement accurately." />
-      <CementQuantityArticle/>
+      <CementQuantityArticle />
     </CalculatorLayout>
   );
 }

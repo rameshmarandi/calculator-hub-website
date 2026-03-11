@@ -49,18 +49,21 @@ export default function SandQuantityCalculator() {
       label: "Length (meters)",
       type: "amount",
       placeholder: "5",
+      prefix: ""
     },
     {
       key: "width",
       label: "Width (meters)",
       type: "amount",
       placeholder: "4",
+      prefix: ""
     },
     {
       key: "thickness",
       label: "Thickness (mm)",
       type: "amount",
       placeholder: "100",
+      prefix: ""
     },
     {
       key: "ratio",

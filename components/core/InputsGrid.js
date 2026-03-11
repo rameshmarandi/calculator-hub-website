@@ -34,7 +34,7 @@ export default function InputsGrid({ inputs, values, setValues }) {
             {/* TYPE SWITCH */}
 
             {i.type === "amount" && (
-              <AmountInput {...commonProps} placeholder={i.placeholder} />
+              <AmountInput {...commonProps} placeholder={i.placeholder}     prefix={i.prefix}/>
             )}
 
             {i.type === "percent" && (
