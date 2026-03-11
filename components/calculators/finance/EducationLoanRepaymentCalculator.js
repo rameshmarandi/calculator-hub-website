@@ -112,7 +112,14 @@ export default function EducationLoanRepaymentCalculator() {
           />
         </>
       )}
+{/* ================= RESULT DISCLAIMER ================= */}
 
+<p className="text-xs text-[var(--text-muted)] mt-3">
+  Note: The results shown by this calculator are estimates based on the
+  values entered and the standard EMI formula used by banks. Actual
+  repayment amounts may vary depending on lender policies, processing
+  fees, interest rate changes, and moratorium conditions.
+</p>
       <EducationLoanRepaymentArticle/>
     </CalculatorLayout>
   );
