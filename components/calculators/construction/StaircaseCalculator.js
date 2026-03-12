@@ -1,11 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { Calculator, BarChart } from "lucide-react";
+import { Calculator, BarChart, RotateCcw } from "lucide-react";
 
 import { AmountInput } from "../../inputs/AmountInput";
-import { PercentageInput } from "../../inputs/PercentageInput";
 import { ResultCard } from "../../ResultCard";
+import StaircaseCalculatorArticle from "../../content/construction/StaircaseCalculatorArticle";
 
 export default function StaircaseCalculator() {
   const [floorHeight, setFloorHeight] = useState("");
@@ -15,20 +15,37 @@ export default function StaircaseCalculator() {
   const [result, setResult] = useState(null);
   const [error, setError] = useState("");
 
+  // Used to force form reset
+  const [formKey, setFormKey] = useState(0);
+
   /* ---------------- VALIDATION ---------------- */
   function validate() {
-    if (!floorHeight || Number(floorHeight) <= 0) {
-      setError("Please enter valid floor height.");
+    const height = Number(floorHeight);
+    const riser = Number(riserHeight);
+    const tread = Number(treadDepth);
+
+    if (!height || height <= 0) {
+      setError("Please enter a valid floor height.");
       return false;
     }
 
-    if (!riserHeight || Number(riserHeight) <= 0) {
-      setError("Please enter valid riser height.");
+    if (!riser || riser <= 0) {
+      setError("Please enter a valid riser height.");
       return false;
     }
 
-    if (!treadDepth || Number(treadDepth) <= 0) {
-      setError("Please enter valid tread depth.");
+    if (!tread || tread <= 0) {
+      setError("Please enter a valid tread depth.");
+      return false;
+    }
+
+    if (riser < 120 || riser > 220) {
+      setError("Riser height should be between 120mm and 220mm.");
+      return false;
+    }
+
+    if (tread < 200 || tread > 350) {
+      setError("Tread depth should be between 200mm and 350mm.");
       return false;
     }
 
@@ -45,9 +62,11 @@ export default function StaircaseCalculator() {
     const riserMM = Number(riserHeight);
     const treadMM = Number(treadDepth);
 
-    const steps = Math.round(heightMM / riserMM);
+    const steps = Math.max(1, Math.round(heightMM / riserMM));
     const actualRiser = heightMM / steps;
-    const totalRun = steps * treadMM;
+
+    // Correct stair run formula
+    const totalRun = (steps - 1) * treadMM;
 
     setResult({
       steps,
@@ -57,43 +76,63 @@ export default function StaircaseCalculator() {
     });
   }
 
+  /* ---------------- RESET ---------------- */
+  function resetCalculator() {
+    setFloorHeight("");
+    setRiserHeight("150");
+    setTreadDepth("270");
+    setResult(null);
+    setError("");
+
+    // Force full form re-render (fixes reset issues)
+    setFormKey((prev) => prev + 1);
+  }
+
   return (
     <section
       className="rounded-xl p-6 space-y-10"
       style={{
         backgroundColor: "var(--surface)",
         border: "1px solid var(--border)",
-      }}>
+      }}
+    >
       {/* ================= HEADER ================= */}
       <header>
         <h1 className="text-2xl font-bold mb-1">Staircase Calculator</h1>
         <p className="text-sm leading-relaxed">
-          Use this Staircase Calculator to calculate the number of steps, riser
-          height, tread depth, and total staircase length.
+          Use this Staircase Calculator to calculate the number of steps,
+          riser height, tread depth, and total staircase length.
         </p>
       </header>
 
       {/* ================= FORM ================= */}
-      <form onSubmit={calculateStaircase} className="space-y-4">
+      <form
+        key={formKey}
+        onSubmit={calculateStaircase}
+        className="space-y-4"
+      >
         <AmountInput
           label="Floor Height (mm)"
           value={floorHeight}
           onChange={setFloorHeight}
           placeholder="3000"
+          prefix=""
         />
 
-        <PercentageInput
+        <AmountInput
           label="Preferred Riser Height (mm)"
           value={riserHeight}
           onChange={setRiserHeight}
           placeholder="150"
+          prefix=""
         />
 
-        <PercentageInput
+        <AmountInput
           label="Tread Depth (mm)"
           value={treadDepth}
           onChange={setTreadDepth}
           placeholder="270"
+          prefix=""
         />
 
         {error && <p className="text-sm text-red-500">{error}</p>}
@@ -104,9 +143,19 @@ export default function StaircaseCalculator() {
           style={{
             backgroundColor: "var(--primary)",
             color: "#fff",
-          }}>
+          }}
+        >
           <Calculator size={18} />
           Calculate Staircase
+        </button>
+
+        <button
+          type="button"
+          onClick={resetCalculator}
+          className="w-full py-2.5 rounded-md font-medium flex items-center justify-center gap-2 border"
+        >
+          <RotateCcw size={16} />
+          Reset
         </button>
       </form>
 
@@ -143,53 +192,8 @@ export default function StaircaseCalculator() {
         </div>
       )}
 
-      {/* ================= SEO BLOG CONTENT ================= */}
-      <article className="space-y-4 text-sm leading-relaxed">
-        <h2 className="font-semibold text-base">
-          How to Calculate Staircase Dimensions
-        </h2>
-
-        <p>
-          Staircase calculation is essential for comfortable and safe movement
-          between floors. Proper riser height and tread depth ensure ease of
-          walking and compliance with building norms.
-        </p>
-
-        <h3 className="font-semibold">Staircase Calculation Formula</h3>
-
-        <p
-          className="font-mono text-xs p-3 rounded"
-          style={{ backgroundColor: "var(--surface-2)" }}>
-          Number of Steps = Floor Height ÷ Riser Height Actual Riser = Floor
-          Height ÷ Number of Steps Total Run = Number of Steps × Tread Depth
-        </p>
-
-        <ul className="list-disc pl-5">
-          <li>Ideal riser height: 150–175 mm</li>
-          <li>Ideal tread depth: 250–300 mm</li>
-          <li>2R + T ≈ 600–630 mm for comfort</li>
-        </ul>
-
-        <h3 className="font-semibold">Why Use a Staircase Calculator?</h3>
-
-        <ul className="list-disc pl-5">
-          <li>Ensures comfortable stair design</li>
-          <li>Helps follow building standards</li>
-          <li>Prevents steep or unsafe stairs</li>
-          <li>Useful for houses & commercial buildings</li>
-        </ul>
-
-        <p>
-          This staircase calculator provides a quick and reliable estimate for
-          planning residential and commercial staircases.
-        </p>
-      </article>
-
-      {/* ================= DISCLAIMER ================= */}
-      <aside className="text-xs text-muted">
-        ⚠️ This calculator provides an estimate only. Final staircase design
-        should comply with local building codes and regulations.
-      </aside>
+      {/* ================= SEO ARTICLE ================= */}
+      <StaircaseCalculatorArticle />
     </section>
   );
 }

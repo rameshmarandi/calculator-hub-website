@@ -4,37 +4,43 @@ import { useState } from "react";
 import { Calculator, BarChart } from "lucide-react";
 
 import { AmountInput } from "../../inputs/AmountInput";
-import { PercentageInput } from "../../inputs/PercentageInput";
 import { ResultCard } from "../../ResultCard";
+import BeamLoadCalculatorArticle from "../../content/construction/BeamLoadCalculatorArticle";
 
 export default function BeamLoadCalculator() {
   const [beamLength, setBeamLength] = useState("");
   const [beamWidth, setBeamWidth] = useState("");
   const [beamDepth, setBeamDepth] = useState("");
-  const [liveLoad, setLiveLoad] = useState("3"); // kN/m² (residential)
+  const [liveLoad, setLiveLoad] = useState("3"); // kN/m
 
   const [result, setResult] = useState(null);
   const [error, setError] = useState("");
 
   /* ---------------- VALIDATION ---------------- */
+
   function validate() {
-    if (!beamLength || Number(beamLength) <= 0) {
-      setError("Please enter valid beam length.");
+    const L = Number(beamLength);
+    const B = Number(beamWidth);
+    const D = Number(beamDepth);
+    const LL = Number(liveLoad);
+
+    if (!L || L <= 0) {
+      setError("Please enter a valid beam length.");
       return false;
     }
 
-    if (!beamWidth || Number(beamWidth) <= 0) {
-      setError("Please enter valid beam width.");
+    if (!B || B <= 0) {
+      setError("Please enter a valid beam width.");
       return false;
     }
 
-    if (!beamDepth || Number(beamDepth) <= 0) {
-      setError("Please enter valid beam depth.");
+    if (!D || D <= 0) {
+      setError("Please enter a valid beam depth.");
       return false;
     }
 
-    if (!liveLoad || Number(liveLoad) <= 0) {
-      setError("Please enter valid live load.");
+    if (!LL || LL <= 0) {
+      setError("Please enter a valid live load.");
       return false;
     }
 
@@ -43,24 +49,29 @@ export default function BeamLoadCalculator() {
   }
 
   /* ---------------- CALCULATION ---------------- */
+
   function calculateBeamLoad(e) {
     e.preventDefault();
+
     if (!validate()) return;
 
     const L = Number(beamLength);
     const B = Number(beamWidth);
     const D = Number(beamDepth);
-    const LL = Number(liveLoad);
+    const liveLoadPerMeter = Number(liveLoad);
 
-    // Convert mm → m
+    // Convert mm → meters
     const widthM = B / 1000;
     const depthM = D / 1000;
 
-    // Self weight of RCC beam (25 kN/m³)
-    const selfWeight = widthM * depthM * 25;
+    // RCC density ≈ 25 kN/m³
+    const concreteDensity = 25;
+
+    // Self weight of beam per meter
+    const selfWeight = widthM * depthM * concreteDensity;
 
     // Total load per meter
-    const totalLoadPerMeter = selfWeight + LL;
+    const totalLoadPerMeter = selfWeight + liveLoadPerMeter;
 
     // Total load on beam
     const totalLoad = totalLoadPerMeter * L;
@@ -81,23 +92,29 @@ export default function BeamLoadCalculator() {
       }}
     >
       {/* ================= HEADER ================= */}
+
       <header>
         <h1 className="text-2xl font-bold mb-1">
           Beam Load Calculator
         </h1>
+
         <p className="text-sm leading-relaxed">
-          Use this Beam Load Calculator to estimate self-weight and
-          total load acting on an RCC beam for structural design.
+          Estimate the self weight and total structural load acting on an RCC
+          beam. Enter the beam dimensions and live load to quickly calculate
+          load per meter and total load on the beam.
         </p>
       </header>
 
       {/* ================= FORM ================= */}
+
       <form onSubmit={calculateBeamLoad} className="space-y-4">
+
         <AmountInput
           label="Beam Length (meters)"
           value={beamLength}
           onChange={setBeamLength}
           placeholder="4"
+          prefix=""
         />
 
         <AmountInput
@@ -105,6 +122,7 @@ export default function BeamLoadCalculator() {
           value={beamWidth}
           onChange={setBeamWidth}
           placeholder="230"
+           prefix=""
         />
 
         <AmountInput
@@ -112,17 +130,21 @@ export default function BeamLoadCalculator() {
           value={beamDepth}
           onChange={setBeamDepth}
           placeholder="450"
+           prefix=""
         />
 
-        <PercentageInput
-          label="Live Load (kN/m²)"
+        <AmountInput
+          label="Live Load (kN/m)"
           value={liveLoad}
           onChange={setLiveLoad}
           placeholder="3"
+           prefix=""
         />
 
         {error && (
-          <p className="text-sm text-red-500">{error}</p>
+          <p className="text-sm text-red-500">
+            {error}
+          </p>
         )}
 
         <button
@@ -138,9 +160,11 @@ export default function BeamLoadCalculator() {
         </button>
       </form>
 
-      {/* ================= RESULT ================= */}
+      {/* ================= RESULTS ================= */}
+
       {result && (
         <div className="grid md:grid-cols-3 gap-4" aria-live="polite">
+
           <ResultCard
             variant="neutral"
             icon={<BarChart size={20} />}
@@ -161,63 +185,14 @@ export default function BeamLoadCalculator() {
             label="Total Load on Beam"
             value={`${result.totalLoad} kN`}
           />
+
         </div>
       )}
 
-      {/* ================= SEO BLOG CONTENT ================= */}
-      <article className="space-y-4 text-sm leading-relaxed">
-        <h2 className="font-semibold text-base">
-          What is Beam Load?
-        </h2>
+      {/* ================= ARTICLE ================= */}
 
-        <p>
-          Beam load refers to the total force acting on a beam due to
-          its own weight, live load, and other applied loads. Accurate
-          beam load calculation is essential for safe structural
-          design.
-        </p>
+      <BeamLoadCalculatorArticle />
 
-        <h3 className="font-semibold">
-          Beam Load Calculation Formula
-        </h3>
-
-        <p
-          className="font-mono text-xs p-3 rounded"
-          style={{ backgroundColor: "var(--surface-2)" }}
-        >
-          Self Weight = Width × Depth × 25  
-          Total Load per meter = Self Weight + Live Load  
-          Total Load = Load per meter × Beam Length
-        </p>
-
-        <ul className="list-disc pl-5">
-          <li>25 kN/m³ is unit weight of RCC</li>
-          <li>Live load depends on building usage</li>
-          <li>Residential live load ≈ 2–3 kN/m²</li>
-        </ul>
-
-        <h3 className="font-semibold">
-          Why Use a Beam Load Calculator?
-        </h3>
-
-        <ul className="list-disc pl-5">
-          <li>Ensures structural safety</li>
-          <li>Helps in beam design & reinforcement</li>
-          <li>Useful for engineers & contractors</li>
-          <li>Prevents overloading failures</li>
-        </ul>
-
-        <p>
-          This beam load calculator provides a simplified estimate for
-          preliminary structural planning and analysis.
-        </p>
-      </article>
-
-      {/* ================= DISCLAIMER ================= */}
-      <aside className="text-xs text-muted">
-        ⚠️ This calculator provides an estimate only. Final beam design
-        should be done by a qualified structural engineer.
-      </aside>
     </section>
   );
 }

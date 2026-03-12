@@ -90,6 +90,7 @@ export default function FlooringCostCalculator() {
           value={length}
           onChange={setLength}
           placeholder="5"
+          prefix=""
         />
 
         <AmountInput
@@ -97,6 +98,7 @@ export default function FlooringCostCalculator() {
           value={width}
           onChange={setWidth}
           placeholder="4"
+           prefix=""
         />
 
         <AmountInput
@@ -104,6 +106,7 @@ export default function FlooringCostCalculator() {
           value={tileCost}
           onChange={setTileCost}
           placeholder="120"
+          
         />
 
         <PercentageInput

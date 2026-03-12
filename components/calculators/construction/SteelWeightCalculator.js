@@ -1,11 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { Calculator, BarChart } from "lucide-react";
 
 import { AmountInput } from "../../inputs/AmountInput";
-import { PercentageInput } from "../../inputs/PercentageInput";
 import { ResultCard } from "../../ResultCard";
+import SteelWeightCalculatorArticle from "../../content/construction/SteelWeightCalculatorArticle";
 
 export default function SteelWeightCalculator() {
   const [diameter, setDiameter] = useState("");
@@ -15,46 +15,70 @@ export default function SteelWeightCalculator() {
   const [result, setResult] = useState(null);
   const [error, setError] = useState("");
 
+  /* ---------------- SAFE NUMBER PARSE ---------------- */
+  const parseNumber = (value) => {
+    const num = Number(value);
+    return Number.isFinite(num) ? num : 0;
+  };
+
   /* ---------------- VALIDATION ---------------- */
-  function validate() {
-    if (!diameter || Number(diameter) <= 0) {
-      setError("Please enter valid bar diameter.");
+  const validate = useCallback(() => {
+    const d = parseNumber(diameter);
+    const l = parseNumber(length);
+    const q = parseNumber(quantity);
+
+    if (!d || d <= 0) {
+      setError("Please enter a valid bar diameter.");
       return false;
     }
 
-    if (!length || Number(length) <= 0) {
-      setError("Please enter valid bar length.");
+    if (d > 100) {
+      setError("Diameter seems unrealistic. Typical bars are below 50 mm.");
       return false;
     }
 
-    if (!quantity || Number(quantity) <= 0) {
+    if (!l || l <= 0) {
+      setError("Please enter a valid bar length.");
+      return false;
+    }
+
+    if (l > 50) {
+      setError("Length seems too large. Please check your value.");
+      return false;
+    }
+
+    if (!q || q <= 0) {
       setError("Quantity must be at least 1.");
       return false;
     }
 
     setError("");
     return true;
-  }
+  }, [diameter, length, quantity]);
 
   /* ---------------- CALCULATION ---------------- */
-  function calculateSteelWeight(e) {
-    e.preventDefault();
-    if (!validate()) return;
+  const calculateSteelWeight = useCallback(
+    (e) => {
+      e.preventDefault();
 
-    const d = Number(diameter);
-    const l = Number(length);
-    const q = Number(quantity);
+      if (!validate()) return;
 
-    // Standard steel weight formula
-    // Weight (kg) = (D² / 162) × Length
-    const weightPerBar = (d * d / 162) * l;
-    const totalWeight = weightPerBar * q;
+      const d = parseNumber(diameter);
+      const l = parseNumber(length);
+      const q = parseNumber(quantity);
 
-    setResult({
-      perBar: weightPerBar.toFixed(2),
-      total: totalWeight.toFixed(2),
-    });
-  }
+      // Standard rebar formula
+      // Weight (kg/m) = D² / 162
+      const weightPerBar = ((d * d) / 162) * l;
+      const totalWeight = weightPerBar * q;
+
+      setResult({
+        perBar: weightPerBar.toFixed(2),
+        total: totalWeight.toFixed(2),
+      });
+    },
+    [diameter, length, quantity, validate]
+  );
 
   return (
     <section
@@ -66,25 +90,21 @@ export default function SteelWeightCalculator() {
     >
       {/* ================= HEADER ================= */}
       <header>
-        <h1 className="text-2xl font-bold mb-1">
-          Steel Weight Calculator
-        </h1>
+        <h1 className="text-2xl font-bold mb-1">Steel Weight Calculator</h1>
         <p className="text-sm leading-relaxed">
-          Use this Steel Weight Calculator to calculate the weight of
-          steel bars based on diameter, length, and quantity.
+          Use this Steel Weight Calculator to calculate the weight of steel bars
+          based on diameter, length, and quantity.
         </p>
       </header>
 
       {/* ================= FORM ================= */}
-      <form
-        onSubmit={calculateSteelWeight}
-        className="space-y-4"
-      >
+      <form onSubmit={calculateSteelWeight} className="space-y-4">
         <AmountInput
           label="Bar Diameter (mm)"
           value={diameter}
           onChange={setDiameter}
           placeholder="12"
+          prefix=""
         />
 
         <AmountInput
@@ -92,17 +112,21 @@ export default function SteelWeightCalculator() {
           value={length}
           onChange={setLength}
           placeholder="6"
+          prefix=""
         />
 
-        <PercentageInput
+        <AmountInput
           label="Number of Bars"
           value={quantity}
           onChange={setQuantity}
           placeholder="10"
+          prefix=""
         />
 
         {error && (
-          <p className="text-sm text-red-500">{error}</p>
+          <p className="text-sm text-red-500" role="alert">
+            {error}
+          </p>
         )}
 
         <button
@@ -137,60 +161,8 @@ export default function SteelWeightCalculator() {
         </div>
       )}
 
-      {/* ================= SEO BLOG CONTENT ================= */}
-      <article className="space-y-4 text-sm leading-relaxed">
-        <h2 className="font-semibold text-base">
-          How to Calculate Steel Weight
-        </h2>
-
-        <p>
-          Steel weight calculation is essential in construction to
-          estimate material quantity, control cost, and ensure
-          structural safety. It is commonly used for RCC slabs, beams,
-          columns, and footings.
-        </p>
-
-        <h3 className="font-semibold">
-          Steel Weight Formula
-        </h3>
-
-        <p
-          className="font-mono text-xs p-3 rounded"
-          style={{ backgroundColor: "var(--surface-2)" }}
-        >
-          Weight (kg) = (Diameter² ÷ 162) × Length  
-          Total Weight = Weight per bar × Number of bars
-        </p>
-
-        <ul className="list-disc pl-5">
-          <li>Diameter is in millimeters (mm)</li>
-          <li>Length is in meters</li>
-          <li>162 is a constant derived from steel density</li>
-        </ul>
-
-        <h3 className="font-semibold">
-          Why Use a Steel Weight Calculator?
-        </h3>
-
-        <ul className="list-disc pl-5">
-          <li>Accurate steel quantity estimation</li>
-          <li>Helps prepare BOQ and costing</li>
-          <li>Reduces material wastage</li>
-          <li>Essential for civil engineers & contractors</li>
-        </ul>
-
-        <p>
-          This steel weight calculator provides a quick and reliable
-          estimate for most residential and commercial construction
-          works.
-        </p>
-      </article>
-
-      {/* ================= DISCLAIMER ================= */}
-      <aside className="text-xs text-muted">
-        ⚠️ This calculator provides an estimate only. Actual steel
-        weight may vary slightly based on manufacturer tolerance.
-      </aside>
+      {/* ================= ARTICLE ================= */}
+      <SteelWeightCalculatorArticle />
     </section>
   );
 }

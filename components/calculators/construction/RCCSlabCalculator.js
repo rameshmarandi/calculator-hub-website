@@ -6,8 +6,10 @@ import { Calculator, BarChart } from "lucide-react";
 import { AmountInput } from "../../inputs/AmountInput";
 import { PercentageInput } from "../../inputs/PercentageInput";
 import { ResultCard } from "../../ResultCard";
+import RCCSlabCalculatorArticle from "../../content/construction/RCCSlabCalculatorArticle";
 
 export default function RCCSlabCalculator() {
+
   const [length, setLength] = useState("");
   const [width, setWidth] = useState("");
   const [thickness, setThickness] = useState("");
@@ -17,20 +19,25 @@ export default function RCCSlabCalculator() {
   const [error, setError] = useState("");
 
   /* ---------------- VALIDATION ---------------- */
+
   function validate() {
+
     if (!length || Number(length) <= 0) {
       setError("Please enter valid slab length.");
       return false;
     }
+
     if (!width || Number(width) <= 0) {
       setError("Please enter valid slab width.");
       return false;
     }
-    if (!thickness || Number(thickness) <= 0) {
-      setError("Please enter valid slab thickness.");
+
+    if (!thickness || Number(thickness) < 50) {
+      setError("Slab thickness should be at least 50 mm.");
       return false;
     }
-    if (Number(steelPercent) <= 0) {
+
+    if (!steelPercent || Number(steelPercent) <= 0) {
       setError("Steel percentage must be greater than 0.");
       return false;
     }
@@ -40,33 +47,46 @@ export default function RCCSlabCalculator() {
   }
 
   /* ---------------- CALCULATION ---------------- */
+
   function calculateRCCSlab(e) {
+
     e.preventDefault();
+
     if (!validate()) return;
 
     const l = Number(length);
     const w = Number(width);
-    const t = Number(thickness) / 1000; // mm → meter
+    const t = Number(thickness) / 1000; // mm → meters
     const steelPct = Number(steelPercent);
 
-    // Concrete volume
+    /* Concrete Volume */
+
     const concreteVolume = l * w * t;
+
+    /* Dry Volume Adjustment */
+
     const dryVolume = concreteVolume * 1.54;
 
-    // M20 mix assumed → 1 : 1.5 : 3
+    /* M20 Concrete Mix Ratio → 1 : 1.5 : 3 */
+
     const totalParts = 5.5;
 
     const cementVolume = (1 / totalParts) * dryVolume;
     const sandVolume = (1.5 / totalParts) * dryVolume;
     const aggregateVolume = (3 / totalParts) * dryVolume;
 
+    /* Cement Bags */
+
     const cementBags = cementVolume / 0.035;
+
+    /* Convert Sand / Aggregate to Brass */
+
     const sandBrass = sandVolume / 2.83;
     const aggregateBrass = aggregateVolume / 2.83;
 
-    // Steel weight (approx % of concrete volume)
-    const steelWeight =
-      concreteVolume * 7850 * (steelPct / 100);
+    /* Steel Estimate */
+
+    const steelWeight = concreteVolume * steelPct * 10;
 
     setResult({
       concrete: concreteVolume.toFixed(3),
@@ -85,50 +105,72 @@ export default function RCCSlabCalculator() {
         border: "1px solid var(--border)",
       }}
     >
+
       {/* ================= HEADER ================= */}
+
       <header>
         <h1 className="text-2xl font-bold mb-1">
           RCC Slab Calculator
         </h1>
+
         <p className="text-sm leading-relaxed">
           Use this RCC Slab Calculator to estimate concrete volume,
-          cement, sand, aggregate, and steel required for slab
-          construction.
+          cement bags, sand, aggregate, and steel required for slab construction.
         </p>
       </header>
 
       {/* ================= FORM ================= */}
+
       <form onSubmit={calculateRCCSlab} className="space-y-4">
+
         <AmountInput
           label="Slab Length (meters)"
           value={length}
-          onChange={setLength}
+          onChange={(v) => {
+            setLength(v);
+            setError("");
+          }}
           placeholder="5"
+          prefix=""
         />
 
         <AmountInput
           label="Slab Width (meters)"
           value={width}
-          onChange={setWidth}
+          onChange={(v) => {
+            setWidth(v);
+            setError("");
+          }}
           placeholder="4"
+          prefix=""
         />
 
         <AmountInput
           label="Slab Thickness (mm)"
           value={thickness}
-          onChange={setThickness}
+          onChange={(v) => {
+            setThickness(v);
+            setError("");
+          }}
           placeholder="125"
+          prefix=""
         />
 
         <PercentageInput
           label="Steel Percentage (%)"
           value={steelPercent}
-          onChange={setSteelPercent}
+          onChange={(v) => {
+            setSteelPercent(v);
+            setError("");
+          }}
           placeholder="1"
+          prefix=""
         />
 
         {error && (
-          <p className="text-sm text-red-500">{error}</p>
+          <p className="text-sm text-red-500">
+            {error}
+          </p>
         )}
 
         <button
@@ -142,11 +184,17 @@ export default function RCCSlabCalculator() {
           <Calculator size={18} />
           Calculate RCC Slab
         </button>
+
       </form>
 
       {/* ================= RESULT ================= */}
+
       {result && (
-        <div className="grid md:grid-cols-2 gap-4" aria-live="polite">
+        <div
+          className="grid md:grid-cols-2 lg:grid-cols-3 gap-4"
+          aria-live="polite"
+        >
+
           <ResultCard
             variant="neutral"
             icon={<BarChart size={20} />}
@@ -181,52 +229,14 @@ export default function RCCSlabCalculator() {
             label="Steel Required"
             value={`${result.steel} kg`}
           />
+
         </div>
       )}
 
-      {/* ================= SEO BLOG CONTENT ================= */}
-      <article className="space-y-4 text-sm leading-relaxed">
-        <h2 className="font-semibold text-base">
-          How to Calculate RCC Slab Quantity
-        </h2>
+      {/* ================= ARTICLE ================= */}
 
-        <p>
-          RCC slab calculation is essential for estimating material
-          requirements before slab casting. It includes concrete,
-          cement, sand, aggregate, and steel reinforcement.
-        </p>
+      <RCCSlabCalculatorArticle />
 
-        <h3 className="font-semibold">
-          RCC Slab Calculation Formula
-        </h3>
-
-        <p
-          className="font-mono text-xs p-3 rounded"
-          style={{ backgroundColor: "var(--surface-2)" }}
-        >
-          Concrete Volume = Length × Width × Thickness  
-          Dry Volume = Concrete Volume × 1.54  
-          Cement / Sand / Aggregate = Ratio ÷ Total Ratio × Dry Volume  
-          Steel Weight ≈ Concrete Volume × 7850 × Steel %
-        </p>
-
-        <ul className="list-disc pl-5">
-          <li>Common slab thickness: 100–150 mm</li>
-          <li>Steel percentage usually ranges from 0.8% to 1.5%</li>
-          <li>M20 concrete mix is commonly used for slabs</li>
-        </ul>
-
-        <p>
-          This RCC slab calculator provides a quick and reliable
-          estimate for residential and commercial slab construction.
-        </p>
-      </article>
-
-      {/* ================= DISCLAIMER ================= */}
-      <aside className="text-xs text-muted">
-        ⚠️ This calculator provides an estimate only. Actual quantities
-        may vary based on structural design and site conditions.
-      </aside>
     </section>
   );
 }

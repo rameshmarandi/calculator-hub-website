@@ -4,8 +4,8 @@ import { useState } from "react";
 import { Calculator, BarChart } from "lucide-react";
 
 import { AmountInput } from "../../inputs/AmountInput";
-import { PercentageInput } from "../../inputs/PercentageInput";
 import { ResultCard } from "../../ResultCard";
+import PlasterCalculatorArticle from "../../content/construction/PlasterCalculatorArticle";
 
 export default function PlasterCalculator() {
   const [length, setLength] = useState("");
@@ -18,23 +18,37 @@ export default function PlasterCalculator() {
 
   /* ---------------- VALIDATION ---------------- */
   function validate() {
-    if (!length || Number(length) <= 0) {
-      setError("Please enter valid wall length.");
+    const l = Number(length);
+    const h = Number(height);
+    const t = Number(thickness);
+
+    if (!l || l <= 0) {
+      setError("Please enter a valid wall length.");
       return false;
     }
 
-    if (!height || Number(height) <= 0) {
-      setError("Please enter valid wall height.");
+    if (!h || h <= 0) {
+      setError("Please enter a valid wall height.");
       return false;
     }
 
-    if (!thickness || Number(thickness) <= 0) {
-      setError("Please enter valid plaster thickness.");
+    if (!t || t <= 0) {
+      setError("Please enter a valid plaster thickness.");
       return false;
     }
 
-    if (!mixRatio.includes(":")) {
-      setError("Please enter a valid mix ratio (e.g. 1:6).");
+    const parts = mixRatio.split(":");
+
+    if (parts.length !== 2) {
+      setError("Mix ratio must be in format like 1:6");
+      return false;
+    }
+
+    const cement = Number(parts[0]);
+    const sand = Number(parts[1]);
+
+    if (!cement || !sand) {
+      setError("Invalid mix ratio values.");
       return false;
     }
 
@@ -49,24 +63,30 @@ export default function PlasterCalculator() {
 
     const l = Number(length);
     const h = Number(height);
-    const t = Number(thickness) / 1000; // mm → m
-
-    const area = l * h;
-    const wetVolume = area * t;
-    const dryVolume = wetVolume * 1.33;
+    const t = Number(thickness) / 1000;
 
     const [cementPart, sandPart] = mixRatio.split(":").map(Number);
+
+    const wallArea = l * h;
+
+    const wetVolume = wallArea * t;
+
+    const dryVolumeFactor = 1.33;
+    const dryVolume = wetVolume * dryVolumeFactor;
 
     const totalParts = cementPart + sandPart;
 
     const cementVolume = (cementPart / totalParts) * dryVolume;
     const sandVolume = (sandPart / totalParts) * dryVolume;
 
-    const cementBags = cementVolume / 0.035;
-    const sandBrass = sandVolume / 2.83;
+    const cementBagVolume = 0.035;
+    const cementBags = cementVolume / cementBagVolume;
+
+    const cubicMeterToBrass = 2.83;
+    const sandBrass = sandVolume / cubicMeterToBrass;
 
     setResult({
-      area: area.toFixed(2),
+      area: wallArea.toFixed(2),
       cement: Math.ceil(cementBags),
       sand: sandBrass.toFixed(2),
     });
@@ -78,7 +98,8 @@ export default function PlasterCalculator() {
       style={{
         backgroundColor: "var(--surface)",
         border: "1px solid var(--border)",
-      }}>
+      }}
+    >
       {/* ================= HEADER ================= */}
       <header>
         <h1 className="text-2xl font-bold mb-1">Plaster Calculator</h1>
@@ -95,6 +116,7 @@ export default function PlasterCalculator() {
           value={length}
           onChange={setLength}
           placeholder="5"
+          prefix=""
         />
 
         <AmountInput
@@ -102,6 +124,7 @@ export default function PlasterCalculator() {
           value={height}
           onChange={setHeight}
           placeholder="3"
+          prefix=""
         />
 
         <AmountInput
@@ -109,14 +132,22 @@ export default function PlasterCalculator() {
           value={thickness}
           onChange={setThickness}
           placeholder="12"
+          prefix=""
         />
 
-        <PercentageInput
-          label="Plaster Mix Ratio (Cement : Sand)"
-          value={mixRatio}
-          onChange={setMixRatio}
-          placeholder="1:6"
-        />
+        {/* Mix Ratio Input */}
+        <div className="space-y-1">
+          <label className="text-sm font-medium">
+            Plaster Mix Ratio (Cement : Sand)
+          </label>
+          <input
+            type="text"
+            value={mixRatio}
+            onChange={(e) => setMixRatio(e.target.value)}
+            placeholder="1:6"
+            className="w-full border rounded-md px-3 py-2 text-sm"
+          />
+        </div>
 
         {error && <p className="text-sm text-red-500">{error}</p>}
 
@@ -126,7 +157,8 @@ export default function PlasterCalculator() {
           style={{
             backgroundColor: "var(--primary)",
             color: "#fff",
-          }}>
+          }}
+        >
           <Calculator size={18} />
           Calculate Plaster Quantity
         </button>
@@ -158,54 +190,8 @@ export default function PlasterCalculator() {
         </div>
       )}
 
-      {/* ================= SEO BLOG CONTENT ================= */}
-      <article className="space-y-4 text-sm leading-relaxed">
-        <h2 className="font-semibold text-base">
-          How to Calculate Plaster Quantity
-        </h2>
-
-        <p>
-          Plaster quantity calculation helps estimate the amount of cement and
-          sand required for wall plastering. Accurate calculation avoids
-          material wastage and controls cost.
-        </p>
-
-        <h3 className="font-semibold">Plaster Calculation Formula</h3>
-
-        <p
-          className="font-mono text-xs p-3 rounded"
-          style={{ backgroundColor: "var(--surface-2)" }}>
-          Plaster Area = Length × Height Wet Volume = Area × Thickness Dry
-          Volume = Wet Volume × 1.33 Cement / Sand = Ratio ÷ Total Ratio × Dry
-          Volume
-        </p>
-
-        <ul className="list-disc pl-5">
-          <li>Common plaster thickness: 12 mm</li>
-          <li>Common plaster ratio: 1:6 (cement:sand)</li>
-          <li>Dry volume factor for plaster: 1.33</li>
-        </ul>
-
-        <h3 className="font-semibold">Why Use a Plaster Calculator?</h3>
-
-        <ul className="list-disc pl-5">
-          <li>Accurate plaster material estimation</li>
-          <li>Better cost planning</li>
-          <li>Reduces construction wastage</li>
-          <li>Useful for homes & commercial buildings</li>
-        </ul>
-
-        <p>
-          This plaster calculator provides a quick and reliable estimate for
-          internal and external wall plastering.
-        </p>
-      </article>
-
-      {/* ================= DISCLAIMER ================= */}
-      <aside className="text-xs text-muted">
-        ⚠️ This calculator provides an estimate only. Actual plaster requirement
-        may vary based on surface condition and workmanship.
-      </aside>
+      {/* ================= ARTICLE ================= */}
+      <PlasterCalculatorArticle />
     </section>
   );
 }
