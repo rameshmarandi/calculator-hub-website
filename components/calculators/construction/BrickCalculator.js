@@ -4,8 +4,8 @@ import { useState } from "react";
 import { Calculator, BarChart } from "lucide-react";
 
 import { AmountInput } from "../../inputs/AmountInput";
-import { PercentageInput } from "../../inputs/PercentageInput";
 import { ResultCard } from "../../ResultCard";
+import BrickCalculatorArticle from "../../content/construction/Brick CalculatorArticle";
 
 export default function BrickCalculator() {
   const [length, setLength] = useState("");
@@ -17,13 +17,21 @@ export default function BrickCalculator() {
 
   /* ---------------- VALIDATION ---------------- */
   function validate() {
-    if (!length || Number(length) <= 0) {
+    const l = Number(length);
+    const h = Number(height);
+
+    if (!l || l <= 0) {
       setError("Please enter valid wall length.");
       return false;
     }
 
-    if (!height || Number(height) <= 0) {
+    if (!h || h <= 0) {
       setError("Please enter valid wall height.");
+      return false;
+    }
+
+    if (l > 1000 || h > 50) {
+      setError("Wall dimensions seem unusually large.");
       return false;
     }
 
@@ -39,21 +47,46 @@ export default function BrickCalculator() {
     const wallLength = Number(length);
     const wallHeight = Number(height);
 
-    // Standard Indian brick size with mortar
-    // 1 sq.m ≈ 500 bricks (for 230mm wall thickness)
-    const bricksPerSqMeter =
-      brickType === "standard" ? 500 : 450;
+    /* ----------- WALL THICKNESS ----------- */
+    const wallThickness = 0.23; // 230mm standard brick wall
 
-    const wallArea = wallLength * wallHeight;
-    const totalBricks = wallArea * bricksPerSqMeter;
+    /* ----------- BRICK SIZE ----------- */
+    let brickLength = 0.19;
+    let brickWidth = 0.09;
+    let brickHeight = 0.09;
 
-    // Mortar approx 25% of brickwork volume
-    const mortarVolume = wallArea * 0.3;
+    if (brickType === "modular") {
+      brickLength = 0.2;
+      brickWidth = 0.1;
+      brickHeight = 0.1;
+    }
+
+    /* ----------- MORTAR JOINT ----------- */
+    const mortar = 0.01; // 10mm
+
+    /* ----------- WALL VOLUME ----------- */
+    const wallVolume = wallLength * wallHeight * wallThickness;
+
+    /* ----------- BRICK VOLUME WITH MORTAR ----------- */
+    const brickVolume =
+      (brickLength + mortar) * (brickWidth + mortar) * (brickHeight + mortar);
+
+    /* ----------- BRICK COUNT ----------- */
+    let bricks = wallVolume / brickVolume;
+
+    /* ----------- WASTAGE ----------- */
+    bricks = bricks * 1.05;
+
+    /* ----------- ACTUAL BRICK VOLUME ----------- */
+    const brickActualVolume = brickLength * brickWidth * brickHeight;
+
+    /* ----------- MORTAR VOLUME ----------- */
+    const mortarVolume = wallVolume - bricks * brickActualVolume;
 
     setResult({
-      area: wallArea.toFixed(2),
-      bricks: Math.ceil(totalBricks),
-      mortar: mortarVolume.toFixed(2),
+      area: (wallLength * wallHeight).toFixed(2),
+      bricks: Math.ceil(bricks),
+      mortar: mortarVolume.toFixed(3),
     });
   }
 
@@ -67,12 +100,10 @@ export default function BrickCalculator() {
     >
       {/* ================= HEADER ================= */}
       <header>
-        <h1 className="text-2xl font-bold mb-1">
-          Brick Calculator
-        </h1>
+        <h1 className="text-2xl font-bold mb-1">Brick Calculator</h1>
         <p className="text-sm leading-relaxed">
-          Use this Brick Calculator to estimate the number of bricks
-          and mortar required for wall construction.
+          Estimate the number of bricks and mortar required for wall
+          construction.
         </p>
       </header>
 
@@ -92,16 +123,21 @@ export default function BrickCalculator() {
           placeholder="3"
         />
 
-        <PercentageInput
-          label="Brick Type"
-          value={brickType}
-          onChange={setBrickType}
-          placeholder="standard"
-        />
+        {/* Brick Type */}
+        <div className="space-y-1">
+          <label className="text-sm font-medium">Brick Type</label>
 
-        {error && (
-          <p className="text-sm text-red-500">{error}</p>
-        )}
+          <select
+            value={brickType}
+            onChange={(e) => setBrickType(e.target.value)}
+            className="w-full border rounded-md px-3 py-2"
+          >
+            <option value="standard">Standard Brick</option>
+            <option value="modular">Modular Brick</option>
+          </select>
+        </div>
+
+        {error && <p className="text-sm text-red-500">{error}</p>}
 
         <button
           type="submit"
@@ -142,60 +178,7 @@ export default function BrickCalculator() {
         </div>
       )}
 
-      {/* ================= SEO BLOG CONTENT ================= */}
-      <article className="space-y-4 text-sm leading-relaxed">
-        <h2 className="font-semibold text-base">
-          How to Calculate Number of Bricks
-        </h2>
-
-        <p>
-          Brick calculation is essential before starting wall
-          construction to estimate material cost and avoid shortages.
-          The number of bricks depends on wall area, brick size, and
-          mortar thickness.
-        </p>
-
-        <h3 className="font-semibold">
-          Brick Calculation Formula
-        </h3>
-
-        <p
-          className="font-mono text-xs p-3 rounded"
-          style={{ backgroundColor: "var(--surface-2)" }}
-        >
-          Wall Area = Length × Height  
-          Total Bricks = Wall Area × Bricks per m²  
-          Mortar Volume ≈ 25–30% of brickwork volume
-        </p>
-
-        <ul className="list-disc pl-5">
-          <li>Standard brick size: 190 × 90 × 90 mm</li>
-          <li>Approx. 500 bricks per m² (230mm wall)</li>
-          <li>Mortar ratio usually 1:6 (cement:sand)</li>
-        </ul>
-
-        <h3 className="font-semibold">
-          Why Use a Brick Calculator?
-        </h3>
-
-        <ul className="list-disc pl-5">
-          <li>Accurate estimation of bricks</li>
-          <li>Better construction cost planning</li>
-          <li>Reduces material wastage</li>
-          <li>Useful for contractors & homeowners</li>
-        </ul>
-
-        <p>
-          This brick calculator provides a quick and reliable estimate
-          for residential and commercial construction projects.
-        </p>
-      </article>
-
-      {/* ================= DISCLAIMER ================= */}
-      <aside className="text-xs text-muted">
-        ⚠️ This calculator provides an estimate only. Actual brick
-        requirement may vary based on workmanship and mortar thickness.
-      </aside>
+      <BrickCalculatorArticle />
     </section>
   );
 }

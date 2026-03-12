@@ -6,6 +6,7 @@ import { Calculator, BarChart } from "lucide-react";
 import { AmountInput } from "../../inputs/AmountInput";
 import { PercentageInput } from "../../inputs/PercentageInput";
 import { ResultCard } from "../../ResultCard";
+import ConcreteCalculatorArticle from "../../content/construction/ConcreteCalculatorArticle";
 
 export default function ConcreteCalculator() {
   const [length, setLength] = useState("");
@@ -103,6 +104,7 @@ export default function ConcreteCalculator() {
           value={length}
           onChange={setLength}
           placeholder="5"
+          prefix={""}
         />
 
         <AmountInput
@@ -110,6 +112,7 @@ export default function ConcreteCalculator() {
           value={width}
           onChange={setWidth}
           placeholder="4"
+           prefix={""}
         />
 
         <AmountInput
@@ -117,6 +120,7 @@ export default function ConcreteCalculator() {
           value={thickness}
           onChange={setThickness}
           placeholder="100"
+           prefix={""}
         />
 
         <PercentageInput
@@ -176,50 +180,7 @@ export default function ConcreteCalculator() {
         </div>
       )}
 
-      {/* ================= SEO BLOG CONTENT ================= */}
-      <article className="space-y-4 text-sm leading-relaxed">
-        <h2 className="font-semibold text-base">
-          How to Calculate Concrete Quantity
-        </h2>
-
-        <p>
-          Concrete quantity calculation is essential for construction
-          projects such as slabs, beams, columns, and footings. It helps
-          estimate material requirements accurately and control costs.
-        </p>
-
-        <h3 className="font-semibold">
-          Concrete Calculation Formula
-        </h3>
-
-        <p
-          className="font-mono text-xs p-3 rounded"
-          style={{ backgroundColor: "var(--surface-2)" }}
-        >
-          Wet Volume = Length × Width × Thickness  
-          Dry Volume = Wet Volume × 1.54  
-          Cement / Sand / Aggregate = Ratio ÷ Total Ratio × Dry Volume
-        </p>
-
-        <ul className="list-disc pl-5">
-          <li>1 cement bag = 50 kg = 0.035 m³</li>
-          <li>1 brass = 2.83 cubic meters</li>
-          <li>Dry volume factor = 1.54</li>
-          <li>Common mix ratios: 1:1.5:3, 1:2:4</li>
-        </ul>
-
-        <p>
-          This concrete calculator gives a quick and reliable estimate
-          for most residential and commercial construction works.
-        </p>
-      </article>
-
-      {/* ================= DISCLAIMER ================= */}
-      <aside className="text-xs text-muted">
-        ⚠️ This calculator provides an estimate only. Actual material
-        quantity may vary based on workmanship, compaction, and site
-        conditions.
-      </aside>
+  <ConcreteCalculatorArticle />
     </section>
   );
 }

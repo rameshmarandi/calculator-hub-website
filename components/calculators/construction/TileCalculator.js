@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 
 import CalculatorLayout from "@/components/core/CalculatorLayout";
 import InputsGrid from "@/components/core/InputsGrid";
@@ -28,28 +28,31 @@ export default function TileCalculator() {
     values.tileLength &&
     values.tileWidth;
 
-  const result = useMemo(() => {
-    if (!isComplete) return null;
-
+  useEffect(() => {
     const tileL = toNumber(values.tileLength);
     const tileW = toNumber(values.tileWidth);
     const waste = toNumber(values.wastage);
 
-    // friendly warnings
-    if (tileL < 100 || tileW < 100) {
+    if (tileL && tileL < 100) {
       setWarning("Tile size looks too small. Minimum recommended is 100 mm.");
+    } else if (tileW && tileW < 100) {
+      setWarning("Tile width looks too small. Minimum recommended is 100 mm.");
     } else if (waste > 30) {
       setWarning("Wastage above 30% is unrealistic. It has been limited.");
     } else {
       setWarning("");
     }
+  }, [values]);
+
+  const result = useMemo(() => {
+    if (!isComplete) return null;
 
     return calculateTiles({
       floorLength: toNumber(values.floorLength),
       floorWidth: toNumber(values.floorWidth),
-      tileLength: tileL,
-      tileWidth: tileW,
-      wastage: waste,
+      tileLength: toNumber(values.tileLength),
+      tileWidth: toNumber(values.tileWidth),
+      wastage: toNumber(values.wastage),
     });
   }, [values, isComplete]);
 
@@ -59,12 +62,14 @@ export default function TileCalculator() {
       label: "Floor Length (meters)",
       type: "amount",
       placeholder: "5",
+      prefix: "",
     },
     {
       key: "floorWidth",
       label: "Floor Width (meters)",
       type: "amount",
       placeholder: "4",
+      prefix: "",
     },
     {
       key: "tileLength",
@@ -72,19 +77,22 @@ export default function TileCalculator() {
       type: "amount",
       placeholder: "600",
       helper: "Common: 300–800 mm",
+      prefix: "",
     },
     {
       key: "tileWidth",
       label: "Tile Width (mm)",
       type: "amount",
       placeholder: "600",
+      prefix: "",
     },
     {
       key: "wastage",
       label: "Wastage (%)",
       type: "amount",
       placeholder: "10",
-      helper: "Recommended: 5–10%",
+      helper: "Recommended: 5–15%",
+      prefix: "",
     },
   ];
 
@@ -101,17 +109,14 @@ export default function TileCalculator() {
     >
       <InputsGrid inputs={inputs} values={values} setValues={setValues} />
 
-      {warning && (
-        <p className="text-sm text-yellow-600">{warning}</p>
-      )}
+      {warning && <p className="text-sm text-yellow-600">{warning}</p>}
 
       {result && (
         <>
           <ResultHero
             label="Tiles Required"
-            value={`${result.tiles} tiles`}
+            value={result?.tiles ? `${result.tiles} ` : "-"}
           />
-
           <StatsGrid
             items={[
               {
@@ -130,7 +135,8 @@ export default function TileCalculator() {
       )}
 
       <ExplanationText text="Floor area divided by tile area plus wastage gives total tiles required." />
-      <TileCalculatorArticle/>
+
+      <TileCalculatorArticle />
     </CalculatorLayout>
   );
 }

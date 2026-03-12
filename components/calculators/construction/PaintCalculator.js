@@ -4,8 +4,8 @@ import { useState } from "react";
 import { Calculator, BarChart } from "lucide-react";
 
 import { AmountInput } from "../../inputs/AmountInput";
-import { PercentageInput } from "../../inputs/PercentageInput";
 import { ResultCard } from "../../ResultCard";
+import PaintCalculatorArticle from "../../content/construction/PaintCalculatorArticle";
 
 export default function PaintCalculator() {
   const [length, setLength] = useState("");
@@ -59,11 +59,16 @@ export default function PaintCalculator() {
     const c = Number(coats);
     const cover = Number(coverage);
 
-    // Wall area = perimeter × height
+    // Wall Area
     const wallArea = 2 * (l + w) * h;
+
+    // Total paintable area (including coats)
     const totalArea = wallArea * c;
 
-    const paintLiters = totalArea / cover;
+    // Add 10% wastage factor
+    const wastageFactor = 1.1;
+
+    const paintLiters = (totalArea / cover) * wastageFactor;
 
     setResult({
       wallArea: wallArea.toFixed(2),
@@ -83,11 +88,12 @@ export default function PaintCalculator() {
       {/* ================= HEADER ================= */}
       <header>
         <h1 className="text-2xl font-bold mb-1">
-          Paint Calculator
+          Paint Calculator – Estimate Paint Quantity
         </h1>
+
         <p className="text-sm leading-relaxed">
-          Use this Paint Calculator to estimate how much paint you need
-          for walls based on room size, number of coats, and coverage.
+          Use this Paint Calculator to estimate how much paint you need for
+          walls based on room size, number of coats, and paint coverage.
         </p>
       </header>
 
@@ -98,6 +104,7 @@ export default function PaintCalculator() {
           value={length}
           onChange={setLength}
           placeholder="5"
+          prefix=""
         />
 
         <AmountInput
@@ -105,6 +112,7 @@ export default function PaintCalculator() {
           value={width}
           onChange={setWidth}
           placeholder="4"
+          prefix=""
         />
 
         <AmountInput
@@ -112,25 +120,26 @@ export default function PaintCalculator() {
           value={height}
           onChange={setHeight}
           placeholder="3"
+          prefix=""
         />
 
-        <PercentageInput
+        <AmountInput
           label="Number of Coats"
           value={coats}
           onChange={setCoats}
           placeholder="2"
+          prefix=""
         />
 
-        <PercentageInput
+        <AmountInput
           label="Paint Coverage (sqm per liter)"
           value={coverage}
           onChange={setCoverage}
           placeholder="10"
+          prefix=""
         />
 
-        {error && (
-          <p className="text-sm text-red-500">{error}</p>
-        )}
+        {error && <p className="text-sm text-red-500">{error}</p>}
 
         <button
           type="submit"
@@ -147,83 +156,38 @@ export default function PaintCalculator() {
 
       {/* ================= RESULT ================= */}
       {result && (
-        <div className="grid md:grid-cols-3 gap-4" aria-live="polite">
-          <ResultCard
-            variant="neutral"
-            icon={<BarChart size={20} />}
-            label="Wall Area"
-            value={`${result.wallArea} m²`}
-          />
+        <>
+          <div className="grid md:grid-cols-3 gap-4" aria-live="polite">
+            <ResultCard
+              variant="neutral"
+              icon={<BarChart size={20} />}
+              label="Wall Area"
+              value={`${result.wallArea} m²`}
+            />
 
-          <ResultCard
-            variant="neutral"
-            icon={<BarChart size={20} />}
-            label="Total Paint Area"
-            value={`${result.totalArea} m²`}
-          />
+            <ResultCard
+              variant="neutral"
+              icon={<BarChart size={20} />}
+              label="Total Paint Area"
+              value={`${result.totalArea} m²`}
+            />
 
-          <ResultCard
-            variant="primary"
-            icon={<BarChart size={20} />}
-            label="Paint Required"
-            value={`${result.paint} liters`}
-          />
-        </div>
+            <ResultCard
+              variant="primary"
+              icon={<BarChart size={20} />}
+              label="Paint Required"
+              value={`${result.paint} liters`}
+            />
+          </div>
+
+          <p className="text-xs opacity-70">
+            Note: Paint estimate includes a 10% buffer for wastage and touch-ups.
+          </p>
+        </>
       )}
 
-      {/* ================= SEO BLOG CONTENT ================= */}
-      <article className="space-y-4 text-sm leading-relaxed">
-        <h2 className="font-semibold text-base">
-          How to Calculate Paint Quantity
-        </h2>
-
-        <p>
-          Paint quantity calculation helps determine how much paint is
-          required before starting interior or exterior painting work.
-          It prevents excess purchase and avoids paint shortage.
-        </p>
-
-        <h3 className="font-semibold">
-          Paint Calculation Formula
-        </h3>
-
-        <p
-          className="font-mono text-xs p-3 rounded"
-          style={{ backgroundColor: "var(--surface-2)" }}
-        >
-          Wall Area = 2 × (Length + Width) × Height  
-          Total Area = Wall Area × Number of Coats  
-          Paint Required (liters) = Total Area ÷ Coverage
-        </p>
-
-        <ul className="list-disc pl-5">
-          <li>Average paint coverage: 8–12 m² per liter</li>
-          <li>2 coats are recommended for best finish</li>
-          <li>Coverage varies by paint brand & surface</li>
-        </ul>
-
-        <h3 className="font-semibold">
-          Why Use a Paint Calculator?
-        </h3>
-
-        <ul className="list-disc pl-5">
-          <li>Accurate paint estimation</li>
-          <li>Better budget planning</li>
-          <li>Reduces paint wastage</li>
-          <li>Ideal for home & commercial projects</li>
-        </ul>
-
-        <p>
-          This paint calculator provides a quick and reliable estimate
-          for most residential and commercial painting works.
-        </p>
-      </article>
-
-      {/* ================= DISCLAIMER ================= */}
-      <aside className="text-xs text-muted">
-        ⚠️ This calculator provides an estimate only. Actual paint
-        requirement may vary based on surface texture and paint brand.
-      </aside>
+      {/* ================= ARTICLE CONTENT ================= */}
+      <PaintCalculatorArticle />
     </section>
   );
 }
