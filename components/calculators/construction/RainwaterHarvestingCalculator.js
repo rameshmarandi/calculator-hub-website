@@ -6,6 +6,7 @@ import { Calculator, BarChart } from "lucide-react";
 import { AmountInput } from "../../inputs/AmountInput";
 import { PercentageInput } from "../../inputs/PercentageInput";
 import { ResultCard } from "../../ResultCard";
+import RainwaterHarvestingCalculatorArticle from "../../content/construction/RainwaterHarvestingCalculatorArticle";
 
 export default function RainwaterHarvestingCalculator() {
   const [roofArea, setRoofArea] = useState("");
@@ -56,9 +57,11 @@ export default function RainwaterHarvestingCalculator() {
     const volumeM3 = area * rainM * coeff;
     const liters = volumeM3 * 1000;
 
+    const formatter = new Intl.NumberFormat("en-IN");
+
     setResult({
-      volume: volumeM3.toFixed(2),
-      liters: liters.toFixed(0),
+      volume: formatter.format(volumeM3.toFixed(2)),
+      liters: formatter.format(Math.round(liters)),
     });
   }
 
@@ -68,7 +71,8 @@ export default function RainwaterHarvestingCalculator() {
       style={{
         backgroundColor: "var(--surface)",
         border: "1px solid var(--border)",
-      }}>
+      }}
+    >
       {/* ================= HEADER ================= */}
       <header>
         <h1 className="text-2xl font-bold mb-1">
@@ -82,27 +86,29 @@ export default function RainwaterHarvestingCalculator() {
 
       {/* ================= FORM ================= */}
       <form onSubmit={calculateRainwater} className="space-y-4">
-        <PercentageInput
+        <AmountInput
           label="Roof Area (square meters)"
           value={roofArea}
           onChange={setRoofArea}
           placeholder="100"
+          prefix=""
         />
 
-        <PercentageInput
+        <AmountInput
           label="Annual Rainfall (mm)"
           value={rainfall}
           onChange={setRainfall}
           placeholder="800"
+          prefix=""
         />
 
-        <PercentageInput
-          label="Runoff Coefficient"
+        <AmountInput
+          label="Runoff Coefficient (0 - 1)"
           value={runoffCoefficient}
           onChange={setRunoffCoefficient}
           placeholder="0.8"
+          prefix=""
         />
-
         {error && <p className="text-sm text-red-500">{error}</p>}
 
         <button
@@ -111,7 +117,8 @@ export default function RainwaterHarvestingCalculator() {
           style={{
             backgroundColor: "var(--primary)",
             color: "#fff",
-          }}>
+          }}
+        >
           <Calculator size={18} />
           Calculate Harvested Rainwater
         </button>
@@ -137,55 +144,7 @@ export default function RainwaterHarvestingCalculator() {
       )}
 
       {/* ================= SEO BLOG CONTENT ================= */}
-      <article className="space-y-4 text-sm leading-relaxed">
-        <h2 className="font-semibold text-base">
-          How to Calculate Rainwater Harvesting Potential
-        </h2>
-
-        <p>
-          Rainwater harvesting calculation helps estimate the amount of
-          rainwater that can be collected from rooftops. This helps in planning
-          water storage systems and reducing dependency on groundwater.
-        </p>
-
-        <h3 className="font-semibold">Rainwater Harvesting Formula</h3>
-
-        <p
-          className="font-mono text-xs p-3 rounded"
-          style={{ backgroundColor: "var(--surface-2)" }}>
-          Harvested Water (m³) = Roof Area × Rainfall × Runoff Coefficient
-          Harvested Water (liters) = Volume × 1000
-        </p>
-
-        <ul className="list-disc pl-5">
-          <li>Runoff coefficient varies by roof type</li>
-          <li>Concrete roof: 0.7 – 0.9</li>
-          <li>Metal sheet roof: 0.8 – 0.95</li>
-          <li>Tiled roof: 0.6 – 0.8</li>
-        </ul>
-
-        <h3 className="font-semibold">
-          Why Use a Rainwater Harvesting Calculator?
-        </h3>
-
-        <ul className="list-disc pl-5">
-          <li>Estimate yearly water savings</li>
-          <li>Plan tank and recharge pit size</li>
-          <li>Reduce water bills</li>
-          <li>Promotes sustainable water usage</li>
-        </ul>
-
-        <p>
-          This rainwater harvesting calculator gives a quick and reliable
-          estimate for residential, commercial, and institutional buildings.
-        </p>
-      </article>
-
-      {/* ================= DISCLAIMER ================= */}
-      <aside className="text-xs text-muted">
-        ⚠️ This calculator provides an estimate only. Actual harvested rainwater
-        may vary based on rainfall pattern and system efficiency.
-      </aside>
+      <RainwaterHarvestingCalculatorArticle />
     </section>
   );
 }

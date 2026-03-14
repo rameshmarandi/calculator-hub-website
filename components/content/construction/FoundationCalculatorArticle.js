@@ -5,10 +5,10 @@ export default function FoundationCalculatorArticle() {
     <article className="max-w-4xl mx-auto space-y-12 leading-relaxed text-sm sm:text-base text-[var(--text-main)]">
       {/* 1 Introduction */}
       <section className="space-y-4">
-        <h1 className="text-2xl font-bold">
+        <h2 className="text-2xl font-bold">
           Foundation Calculator – Estimate Concrete and Material Requirements
           for Building Foundations
-        </h1>
+        </h2>
 
         <p>
           Every building begins with a strong and stable foundation. The
@@ -1033,7 +1033,7 @@ export default function FoundationCalculatorArticle() {
 
         <ul className="list-disc pl-6 space-y-2">
           <li>
-            <Link href="/calculators/concrete-calculator">
+            <Link href="/construction/concrete-calculator">
               Concrete Calculator
             </Link>{" "}
             – Estimate the total volume of concrete required for slabs, beams,
@@ -1042,7 +1042,7 @@ export default function FoundationCalculatorArticle() {
           </li>
 
           <li>
-            <Link href="/calculators/rcc-slab-calculator">
+            <Link href="/construction/rcc-slab-calculator">
               RCC Slab Calculator
             </Link>{" "}
             – Calculate the materials required for reinforced concrete slabs,
@@ -1050,7 +1050,7 @@ export default function FoundationCalculatorArticle() {
           </li>
 
           <li>
-            <Link href="/calculators/brick-calculator">Brick Calculator</Link> –
+            <Link href="/construction/brick-calculator">Brick Calculator</Link> –
             Estimate the number of bricks and the quantity of mortar required
             for wall construction based on wall dimensions.
           </li>

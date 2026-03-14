@@ -6,9 +6,9 @@ const BreakEvenCalculatorArticle = () => {
 
    {/* ================= 1 INTRODUCTION ================= */}
 <section className="space-y-6">
-  <h1 className="text-3xl font-bold">
+  <h2 className="text-3xl font-bold">
     Break Even Calculator – Complete Guide to Understanding Your Business Profit Point
-  </h1>
+  </h2>
 
   <p>
     Every business has one important financial milestone that determines whether

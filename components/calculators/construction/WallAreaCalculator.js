@@ -6,6 +6,7 @@ import { Calculator, BarChart } from "lucide-react";
 import { AmountInput } from "../../inputs/AmountInput";
 import { PercentageInput } from "../../inputs/PercentageInput";
 import { ResultCard } from "../../ResultCard";
+import WallAreaCalculatorArticle from "../../content/construction/WallAreaCalculatorArticle";
 
 export default function WallAreaCalculator() {
   const [length, setLength] = useState("");
@@ -15,20 +16,36 @@ export default function WallAreaCalculator() {
   const [result, setResult] = useState(null);
   const [error, setError] = useState("");
 
+  /* ---------------- NUMBER FORMAT ---------------- */
+  function formatNumber(value) {
+    return Number(value).toLocaleString("en-US", {
+      maximumFractionDigits: 2,
+    });
+  }
+
   /* ---------------- VALIDATION ---------------- */
   function validate() {
-    if (!length || Number(length) <= 0) {
+    const l = Number(length);
+    const h = Number(height);
+    const o = Number(openings);
+
+    if (!l || l <= 0) {
       setError("Please enter valid wall length.");
       return false;
     }
 
-    if (!height || Number(height) <= 0) {
+    if (!h || h <= 0) {
       setError("Please enter valid wall height.");
       return false;
     }
 
-    if (Number(openings) < 0) {
+    if (o < 0) {
       setError("Opening area cannot be negative.");
+      return false;
+    }
+
+    if (o > l * h) {
+      setError("Opening area cannot be larger than wall area.");
       return false;
     }
 
@@ -43,14 +60,14 @@ export default function WallAreaCalculator() {
 
     const l = Number(length);
     const h = Number(height);
-    const openingArea = Number(openings);
+    const o = Number(openings);
 
     const grossArea = l * h;
-    const netArea = grossArea - openingArea;
+    const netArea = grossArea - o;
 
     setResult({
-      gross: grossArea.toFixed(2),
-      net: netArea > 0 ? netArea.toFixed(2) : "0.00",
+      gross: formatNumber(grossArea),
+      net: formatNumber(netArea > 0 ? netArea : 0),
     });
   }
 
@@ -60,37 +77,43 @@ export default function WallAreaCalculator() {
       style={{
         backgroundColor: "var(--surface)",
         border: "1px solid var(--border)",
-      }}>
+      }}
+    >
       {/* ================= HEADER ================= */}
       <header>
         <h1 className="text-2xl font-bold mb-1">Wall Area Calculator</h1>
+
         <p className="text-sm leading-relaxed">
-          Use this Wall Area Calculator to calculate the total and net wall area
-          for painting, plastering, or brickwork.
+          Use this Wall Area Calculator to determine the gross and net wall
+          surface area required for painting, plastering, tiling, or brickwork
+          projects.
         </p>
       </header>
 
       {/* ================= FORM ================= */}
       <form onSubmit={calculateWallArea} className="space-y-4">
-        <PercentageInput
+        <AmountInput
           label="Wall Length (meters)"
           value={length}
           onChange={setLength}
           placeholder="5"
+          prefix=""
         />
 
-        <PercentageInput
+        <AmountInput
           label="Wall Height (meters)"
           value={height}
           onChange={setHeight}
           placeholder="3"
+          prefix=""
         />
 
-        <PercentageInput
+        <AmountInput
           label="Door / Window Area (sq.m)"
           value={openings}
           onChange={setOpenings}
           placeholder="2"
+          prefix=""
         />
 
         {error && <p className="text-sm text-red-500">{error}</p>}
@@ -101,7 +124,8 @@ export default function WallAreaCalculator() {
           style={{
             backgroundColor: "var(--primary)",
             color: "#fff",
-          }}>
+          }}
+        >
           <Calculator size={18} />
           Calculate Wall Area
         </button>
@@ -126,51 +150,8 @@ export default function WallAreaCalculator() {
         </div>
       )}
 
-      {/* ================= SEO BLOG CONTENT ================= */}
-      <article className="space-y-4 text-sm leading-relaxed">
-        <h2 className="font-semibold text-base">How to Calculate Wall Area</h2>
-
-        <p>
-          Wall area calculation is essential before starting painting,
-          plastering, wallpaper, or brickwork. It helps determine the exact
-          material quantity required and prevents wastage.
-        </p>
-
-        <h3 className="font-semibold">Wall Area Calculation Formula</h3>
-
-        <p
-          className="font-mono text-xs p-3 rounded"
-          style={{ backgroundColor: "var(--surface-2)" }}>
-          Gross Wall Area = Length × Height Net Wall Area = Gross Area − Door &
-          Window Area
-        </p>
-
-        <ul className="list-disc pl-5">
-          <li>Length and height are measured in meters</li>
-          <li>Opening area includes doors and windows</li>
-          <li>Net wall area is used for material calculation</li>
-        </ul>
-
-        <h3 className="font-semibold">Why Use a Wall Area Calculator?</h3>
-
-        <ul className="list-disc pl-5">
-          <li>Accurate paint & plaster estimation</li>
-          <li>Reduces construction material wastage</li>
-          <li>Supports cost planning</li>
-          <li>Useful for homes and commercial buildings</li>
-        </ul>
-
-        <p>
-          This wall area calculator provides a quick and reliable estimate for
-          most residential and commercial projects.
-        </p>
-      </article>
-
-      {/* ================= DISCLAIMER ================= */}
-      <aside className="text-xs text-muted">
-        ⚠️ This calculator provides an estimate only. Actual wall area may vary
-        based on site measurement accuracy.
-      </aside>
+      {/* ================= SEO CONTENT ================= */}
+      <WallAreaCalculatorArticle />
     </section>
   );
 }

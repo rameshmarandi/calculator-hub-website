@@ -6,10 +6,10 @@ const CreditCardEMIArticle = () => {
       {/* ================= HERO ================= */}
 
       <section className="space-y-6">
-        <h1 className="text-3xl font-bold">
+        <h2 className="text-3xl font-bold">
           Credit Card EMI Calculator – Know Your Monthly EMI and Total Interest
           Cost
-        </h1>
+        </h2>
 
         <p>
           Credit cards make it extremely convenient to purchase expensive

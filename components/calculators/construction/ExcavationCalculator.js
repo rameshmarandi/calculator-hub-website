@@ -3,9 +3,10 @@
 import { useState } from "react";
 import { Calculator, BarChart } from "lucide-react";
 
-import { AmountInput } from "../../inputs/AmountInput";
 import { PercentageInput } from "../../inputs/PercentageInput";
 import { ResultCard } from "../../ResultCard";
+import ExcavationCalculatorArticle from "../../content/construction/ExcavationCalculatorArticle";
+import { AmountInput } from "../../inputs/AmountInput";
 
 export default function ExcavationCalculator() {
   const [length, setLength] = useState("");
@@ -14,6 +15,28 @@ export default function ExcavationCalculator() {
 
   const [result, setResult] = useState(null);
   const [error, setError] = useState("");
+
+  /* ---------------- FORMAT NUMBER ---------------- */
+  function formatNumber(value) {
+    if (!value) return "";
+
+    const num = value.toString().replace(/,/g, "");
+    if (isNaN(num)) return value;
+
+    return Number(num).toLocaleString("en-IN");
+  }
+
+  /* ---------------- INPUT HANDLER ---------------- */
+  function handleInput(setter) {
+    return (value) => {
+      const clean = value.toString().replace(/,/g, "");
+
+      // allow only numbers + decimal
+      if (/^\d*\.?\d*$/.test(clean)) {
+        setter(clean);
+      }
+    };
+  }
 
   /* ---------------- VALIDATION ---------------- */
   function validate() {
@@ -39,21 +62,19 @@ export default function ExcavationCalculator() {
   /* ---------------- CALCULATION ---------------- */
   function calculateExcavation(e) {
     e.preventDefault();
+
     if (!validate()) return;
 
     const l = Number(length);
     const w = Number(width);
     const d = Number(depth);
 
-    // Volume in cubic meters
     const volume = l * w * d;
-
-    // Conversions
     const volumeCFT = volume * 35.3147;
 
     setResult({
-      volume: volume.toFixed(3),
-      cft: volumeCFT.toFixed(2),
+      volume: Number(volume.toFixed(3)).toLocaleString("en-US"),
+      cft: Number(volumeCFT.toFixed(2)).toLocaleString("en-US"),
     });
   }
 
@@ -63,37 +84,43 @@ export default function ExcavationCalculator() {
       style={{
         backgroundColor: "var(--surface)",
         border: "1px solid var(--border)",
-      }}>
+      }}
+    >
       {/* ================= HEADER ================= */}
       <header>
         <h1 className="text-2xl font-bold mb-1">Excavation Calculator</h1>
+
         <p className="text-sm leading-relaxed">
           Use this Excavation Calculator to calculate the quantity of earthwork
-          required for foundation, footing, or trench excavation.
+          required for foundation, footing, trench excavation, or site
+          preparation.
         </p>
       </header>
 
       {/* ================= FORM ================= */}
       <form onSubmit={calculateExcavation} className="space-y-4">
-        <PercentageInput
+        <AmountInput
           label="Excavation Length (meters)"
-          value={length}
-          onChange={setLength}
+          value={formatNumber(length)}
+          onChange={handleInput(setLength)}
           placeholder="5"
+          prefix=""
         />
 
-        <PercentageInput
+        <AmountInput
           label="Excavation Width (meters)"
-          value={width}
-          onChange={setWidth}
+          value={formatNumber(width)}
+          onChange={handleInput(setWidth)}
           placeholder="3"
+          prefix=""
         />
 
-        <PercentageInput
+        <AmountInput
           label="Excavation Depth (meters)"
-          value={depth}
-          onChange={setDepth}
+          value={formatNumber(depth)}
+          onChange={handleInput(setDepth)}
           placeholder="1.5"
+          prefix=""
         />
 
         {error && <p className="text-sm text-red-500">{error}</p>}
@@ -104,7 +131,8 @@ export default function ExcavationCalculator() {
           style={{
             backgroundColor: "var(--primary)",
             color: "#fff",
-          }}>
+          }}
+        >
           <Calculator size={18} />
           Calculate Excavation
         </button>
@@ -123,60 +151,14 @@ export default function ExcavationCalculator() {
           <ResultCard
             variant="primary"
             icon={<BarChart size={20} />}
-            label="Excavation Volume"
+            label="Excavation Volume (Cubic Feet)"
             value={`${result.cft} CFT`}
           />
         </div>
       )}
 
-      {/* ================= SEO BLOG CONTENT ================= */}
-      <article className="space-y-4 text-sm leading-relaxed">
-        <h2 className="font-semibold text-base">
-          How to Calculate Excavation Quantity
-        </h2>
-
-        <p>
-          Excavation calculation is required to estimate the quantity of soil to
-          be removed for foundations, footings, basements, and trenches.
-          Accurate excavation estimation helps control construction cost and
-          planning.
-        </p>
-
-        <h3 className="font-semibold">Excavation Calculation Formula</h3>
-
-        <p
-          className="font-mono text-xs p-3 rounded"
-          style={{ backgroundColor: "var(--surface-2)" }}>
-          Excavation Volume (m³) = Length × Width × Depth Excavation Volume
-          (CFT) = Volume × 35.3147
-        </p>
-
-        <ul className="list-disc pl-5">
-          <li>1 cubic meter = 35.3147 cubic feet</li>
-          <li>Used for foundation & trench excavation</li>
-          <li>Helps estimate earthwork cost</li>
-        </ul>
-
-        <h3 className="font-semibold">Why Use an Excavation Calculator?</h3>
-
-        <ul className="list-disc pl-5">
-          <li>Accurate earthwork estimation</li>
-          <li>Plan excavation machinery & labor</li>
-          <li>Prevents over-excavation</li>
-          <li>Useful for contractors & engineers</li>
-        </ul>
-
-        <p>
-          This excavation calculator provides a quick and reliable estimate for
-          residential and commercial construction projects.
-        </p>
-      </article>
-
-      {/* ================= DISCLAIMER ================= */}
-      <aside className="text-xs text-muted">
-        ⚠️ This calculator provides an estimate only. Actual excavation quantity
-        may vary based on soil condition and site layout.
-      </aside>
+      {/* ================= SEO ARTICLE ================= */}
+      <ExcavationCalculatorArticle />
     </section>
   );
 }

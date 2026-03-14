@@ -5,9 +5,9 @@ const SIPCalculatorArticle = () => {
     <article className="max-w-4xl mx-auto space-y-14 leading-relaxed text-sm sm:text-base text-[var(--text-main)]">
       {/* 1 INTRODUCTION */}
       <section className="space-y-6">
-        <h1 className="text-3xl font-bold">
+        <h2 className="text-3xl font-bold">
           SIP Calculator – Estimate the Future Value of Your Monthly Investments
-        </h1>
+        </h2>
 
         <p>
           A SIP Calculator is a financial planning tool that helps investors

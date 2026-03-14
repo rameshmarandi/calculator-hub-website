@@ -7,10 +7,10 @@ export default function StaircaseCalculatorArticle() {
       {/* 1. INTRODUCTION */}
       {/* ================================================= */}
       <section className="space-y-4">
-        <h1 className="text-2xl font-bold">
+        <h2 className="text-2xl font-bold">
           Staircase Calculator – Complete Planning Guide for Safe and Accurate
           Stair Design
-        </h1>
+        </h2>
 
         <p>
           A staircase is one of the most important structural components in any

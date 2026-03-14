@@ -5,9 +5,9 @@ const LoanEligibilityArticle = () => {
     <article className="max-w-4xl mx-auto space-y-12 leading-relaxed text-sm sm:text-base text-[var(--text-main)]">
       {/* ================= 1 INTRODUCTION ================= */}
       <section className="space-y-6">
-        <h1 className="text-3xl font-bold">
+        <h2 className="text-3xl font-bold">
           Loan Eligibility Calculator – Check How Much Loan You Can Afford
-        </h1>
+        </h2>
 
         <p>
           Before applying for a home loan, personal loan, or any type of credit,

@@ -5,10 +5,10 @@ export default function RCCSlabCalculatorArticle() {
     <article className="max-w-4xl mx-auto space-y-12 leading-relaxed text-sm sm:text-base text-[var(--text-main)]">
       {/* 1 Introduction */}
       <section className="space-y-4">
-        <h1 className="text-2xl font-bold">
+        <h2 className="text-2xl font-bold">
           RCC Slab Calculator – Complete Guide to Estimating Slab Materials and
           Cost
-        </h1>
+        </h2>
 
         <p>
           When constructing a house, apartment, commercial building, or any
@@ -960,7 +960,7 @@ export default function RCCSlabCalculatorArticle() {
 
         <ul className="list-disc pl-6 space-y-2">
           <li>
-            <Link href="/calculators/concrete-calculator">
+            <Link href="/construction/concrete-calculator">
               Concrete Calculator
             </Link>{" "}
             – Estimate the total volume of concrete required for slabs,
@@ -968,24 +968,24 @@ export default function RCCSlabCalculatorArticle() {
           </li>
 
           <li>
-            <Link href="/calculators/brick-calculator">Brick Calculator</Link> –
+            <Link href="/construction/brick-calculator">Brick Calculator</Link> –
             Calculate the number of bricks and mortar required for building
             walls.
           </li>
 
           <li>
-            <Link href="/calculators/tile-calculator">Tile Calculator</Link> –
+            <Link href="/construction/tile-calculator">Tile Calculator</Link> –
             Determine how many tiles are required for flooring or wall tiling
             projects.
           </li>
 
           <li>
-            <Link href="/calculators/paint-calculator">Paint Calculator</Link> –
+            <Link href="/construction/paint-calculator">Paint Calculator</Link> –
             Estimate the amount of paint needed to cover walls and ceilings.
           </li>
 
           <li>
-            <Link href="/calculators/steel-weight-calculator">
+            <Link href="/construction/steel-weight-calculator">
               Steel Weight Calculator
             </Link>{" "}
             – Calculate the weight of reinforcement steel used in construction

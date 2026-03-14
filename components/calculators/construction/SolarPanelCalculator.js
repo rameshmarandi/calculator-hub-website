@@ -4,11 +4,25 @@ import { useState } from "react";
 import { Calculator, BarChart } from "lucide-react";
 
 import { AmountInput } from "../../inputs/AmountInput";
-import { PercentageInput } from "../../inputs/PercentageInput";
 import { ResultCard } from "../../ResultCard";
+import SolarPanelCalculatorArticle from "../../content/construction/SolarPanelCalculatorArticle";
+
+/* ---------- FORMAT HELPERS ---------- */
+
+function formatNumber(value) {
+  if (!value) return "";
+  const num = value.toString().replace(/,/g, "");
+  if (isNaN(num)) return "";
+  return Number(num).toLocaleString("en-IN");
+}
+
+function parseNumber(value) {
+  if (!value) return "";
+  return value.toString().replace(/,/g, "");
+}
 
 export default function SolarPanelCalculator() {
-  const [dailyUnits, setDailyUnits] = useState("");
+  const [monthlyUnits, setMonthlyUnits] = useState("");
   const [sunHours, setSunHours] = useState("5");
   const [panelWatt, setPanelWatt] = useState("550");
 
@@ -16,18 +30,23 @@ export default function SolarPanelCalculator() {
   const [error, setError] = useState("");
 
   /* ---------------- VALIDATION ---------------- */
+
   function validate() {
-    if (!dailyUnits || Number(dailyUnits) <= 0) {
-      setError("Please enter valid daily electricity consumption.");
+    const monthly = Number(parseNumber(monthlyUnits));
+    const hours = Number(parseNumber(sunHours));
+    const watt = Number(parseNumber(panelWatt));
+
+    if (!monthly || monthly <= 0) {
+      setError("Please enter valid monthly electricity consumption.");
       return false;
     }
 
-    if (!sunHours || Number(sunHours) <= 0) {
+    if (!hours || hours <= 0) {
       setError("Please enter valid sun hours.");
       return false;
     }
 
-    if (!panelWatt || Number(panelWatt) <= 0) {
+    if (!watt || watt <= 0) {
       setError("Please enter valid panel wattage.");
       return false;
     }
@@ -37,24 +56,30 @@ export default function SolarPanelCalculator() {
   }
 
   /* ---------------- CALCULATION ---------------- */
+
   function calculateSolar(e) {
     e.preventDefault();
     if (!validate()) return;
 
-    const unitsPerDay = Number(dailyUnits);
-    const hours = Number(sunHours);
-    const watt = Number(panelWatt);
+    const monthly = Number(parseNumber(monthlyUnits));
+    const hours = Number(parseNumber(sunHours));
+    const watt = Number(parseNumber(panelWatt));
 
-    // Required system size (kW)
+    // Convert monthly usage → daily usage
+    const unitsPerDay = monthly / 30;
+
+    // Required system size
     const systemKW = unitsPerDay / hours;
 
-    // Number of panels
+    // Panels required
     const panelsRequired = (systemKW * 1000) / watt;
 
     setResult({
-      units: unitsPerDay.toFixed(1),
-      system: systemKW.toFixed(2),
-      panels: Math.ceil(panelsRequired),
+      monthly: monthly.toLocaleString("en-IN"),
+      system: systemKW.toLocaleString("en-IN", {
+        maximumFractionDigits: 2,
+      }),
+      panels: Math.ceil(panelsRequired).toLocaleString("en-IN"),
     });
   }
 
@@ -64,37 +89,44 @@ export default function SolarPanelCalculator() {
       style={{
         backgroundColor: "var(--surface)",
         border: "1px solid var(--border)",
-      }}>
+      }}
+    >
       {/* ================= HEADER ================= */}
+
       <header>
         <h1 className="text-2xl font-bold mb-1">Solar Panel Calculator</h1>
+
         <p className="text-sm leading-relaxed">
           Use this Solar Panel Calculator to estimate the solar system size and
-          number of panels required based on your electricity usage.
+          number of panels required based on your monthly electricity usage.
         </p>
       </header>
 
       {/* ================= FORM ================= */}
+
       <form onSubmit={calculateSolar} className="space-y-4">
-        <PercentageInput
-          label="Daily Electricity Consumption (Units / kWh)"
-          value={dailyUnits}
-          onChange={setDailyUnits}
-          placeholder="10"
+        <AmountInput
+          label="Monthly Electricity Consumption (Units / kWh)"
+          value={formatNumber(monthlyUnits)}
+          onChange={(val) => setMonthlyUnits(parseNumber(val))}
+          placeholder="300"
+          prefix=""
         />
 
-        <PercentageInput
+        <AmountInput
           label="Average Sunlight Hours (per day)"
-          value={sunHours}
-          onChange={setSunHours}
+          value={formatNumber(sunHours)}
+          onChange={(val) => setSunHours(parseNumber(val))}
           placeholder="5"
+          prefix=""
         />
 
-        <PercentageInput
+        <AmountInput
           label="Solar Panel Wattage (W)"
-          value={panelWatt}
-          onChange={setPanelWatt}
+          value={formatNumber(panelWatt)}
+          onChange={(val) => setPanelWatt(parseNumber(val))}
           placeholder="550"
+          prefix=""
         />
 
         {error && <p className="text-sm text-red-500">{error}</p>}
@@ -105,20 +137,22 @@ export default function SolarPanelCalculator() {
           style={{
             backgroundColor: "var(--primary)",
             color: "#fff",
-          }}>
+          }}
+        >
           <Calculator size={18} />
           Calculate Solar Panels
         </button>
       </form>
 
       {/* ================= RESULT ================= */}
+
       {result && (
         <div className="grid md:grid-cols-3 gap-4" aria-live="polite">
           <ResultCard
             variant="neutral"
             icon={<BarChart size={20} />}
-            label="Daily Consumption"
-            value={`${result.units} units`}
+            label="Monthly Consumption"
+            value={`${result.monthly} units`}
           />
 
           <ResultCard
@@ -137,53 +171,9 @@ export default function SolarPanelCalculator() {
         </div>
       )}
 
-      {/* ================= SEO BLOG CONTENT ================= */}
-      <article className="space-y-4 text-sm leading-relaxed">
-        <h2 className="font-semibold text-base">
-          How to Calculate Solar Panel Requirement
-        </h2>
+      {/* ================= ARTICLE ================= */}
 
-        <p>
-          Solar panel calculation helps determine the right solar system size
-          for your home or business. Choosing the correct system size ensures
-          maximum savings and efficient power generation.
-        </p>
-
-        <h3 className="font-semibold">Solar Panel Calculation Formula</h3>
-
-        <p
-          className="font-mono text-xs p-3 rounded"
-          style={{ backgroundColor: "var(--surface-2)" }}>
-          System Size (kW) = Daily Units ÷ Sunlight Hours Number of Panels =
-          (System Size × 1000) ÷ Panel Wattage
-        </p>
-
-        <ul className="list-disc pl-5">
-          <li>1 unit = 1 kWh</li>
-          <li>Average sunlight in India: 4–6 hours/day</li>
-          <li>Common panel sizes: 450W, 500W, 550W</li>
-        </ul>
-
-        <h3 className="font-semibold">Why Use a Solar Panel Calculator?</h3>
-
-        <ul className="list-disc pl-5">
-          <li>Estimate solar system capacity</li>
-          <li>Plan rooftop space efficiently</li>
-          <li>Reduce electricity bills</li>
-          <li>Helpful for subsidy & net-metering planning</li>
-        </ul>
-
-        <p>
-          This solar panel calculator provides a practical estimate for
-          residential rooftop solar installations.
-        </p>
-      </article>
-
-      {/* ================= DISCLAIMER ================= */}
-      <aside className="text-xs text-muted">
-        ⚠️ This calculator provides an estimate only. Actual solar system size
-        may vary based on location, panel efficiency, and system losses.
-      </aside>
+      <SolarPanelCalculatorArticle />
     </section>
   );
 }

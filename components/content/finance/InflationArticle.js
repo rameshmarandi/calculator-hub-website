@@ -5,9 +5,9 @@ const InflationCalculatorArticle = () => {
     <article className="max-w-4xl mx-auto space-y-12 leading-relaxed text-sm sm:text-base text-[var(--text-main)]">
       {/* ================= HERO ================= */}
       <section className="space-y-6">
-        <h1 className="text-3xl font-bold">
+        <h2 className="text-3xl font-bold">
           Inflation Calculator – Calculate the Future Value of Your Money
-        </h1>
+        </h2>
 
         <p>
           Inflation quietly reduces the value of money every year. While the

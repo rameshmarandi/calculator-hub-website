@@ -5,9 +5,9 @@ export default function BeamLoadCalculatorArticle() {
     <article className="max-w-4xl mx-auto space-y-12 leading-relaxed text-sm sm:text-base text-[var(--text-main)]">
       {/* 1 Introduction */}
       <section className="space-y-4">
-        <h1 className="text-2xl font-bold">
+        <h2 className="text-2xl font-bold">
         Beam Load Calculator – Calculate RCC Beam Self Weight and Structural Load
-        </h1>
+        </h2>
 
         <p>
           In construction and structural engineering, beams are one of the most
@@ -994,7 +994,7 @@ export default function BeamLoadCalculatorArticle() {
 
         <ul className="list-disc pl-6 space-y-2">
           <li>
-            <Link href="/calculators/concrete-calculator">
+            <Link href="/construction/concrete-calculator">
               Concrete Calculator
             </Link>{" "}
             – Estimate the total volume of concrete required for slabs,
@@ -1002,7 +1002,7 @@ export default function BeamLoadCalculatorArticle() {
           </li>
 
           <li>
-            <Link href="/calculators/rcc-slab-calculator">
+            <Link href="/construction/rcc-slab-calculator">
               RCC Slab Calculator
             </Link>{" "}
             – Calculate the quantity of cement, sand, and aggregate needed for
@@ -1010,7 +1010,7 @@ export default function BeamLoadCalculatorArticle() {
           </li>
 
           <li>
-            <Link href="/calculators/steel-weight-calculator">
+            <Link href="/construction/steel-weight-calculator">
               Steel Weight Calculator
             </Link>{" "}
             – Determine the weight of reinforcement steel used in beams,
@@ -1018,7 +1018,7 @@ export default function BeamLoadCalculatorArticle() {
           </li>
 
           <li>
-            <Link href="/calculators/brick-calculator">Brick Calculator</Link> –
+            <Link href="/construction/brick-calculator">Brick Calculator</Link> –
             Estimate the number of bricks and mortar required for wall
             construction.
           </li>

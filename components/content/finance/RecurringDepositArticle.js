@@ -5,10 +5,10 @@ const RecurringDepositArticle = () => {
     <article className="max-w-4xl mx-auto space-y-12 leading-relaxed text-sm sm:text-base text-[var(--text-main)]">
       {/* INTRODUCTION */}
       <section className="space-y-4">
-        <h1 className="text-3xl font-bold">
+        <h2 className="text-3xl font-bold">
           Recurring Deposit Calculator – Estimate RD Maturity Value and Interest
           Earnings
-        </h1>
+        </h2>
 
         <p>
           A Recurring Deposit Calculator is a financial planning tool that helps

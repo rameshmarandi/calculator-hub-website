@@ -2,9 +2,10 @@
 
 import { useState } from "react";
 import { Calculator, BarChart } from "lucide-react";
-
 import { PercentageInput } from "../../inputs/PercentageInput";
+import { AmountInput } from "../../inputs/AmountInput";
 import { ResultCard } from "../../ResultCard";
+import BuiltUpAreaCalculatorArticle from "../../content/construction/BuiltUpAreaCalculatorArticle";
 
 export default function BuiltUpAreaCalculator() {
   const [carpetArea, setCarpetArea] = useState("");
@@ -13,9 +14,20 @@ export default function BuiltUpAreaCalculator() {
   const [result, setResult] = useState(null);
   const [error, setError] = useState("");
 
+  /* ---------------- FORMAT HELPER ---------------- */
+  function parseNumber(value) {
+    return Number(value.toString().replace(/,/g, ""));
+  }
+
+  function formatNumber(value) {
+    return new Intl.NumberFormat("en-IN").format(value);
+  }
+
   /* ---------------- VALIDATION ---------------- */
   function validate() {
-    if (!carpetArea || Number(carpetArea) <= 0) {
+    const carpet = parseNumber(carpetArea);
+
+    if (!carpet || carpet <= 0) {
       setError("Please enter valid carpet area.");
       return false;
     }
@@ -34,16 +46,16 @@ export default function BuiltUpAreaCalculator() {
     e.preventDefault();
     if (!validate()) return;
 
-    const carpet = Number(carpetArea);
+    const carpet = parseNumber(carpetArea);
     const wallPercent = Number(wallPercentage);
 
     const wallArea = (carpet * wallPercent) / 100;
     const builtUpArea = carpet + wallArea;
 
     setResult({
-      carpet: carpet.toFixed(2),
-      wall: wallArea.toFixed(2),
-      builtUp: builtUpArea.toFixed(2),
+      carpet: formatNumber(carpet.toFixed(2)),
+      wall: formatNumber(wallArea.toFixed(2)),
+      builtUp: formatNumber(builtUpArea.toFixed(2)),
     });
   }
 
@@ -53,7 +65,8 @@ export default function BuiltUpAreaCalculator() {
       style={{
         backgroundColor: "var(--surface)",
         border: "1px solid var(--border)",
-      }}>
+      }}
+    >
       {/* ================= HEADER ================= */}
       <header>
         <h1 className="text-2xl font-bold mb-1">Built-Up Area Calculator</h1>
@@ -65,11 +78,12 @@ export default function BuiltUpAreaCalculator() {
 
       {/* ================= FORM ================= */}
       <form onSubmit={calculateBuiltUpArea} className="space-y-4">
-        <PercentageInput
+        <AmountInput
           label="Carpet Area (sq.ft)"
           value={carpetArea}
           onChange={setCarpetArea}
-          placeholder="1000"
+          placeholder="12,000"
+          prefix=""
         />
 
         <PercentageInput
@@ -77,6 +91,7 @@ export default function BuiltUpAreaCalculator() {
           value={wallPercentage}
           onChange={setWallPercentage}
           placeholder="15"
+          // prefix=""
         />
 
         {error && <p className="text-sm text-red-500">{error}</p>}
@@ -87,7 +102,8 @@ export default function BuiltUpAreaCalculator() {
           style={{
             backgroundColor: "var(--primary)",
             color: "#fff",
-          }}>
+          }}
+        >
           <Calculator size={18} />
           Calculate Built-Up Area
         </button>
@@ -119,62 +135,8 @@ export default function BuiltUpAreaCalculator() {
         </div>
       )}
 
-      {/* ================= SEO BLOG CONTENT ================= */}
-      <article className="space-y-4 text-sm leading-relaxed">
-        <h2 className="font-semibold text-base">What is Built-Up Area?</h2>
-
-        <p>
-          Built-up area includes the carpet area plus the thickness of all
-          internal and external walls. It represents the total area covered by
-          the apartment or house structure.
-        </p>
-
-        <h3 className="font-semibold">Built-Up Area Calculation Formula</h3>
-
-        <p
-          className="font-mono text-xs p-3 rounded"
-          style={{ backgroundColor: "var(--surface-2)" }}>
-          Wall Area = Carpet Area × Wall Percentage Built-Up Area = Carpet Area
-          + Wall Area
-        </p>
-
-        <ul className="list-disc pl-5">
-          <li>Typical wall percentage: 10% – 20%</li>
-          <li>Built-up area includes walls only</li>
-          <li>Does not include common areas</li>
-        </ul>
-
-        <h3 className="font-semibold">Built-Up Area vs Carpet Area</h3>
-
-        <ul className="list-disc pl-5">
-          <li>
-            <strong>Carpet Area:</strong> Usable internal space
-          </li>
-          <li>
-            <strong>Built-Up Area:</strong> Carpet area + walls
-          </li>
-        </ul>
-
-        <h3 className="font-semibold">Why Use a Built-Up Area Calculator?</h3>
-
-        <ul className="list-disc pl-5">
-          <li>Understand actual flat size</li>
-          <li>Compare property listings correctly</li>
-          <li>Helpful for buyers & real estate planning</li>
-          <li>Supports cost and valuation calculations</li>
-        </ul>
-
-        <p>
-          This built-up area calculator gives a quick and realistic estimate
-          commonly used in residential real estate.
-        </p>
-      </article>
-
-      {/* ================= DISCLAIMER ================= */}
-      <aside className="text-xs text-muted">
-        ⚠️ This calculator provides an estimate only. Actual built-up area may
-        vary based on design, wall thickness, and local regulations.
-      </aside>
+      {/* ================= SEO ARTICLE ================= */}
+      <BuiltUpAreaCalculatorArticle />
     </section>
   );
 }

@@ -5,9 +5,9 @@ const ROICalculatorArticle = () => {
     <article className="max-w-4xl mx-auto space-y-14 leading-relaxed text-sm sm:text-base text-[var(--text-main)]">
       {/* ================= 1 INTRODUCTION ================= */}
       <section className="space-y-6">
-        <h1 className="text-3xl font-bold">
+        <h2 className="text-3xl font-bold">
           ROI Calculator – Calculate Return on Investment and Profit Instantly
-        </h1>
+        </h2>
 
         <p>
           Every financial decision ultimately comes down to one important

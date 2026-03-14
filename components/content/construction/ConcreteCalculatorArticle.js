@@ -6,9 +6,9 @@ const ConcreteCalculatorArticle = () => {
 
      {/* 1 INTRODUCTION */}
 <section className="space-y-4">
-  <h1 className="text-3xl font-bold">
+  <h2 className="text-3xl font-bold">
     Concrete Calculator – Estimate Concrete Volume and Material Requirements
-  </h1>
+  </h2>
 
   <p>
     Concrete is one of the most important materials used in construction.

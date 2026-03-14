@@ -5,9 +5,9 @@ const SalaryInHandCalculatorArticle = () => {
     <article className="max-w-4xl mx-auto space-y-12 leading-relaxed text-sm sm:text-base text-[var(--text-main)]">
       {/* ================= HERO ================= */}
       <section className="space-y-6">
-        <h1 className="text-3xl font-bold">
+        <h2 className="text-3xl font-bold">
           Salary In Hand Calculator – Calculate Your Real Take Home Salary
-        </h1>
+        </h2>
 
         <p>
           When you receive a job offer, the first number you usually notice is

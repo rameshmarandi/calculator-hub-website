@@ -4,27 +4,42 @@ import { useState } from "react";
 import { Calculator, BarChart } from "lucide-react";
 
 import { AmountInput } from "../../inputs/AmountInput";
-import { PercentageInput } from "../../inputs/PercentageInput";
 import { ResultCard } from "../../ResultCard";
+import ElectricalLoadCalculatorArticle from "../../content/construction/ElectricalLoadCalculatorArticle";
+
+/* ---------- STANDARD APPLIANCE LOADS (WATTS) ---------- */
+const LOAD_CONFIG = {
+  LIGHT: 60,
+  FAN: 75,
+  AC: 1500,
+  FRIDGE: 300,
+};
 
 export default function ElectricalLoadCalculator() {
-  const [lights, setLights] = useState("0");
-  const [fans, setFans] = useState("0");
-  const [ac, setAC] = useState("0");
-  const [refrigerator, setRefrigerator] = useState("0");
-  const [otherLoad, setOtherLoad] = useState("0");
+  const [lights, setLights] = useState("");
+  const [fans, setFans] = useState("");
+  const [ac, setAC] = useState("");
+  const [refrigerator, setRefrigerator] = useState("");
+  const [otherLoad, setOtherLoad] = useState("");
 
   const [result, setResult] = useState(null);
   const [error, setError] = useState("");
 
-  /* ---------------- VALIDATION ---------------- */
+  /* ---------- NUMBER PARSER ---------- */
+  const parseValue = (value) => {
+    if (!value) return 0;
+    const cleaned = value.toString().replace(/,/g, "");
+    return Math.max(0, Number(cleaned) || 0);
+  };
+
+  /* ---------- VALIDATION ---------- */
   function validate() {
     if (
-      Number(lights) < 0 ||
-      Number(fans) < 0 ||
-      Number(ac) < 0 ||
-      Number(refrigerator) < 0 ||
-      Number(otherLoad) < 0
+      parseValue(lights) < 0 ||
+      parseValue(fans) < 0 ||
+      parseValue(ac) < 0 ||
+      parseValue(refrigerator) < 0 ||
+      parseValue(otherLoad) < 0
     ) {
       setError("Values cannot be negative.");
       return false;
@@ -34,19 +49,23 @@ export default function ElectricalLoadCalculator() {
     return true;
   }
 
-  /* ---------------- CALCULATION ---------------- */
+  /* ---------- CALCULATION ---------- */
   function calculateElectricalLoad(e) {
     e.preventDefault();
     if (!validate()) return;
 
-    // Standard wattage assumptions
-    const lightLoad = Number(lights) * 60;
-    const fanLoad = Number(fans) * 75;
-    const acLoad = Number(ac) * 1500;
-    const fridgeLoad = Number(refrigerator) * 300;
-    const extraLoad = Number(otherLoad);
+    const lightLoad = parseValue(lights) * LOAD_CONFIG.LIGHT;
+    const fanLoad = parseValue(fans) * LOAD_CONFIG.FAN;
+    const acLoad = parseValue(ac) * LOAD_CONFIG.AC;
+    const fridgeLoad = parseValue(refrigerator) * LOAD_CONFIG.FRIDGE;
+    const extraLoad = parseValue(otherLoad);
 
-    const totalWatts = lightLoad + fanLoad + acLoad + fridgeLoad + extraLoad;
+    const totalWatts =
+      lightLoad +
+      fanLoad +
+      acLoad +
+      fridgeLoad +
+      extraLoad;
 
     const totalKW = totalWatts / 1000;
 
@@ -62,44 +81,56 @@ export default function ElectricalLoadCalculator() {
       style={{
         backgroundColor: "var(--surface)",
         border: "1px solid var(--border)",
-      }}>
-      {/* ================= HEADER ================= */}
+      }}
+    >
+      {/* ---------- HEADER ---------- */}
       <header>
-        <h1 className="text-2xl font-bold mb-1">Electrical Load Calculator</h1>
+        <h1 className="text-2xl font-bold mb-1">
+          Electrical Load Calculator
+        </h1>
         <p className="text-sm leading-relaxed">
-          Use this Electrical Load Calculator to calculate the total electrical
-          load of your house or building in watts and kW.
+          Use this Electrical Load Calculator to estimate the total
+          electricity demand of your house or building. Enter the
+          number of appliances to calculate the total electrical
+          load in watts and kilowatts.
         </p>
       </header>
 
-      {/* ================= FORM ================= */}
-      <form onSubmit={calculateElectricalLoad} className="space-y-4">
-        <PercentageInput
+      {/* ---------- FORM ---------- */}
+      <form
+        onSubmit={calculateElectricalLoad}
+        className="space-y-4"
+      >
+        <AmountInput
           label="Number of Lights"
           value={lights}
           onChange={setLights}
           placeholder="10"
+          prefix=""
         />
 
-        <PercentageInput
+        <AmountInput
           label="Number of Fans"
           value={fans}
           onChange={setFans}
           placeholder="5"
+          prefix=""
         />
 
-        <PercentageInput
+        <AmountInput
           label="Number of Air Conditioners"
           value={ac}
           onChange={setAC}
           placeholder="1"
+          prefix=""
         />
 
-        <PercentageInput
+        <AmountInput
           label="Number of Refrigerators"
           value={refrigerator}
           onChange={setRefrigerator}
           placeholder="1"
+          prefix=""
         />
 
         <AmountInput
@@ -107,9 +138,14 @@ export default function ElectricalLoadCalculator() {
           value={otherLoad}
           onChange={setOtherLoad}
           placeholder="500"
+          prefix=""
         />
 
-        {error && <p className="text-sm text-red-500">{error}</p>}
+        {error && (
+          <p className="text-sm text-red-500">
+            {error}
+          </p>
+        )}
 
         <button
           type="submit"
@@ -117,81 +153,37 @@ export default function ElectricalLoadCalculator() {
           style={{
             backgroundColor: "var(--primary)",
             color: "#fff",
-          }}>
+          }}
+        >
           <Calculator size={18} />
           Calculate Electrical Load
         </button>
       </form>
 
-      {/* ================= RESULT ================= */}
+      {/* ---------- RESULT ---------- */}
       {result && (
-        <div className="grid md:grid-cols-2 gap-4" aria-live="polite">
+        <div
+          className="grid md:grid-cols-2 gap-4"
+          aria-live="polite"
+        >
           <ResultCard
             variant="neutral"
             icon={<BarChart size={20} />}
-            label="Total Load"
-            value={`${result.watts} Watts`}
+            label="Total Load (Watts)"
+            value={`${result.watts} W`}
           />
 
           <ResultCard
             variant="primary"
             icon={<BarChart size={20} />}
-            label="Total Load"
+            label="Total Load (Kilowatts)"
             value={`${result.kw} kW`}
           />
         </div>
       )}
 
-      {/* ================= SEO BLOG CONTENT ================= */}
-      <article className="space-y-4 text-sm leading-relaxed">
-        <h2 className="font-semibold text-base">
-          How to Calculate Electrical Load
-        </h2>
-
-        <p>
-          Electrical load calculation helps determine the total power
-          requirement of a building. It is important for selecting the correct
-          electrical connection, MCB rating, inverter, or generator capacity.
-        </p>
-
-        <h3 className="font-semibold">Electrical Load Calculation Formula</h3>
-
-        <p
-          className="font-mono text-xs p-3 rounded"
-          style={{ backgroundColor: "var(--surface-2)" }}>
-          Total Load (Watts) = Σ (Number of appliances × Wattage) Total Load
-          (kW) = Total Watts ÷ 1000
-        </p>
-
-        <ul className="list-disc pl-5">
-          <li>LED light ≈ 60 W</li>
-          <li>Ceiling fan ≈ 75 W</li>
-          <li>1 ton AC ≈ 1500 W</li>
-          <li>Refrigerator ≈ 300 W</li>
-        </ul>
-
-        <h3 className="font-semibold">
-          Why Use an Electrical Load Calculator?
-        </h3>
-
-        <ul className="list-disc pl-5">
-          <li>Avoid overloading electrical systems</li>
-          <li>Select correct MCB & wiring size</li>
-          <li>Plan inverter or generator capacity</li>
-          <li>Useful for homes, offices & shops</li>
-        </ul>
-
-        <p>
-          This electrical load calculator gives a simple and reliable estimate
-          for most residential and commercial buildings.
-        </p>
-      </article>
-
-      {/* ================= DISCLAIMER ================= */}
-      <aside className="text-xs text-muted">
-        ⚠️ This calculator provides an estimate only. Actual load may vary based
-        on appliance rating and usage pattern.
-      </aside>
+      {/* ---------- ARTICLE CONTENT ---------- */}
+      <ElectricalLoadCalculatorArticle />
     </section>
   );
 }

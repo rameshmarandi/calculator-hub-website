@@ -5,10 +5,10 @@ const FixedDepositArticle = () => {
     <article className="max-w-4xl mx-auto space-y-14 leading-relaxed text-sm sm:text-base text-[var(--text-main)]">
       {/* INTRODUCTION */}
       <section className="space-y-4">
-        <h1 className="text-3xl font-bold">
+        <h2 className="text-3xl font-bold">
           Fixed Deposit Calculator – Estimate FD Maturity Amount and Interest
           Earnings
-        </h1>
+        </h2>
 
         <p>
           A Fixed Deposit Calculator is a financial planning tool that helps

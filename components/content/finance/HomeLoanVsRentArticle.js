@@ -9,9 +9,9 @@ const HomeLoanVsRentArticle = () => {
       {/* ================================================= */}
 
       <section className="space-y-4">
-        <h1 className="text-3xl font-bold">
+        <h2 className="text-3xl font-bold">
           Buy vs Rent Wealth Calculator – Which Choice Builds More Wealth?
-        </h1>
+        </h2>
 
         <p>
           Choosing between buying a home and continuing to rent is one of the

@@ -5,9 +5,9 @@ const GSTCalculatorArticle = () => {
     <article className="max-w-4xl mx-auto space-y-12 leading-relaxed text-sm sm:text-base text-[var(--text-main)]">
       {/* ================= 1 INTRODUCTION ================= */}
       <section className="space-y-6">
-        <h1 className="text-3xl font-bold">
+        <h2 className="text-3xl font-bold">
           GST Calculator – Calculate GST Amount, CGST, SGST and Final Price
-        </h1>
+        </h2>
 
         <p>
           Goods and Services Tax, commonly known as GST, is applied to most

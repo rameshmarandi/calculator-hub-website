@@ -5,9 +5,9 @@ export default function PlasterCalculatorArticle() {
     <article className="max-w-4xl mx-auto space-y-8 leading-relaxed">
       {/* SECTION 1: Introduction to the Calculator */}
       <section className="space-y-4">
-        <h1 className="text-2xl font-bold">
+        <h2 className="text-2xl font-bold">
           Plaster Calculator – Complete Guide to Estimating Plaster Materials
-        </h1>
+        </h2>
 
         <p>
           Plastering is one of the most important finishing stages in any

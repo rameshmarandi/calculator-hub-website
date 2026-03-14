@@ -5,10 +5,10 @@ const HomeLoanEMIArticle = () => {
     <article className="max-w-4xl mx-auto space-y-12 leading-relaxed text-sm sm:text-base text-[var(--text-main)]">
       {/* HERO / INTRODUCTION */}
       <section className="space-y-6">
-        <h1 className="text-3xl font-bold">
+        <h2 className="text-3xl font-bold">
           Home Loan EMI Calculator – Plan Your Housing Loan Repayment with
           Confidence
-        </h1>
+        </h2>
 
         <p>
           Buying a home is one of the most important financial milestones in a

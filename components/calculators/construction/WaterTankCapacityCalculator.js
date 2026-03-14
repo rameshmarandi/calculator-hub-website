@@ -6,6 +6,7 @@ import { Calculator, BarChart } from "lucide-react";
 import { AmountInput } from "../../inputs/AmountInput";
 import { PercentageInput } from "../../inputs/PercentageInput";
 import { ResultCard } from "../../ResultCard";
+import WaterTankCapacityCalculatorArticle from "../../content/construction/WaterTankCapacityCalculatorArticle";
 
 export default function WaterTankCapacityCalculator() {
   const [length, setLength] = useState("");
@@ -52,10 +53,19 @@ export default function WaterTankCapacityCalculator() {
     const liters = volumeM3 * 1000;
     const gallons = liters * 0.264;
 
+    // setResult({
+    //   volume: volumeM3.toFixed(2),
+    //   liters: liters.toFixed(0),
+    //   gallons: gallons.toFixed(0),
+    // });
+
     setResult({
-      volume: volumeM3.toFixed(2),
-      liters: liters.toFixed(0),
-      gallons: gallons.toFixed(0),
+      volume: volumeM3.toLocaleString(undefined, {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      }),
+      liters: Math.round(liters).toLocaleString(),
+      gallons: Math.round(gallons).toLocaleString(),
     });
   }
 
@@ -65,7 +75,8 @@ export default function WaterTankCapacityCalculator() {
       style={{
         backgroundColor: "var(--surface)",
         border: "1px solid var(--border)",
-      }}>
+      }}
+    >
       {/* ================= HEADER ================= */}
       <header>
         <h1 className="text-2xl font-bold mb-1">
@@ -79,7 +90,30 @@ export default function WaterTankCapacityCalculator() {
 
       {/* ================= FORM ================= */}
       <form onSubmit={calculateTankCapacity} className="space-y-4">
-        <PercentageInput
+        <AmountInput
+  label="Tank Length (meters)"
+  value={length}
+  onChange={setLength}
+  placeholder="2"
+  prefix=""
+/>
+
+<AmountInput
+  label="Tank Width (meters)"
+  value={width}
+  onChange={setWidth}
+  placeholder="1.5"
+   prefix=""
+/>
+
+<AmountInput
+  label="Tank Height (meters)"
+  value={height}
+  onChange={setHeight}
+  placeholder="1.5"
+   prefix=""
+/>
+        {/* <PercentageInput
           label="Tank Length (meters)"
           value={length}
           onChange={setLength}
@@ -98,7 +132,7 @@ export default function WaterTankCapacityCalculator() {
           value={height}
           onChange={setHeight}
           placeholder="1.5"
-        />
+        /> */}
 
         {error && <p className="text-sm text-red-500">{error}</p>}
 
@@ -108,7 +142,8 @@ export default function WaterTankCapacityCalculator() {
           style={{
             backgroundColor: "var(--primary)",
             color: "#fff",
-          }}>
+          }}
+        >
           <Calculator size={18} />
           Calculate Tank Capacity
         </button>
@@ -140,55 +175,7 @@ export default function WaterTankCapacityCalculator() {
         </div>
       )}
 
-      {/* ================= SEO BLOG CONTENT ================= */}
-      <article className="space-y-4 text-sm leading-relaxed">
-        <h2 className="font-semibold text-base">
-          How to Calculate Water Tank Capacity
-        </h2>
-
-        <p>
-          Calculating water tank capacity helps determine how much water can be
-          stored for domestic, commercial, or agricultural use. It is especially
-          useful when selecting overhead or underground water tanks.
-        </p>
-
-        <h3 className="font-semibold">Water Tank Capacity Formula</h3>
-
-        <p
-          className="font-mono text-xs p-3 rounded"
-          style={{ backgroundColor: "var(--surface-2)" }}>
-          Tank Volume (m³) = Length × Width × Height Capacity (Liters) = Volume
-          × 1000 Capacity (Gallons) = Liters × 0.264
-        </p>
-
-        <ul className="list-disc pl-5">
-          <li>1 cubic meter = 1000 liters</li>
-          <li>1 liter = 0.264 gallons</li>
-          <li>Used for rectangular water tanks</li>
-        </ul>
-
-        <h3 className="font-semibold">
-          Why Use a Water Tank Capacity Calculator?
-        </h3>
-
-        <ul className="list-disc pl-5">
-          <li>Choose the right tank size</li>
-          <li>Plan water storage efficiently</li>
-          <li>Avoid under-sized or over-sized tanks</li>
-          <li>Useful for homes, apartments & farms</li>
-        </ul>
-
-        <p>
-          This water tank capacity calculator gives a quick and accurate
-          estimate for most rectangular water tanks.
-        </p>
-      </article>
-
-      {/* ================= DISCLAIMER ================= */}
-      <aside className="text-xs text-muted">
-        ⚠️ This calculator provides an estimate only. Actual tank capacity may
-        vary slightly due to internal design and manufacturing tolerance.
-      </aside>
+      <WaterTankCapacityCalculatorArticle />
     </section>
   );
 }

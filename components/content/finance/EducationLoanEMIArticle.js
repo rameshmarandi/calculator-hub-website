@@ -6,10 +6,10 @@ const EducationLoanEMIArticle = () => {
       {/* 1 INTRODUCTION */}
       {/* 1 INTRODUCTION */}
       <section className="space-y-6">
-        <h1 className="text-3xl font-bold">
+        <h2 className="text-3xl font-bold">
           Education Loan EMI Calculator – Plan Your Student Loan Repayment
           Smartly
-        </h1>
+        </h2>
 
         <p>
           Higher education is one of the most powerful investments a person can

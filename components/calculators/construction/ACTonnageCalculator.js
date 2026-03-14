@@ -4,8 +4,30 @@ import { useState } from "react";
 import { Calculator, BarChart } from "lucide-react";
 
 import { AmountInput } from "../../inputs/AmountInput";
-import { PercentageInput } from "../../inputs/PercentageInput";
 import { ResultCard } from "../../ResultCard";
+import ACTonnageCalculatorArticle from "../../content/construction/ACTonnageCalculatorArticle";
+
+/* ---------------- HELPER FUNCTIONS ---------------- */
+
+function parseNumber(value) {
+  return Number(String(value).replace(/,/g, ""));
+}
+
+function formatNumber(value) {
+  return Number(value).toLocaleString();
+}
+
+/* Standard AC sizes used in residential HVAC */
+
+function getRecommendedAC(tonnage) {
+  const sizes = [0.75, 1, 1.5, 2, 2.5, 3, 4, 5];
+
+  for (let size of sizes) {
+    if (tonnage <= size) return `${size} Ton`;
+  }
+
+  return `${Math.ceil(tonnage)} Ton (Commercial HVAC Required)`;
+}
 
 export default function ACTonnageCalculator() {
   const [roomLength, setRoomLength] = useState("");
@@ -17,24 +39,42 @@ export default function ACTonnageCalculator() {
   const [error, setError] = useState("");
 
   /* ---------------- VALIDATION ---------------- */
+
   function validate() {
-    if (!roomLength || Number(roomLength) <= 0) {
-      setError("Please enter valid room length.");
+    const length = parseNumber(roomLength);
+    const width = parseNumber(roomWidth);
+    const height = parseNumber(roomHeight);
+    const persons = parseNumber(people);
+
+    if (!length || length <= 0) {
+      setError("Please enter a valid room length.");
       return false;
     }
 
-    if (!roomWidth || Number(roomWidth) <= 0) {
-      setError("Please enter valid room width.");
+    if (!width || width <= 0) {
+      setError("Please enter a valid room width.");
       return false;
     }
 
-    if (!roomHeight || Number(roomHeight) <= 0) {
-      setError("Please enter valid room height.");
+    if (!height || height <= 0) {
+      setError("Please enter a valid room height.");
       return false;
     }
 
-    if (Number(people) < 0) {
+    if (persons < 0) {
       setError("Number of people cannot be negative.");
+      return false;
+    }
+
+    if (length > 30 || width > 30) {
+      setError(
+        "Room dimensions seem unrealistic. Enter values below 30 meters.",
+      );
+      return false;
+    }
+
+    if (height > 6) {
+      setError("Room height should normally be below 6 meters.");
       return false;
     }
 
@@ -43,33 +83,48 @@ export default function ACTonnageCalculator() {
   }
 
   /* ---------------- CALCULATION ---------------- */
+
   function calculateACTonnage(e) {
     e.preventDefault();
+
     if (!validate()) return;
 
-    const length = Number(roomLength);
-    const width = Number(roomWidth);
-    const height = Number(roomHeight);
-    const persons = Number(people);
+    const length = parseNumber(roomLength);
+    const width = parseNumber(roomWidth);
+    const height = parseNumber(roomHeight);
+    const persons = parseNumber(people);
 
-    // Room volume (meters)
-    const roomVolume = length * width * height;
+    const area = length * width;
 
-    // Base cooling load (BTU)
-    let btu = roomVolume * 141;
+    /* Base cooling load
+       Industry quick estimate: 600 BTU per m² */
 
-    // Extra load for people (600 BTU per person beyond 2)
+    let btu = area * 600;
+
+    /* Ceiling height adjustment
+       Standard height assumed = 3 meters */
+
+    if (height > 3) {
+      const heightFactor = height / 3;
+      btu = btu * heightFactor;
+    }
+
+    /* Occupancy heat load
+       Each extra person adds ~600 BTU */
+
     if (persons > 2) {
       btu += (persons - 2) * 600;
     }
 
-    // Convert BTU to tons (1 ton = 12,000 BTU)
     const tonnage = btu / 12000;
 
     setResult({
-      volume: roomVolume.toFixed(2),
-      btu: btu.toFixed(0),
+      area: area.toFixed(2),
+      height: height,
+      btu: Math.round(btu),
       tonnage: tonnage.toFixed(2),
+      recommended: getRecommendedAC(tonnage),
+      largeRoom: area > 80,
     });
   }
 
@@ -79,40 +134,46 @@ export default function ACTonnageCalculator() {
       style={{
         backgroundColor: "var(--surface)",
         border: "1px solid var(--border)",
-      }}>
-      {/* ================= HEADER ================= */}
-      <header>
-        <h1 className="text-2xl font-bold mb-1">AC Tonnage Calculator</h1>
+      }}
+    >
+      {/* HEADER */}
+
+      <header className="space-y-3">
+        <h1 className="text-2xl font-bold">AC Tonnage Calculator</h1>
+
         <p className="text-sm leading-relaxed">
-          Use this AC Tonnage Calculator to find the right air conditioner size
-          based on your room dimensions and occupancy.
+          Use this AC Tonnage Calculator to estimate the correct air conditioner
+          capacity required for your room. Enter the room dimensions and number
+          of occupants to determine the recommended AC size for efficient
+          cooling.
         </p>
       </header>
 
-      {/* ================= FORM ================= */}
+      {/* FORM */}
+
       <form onSubmit={calculateACTonnage} className="space-y-4">
-        <PercentageInput
+        <AmountInput
           label="Room Length (meters)"
           value={roomLength}
           onChange={setRoomLength}
           placeholder="5"
         />
 
-        <PercentageInput
+        <AmountInput
           label="Room Width (meters)"
           value={roomWidth}
           onChange={setRoomWidth}
           placeholder="4"
         />
 
-        <PercentageInput
+        <AmountInput
           label="Room Height (meters)"
           value={roomHeight}
           onChange={setRoomHeight}
           placeholder="3"
         />
 
-        <PercentageInput
+        <AmountInput
           label="Number of People"
           value={people}
           onChange={setPeople}
@@ -127,83 +188,79 @@ export default function ACTonnageCalculator() {
           style={{
             backgroundColor: "var(--primary)",
             color: "#fff",
-          }}>
+          }}
+        >
           <Calculator size={18} />
           Calculate AC Tonnage
         </button>
       </form>
 
-      {/* ================= RESULT ================= */}
+      {/* RESULTS */}
+
       {result && (
-        <div className="grid md:grid-cols-3 gap-4" aria-live="polite">
-          <ResultCard
-            variant="neutral"
-            icon={<BarChart size={20} />}
-            label="Room Volume"
-            value={`${result.volume} m³`}
-          />
+        <>
+          <div className="grid md:grid-cols-3 gap-4" aria-live="polite">
+            <ResultCard
+              variant="neutral"
+              icon={<BarChart size={20} />}
+              label="Room Area"
+              value={`${formatNumber(result.area)} m²`}
+            />
 
-          <ResultCard
-            variant="neutral"
-            icon={<BarChart size={20} />}
-            label="Cooling Load"
-            value={`${result.btu} BTU`}
-          />
+            <ResultCard
+              variant="neutral"
+              icon={<BarChart size={20} />}
+              label="Cooling Load"
+              value={`${formatNumber(result.btu)} BTU`}
+            />
 
-          <ResultCard
-            variant="primary"
-            icon={<BarChart size={20} />}
-            label="Recommended AC Size"
-            value={`${result.tonnage} Ton`}
-          />
-        </div>
+            <ResultCard
+              variant="primary"
+              icon={<BarChart size={20} />}
+              label="Recommended AC Size"
+              value={result.recommended}
+            />
+          </div>
+
+          {/* RESULT EXPLANATION */}
+
+          <div className="space-y-3 text-sm leading-relaxed">
+            <h3 className="font-semibold text-lg">Understanding Your Result</h3>
+
+            <p>
+              The calculator estimates the cooling load based on room size,
+              ceiling height, and occupancy. Cooling load is measured in BTU,
+              which represents the amount of heat an air conditioner must remove
+              from the room every hour.
+            </p>
+
+            <p>
+              The calculated tonnage indicates the approximate cooling capacity
+              required. Because air conditioners are available in standard
+              sizes, the recommended AC size rounds the calculation to the
+              nearest commonly available unit.
+            </p>
+
+            <p>
+              For example, if the calculated capacity is 1.2 tons, a 1.5 ton air
+              conditioner is usually recommended to ensure reliable cooling
+              during very hot summer days.
+            </p>
+
+            {result.largeRoom && (
+              <p className="text-amber-600">
+                Your room area is quite large. For halls or commercial
+                buildings, professional HVAC load calculations may be required
+                for precise system design.
+              </p>
+            )}
+          </div>
+        </>
       )}
 
-      {/* ================= SEO BLOG CONTENT ================= */}
-      <article className="space-y-4 text-sm leading-relaxed">
-        <h2 className="font-semibold text-base">How to Calculate AC Tonnage</h2>
+      {/* SEO ARTICLE */}
 
-        <p>
-          AC tonnage calculation helps you choose the correct air conditioner
-          capacity for your room. Selecting the right AC size ensures efficient
-          cooling, lower electricity bills, and longer AC life.
-        </p>
-
-        <h3 className="font-semibold">AC Tonnage Calculation Formula</h3>
-
-        <p
-          className="font-mono text-xs p-3 rounded"
-          style={{ backgroundColor: "var(--surface-2)" }}>
-          Room Volume = Length × Width × Height Cooling Load (BTU) = Room Volume
-          × 141 AC Tonnage = BTU ÷ 12,000
-        </p>
-
-        <ul className="list-disc pl-5">
-          <li>1 Ton AC = 12,000 BTU/hour</li>
-          <li>Extra occupants increase cooling load</li>
-          <li>Higher ceiling height needs higher tonnage</li>
-        </ul>
-
-        <h3 className="font-semibold">Recommended AC Size by Room Area</h3>
-
-        <ul className="list-disc pl-5">
-          <li>Up to 120 sq.ft → 1 Ton AC</li>
-          <li>120 – 180 sq.ft → 1.5 Ton AC</li>
-          <li>180 – 250 sq.ft → 2 Ton AC</li>
-        </ul>
-
-        <p>
-          This AC tonnage calculator gives a practical estimate for residential
-          rooms. For commercial spaces, additional heat sources should be
-          considered.
-        </p>
-      </article>
-
-      {/* ================= DISCLAIMER ================= */}
-      <aside className="text-xs text-muted">
-        ⚠️ This calculator provides an estimate only. Actual AC requirement may
-        vary based on insulation, sunlight exposure, and climate.
-      </aside>
+      <ACTonnageCalculatorArticle />
     </section>
   );
 }

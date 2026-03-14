@@ -9,9 +9,9 @@ const LoanPrepaymentArticle = () => {
       {/* ================================================= */}
 
       <section className="space-y-4">
-        <h1 className="text-3xl font-bold">
+        <h2 className="text-3xl font-bold">
           Loan Prepayment Calculator – Calculate How Much Interest You Can Save
-        </h1>
+        </h2>
 
         <p>
           Loans make it possible to afford large expenses such as buying a

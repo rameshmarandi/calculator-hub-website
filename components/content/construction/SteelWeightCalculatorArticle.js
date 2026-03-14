@@ -5,9 +5,9 @@ export default function SteelWeightCalculatorArticle() {
     <article className="max-w-4xl mx-auto py-10 space-y-10 leading-relaxed">
       {/* 1 INTRODUCTION */}
       <section className="space-y-4">
-        <h1 className="text-2xl font-bold">
+        <h2 className="text-2xl font-bold">
           Steel Weight Calculator – Complete Guide
-        </h1>
+        </h2>
 
         <p>
           Steel is one of the most important materials used in modern
@@ -1073,7 +1073,8 @@ export default function SteelWeightCalculatorArticle() {
         <ul className="list-disc pl-6 space-y-2">
           <li>
             <Link
-              href="/concrete-calculator"
+
+                      href="/construction/concrete-calculator"
               className="text-blue-600 underline"
             >
               Concrete Calculator
@@ -1083,7 +1084,7 @@ export default function SteelWeightCalculatorArticle() {
           </li>
 
           <li>
-            <Link href="/brick-calculator" className="text-blue-600 underline">
+            <Link href="/construction/brick-calculator" className="text-blue-600 underline">
               Brick Calculator
             </Link>{" "}
             – calculates the number of bricks and mortar required for wall
@@ -1091,7 +1092,7 @@ export default function SteelWeightCalculatorArticle() {
           </li>
 
           <li>
-            <Link href="/paint-calculator" className="text-blue-600 underline">
+            <Link href="/construction/paint-calculator" className="text-blue-600 underline">
               Paint Calculator
             </Link>{" "}
             – estimates the quantity of paint needed for walls and ceilings

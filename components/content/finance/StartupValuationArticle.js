@@ -5,10 +5,10 @@ const StartupValuationArticle = () => {
     <article className="max-w-4xl mx-auto space-y-14 leading-relaxed text-sm sm:text-base text-[var(--text-main)]">
       {/* ================= HERO ================= */}
       <section className="space-y-6">
-        <h1 className="text-3xl font-bold">
+        <h2 className="text-3xl font-bold">
           Startup Valuation Calculator – Estimate Your Startup Worth and
           Investor Equity
-        </h1>
+        </h2>
 
         <p>
           Determining the value of a startup is one of the most important

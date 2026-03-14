@@ -6,10 +6,10 @@ const EducationLoanRepaymentArticle = () => {
       {/* ================= HERO ================= */}
 
       <section className="space-y-6">
-        <h1 className="text-3xl font-bold">
+        <h2 className="text-3xl font-bold">
           Education Loan Repayment Calculator – Calculate EMI, Interest and
           Total Repayment
-        </h1>
+        </h2>
 
         <p>
           Education loans make higher studies possible for millions of students,

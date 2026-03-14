@@ -6,10 +6,10 @@ const GratuityCalculatorArticle = () => {
       {/* 1 INTRODUCTION */}
 
       <section className='space-y-5'>
-        <h1 className='text-3xl font-bold'>
+        <h2 className='text-3xl font-bold'>
           Gratuity Calculator – Complete Guide to Calculating Your Gratuity
           Benefit
-        </h1>
+        </h2>
 
         <p>
           Gratuity is one of the most important long-term financial benefits

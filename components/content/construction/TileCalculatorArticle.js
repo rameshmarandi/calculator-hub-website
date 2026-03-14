@@ -5,9 +5,9 @@ const TileCalculatorArticle = () => {
     <article className="max-w-4xl mx-auto space-y-12 leading-relaxed text-sm sm:text-base text-[var(--text-main)]">
       {/* ================= INTRODUCTION ================= */}
       <section className="space-y-6">
-        <h1 className="text-3xl font-bold">
+        <h2 className="text-3xl font-bold">
           Tile Calculator – Estimate Tiles Required for Floors and Walls
-        </h1>
+        </h2>
 
         <p>
           Tiles are one of the most widely used finishing materials in modern

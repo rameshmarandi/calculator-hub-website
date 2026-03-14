@@ -4,8 +4,8 @@ import { useState } from "react";
 import { Calculator, BarChart } from "lucide-react";
 
 import { AmountInput } from "../../inputs/AmountInput";
-import { PercentageInput } from "../../inputs/PercentageInput";
 import { ResultCard } from "../../ResultCard";
+import FlooringCostCalculatorArticle from "../../content/construction/FlooringCostCalculatorArticle";
 
 export default function FlooringCostCalculator() {
   const [length, setLength] = useState("");
@@ -18,22 +18,27 @@ export default function FlooringCostCalculator() {
 
   /* ---------------- VALIDATION ---------------- */
   function validate() {
-    if (!length || Number(length) <= 0) {
-      setError("Please enter valid floor length.");
+    const l = Number(length);
+    const w = Number(width);
+    const m = Number(tileCost);
+    const labor = Number(laborCost);
+
+    if (!l || l <= 0 || l > 100) {
+      setError("Floor length must be between 1 and 100 meters.");
       return false;
     }
 
-    if (!width || Number(width) <= 0) {
-      setError("Please enter valid floor width.");
+    if (!w || w <= 0 || w > 100) {
+      setError("Floor width must be between 1 and 100 meters.");
       return false;
     }
 
-    if (!tileCost || Number(tileCost) <= 0) {
-      setError("Please enter valid flooring cost per sq.ft.");
+    if (!m || m <= 0) {
+      setError("Enter a valid flooring cost per sq.ft.");
       return false;
     }
 
-    if (Number(laborCost) < 0) {
+    if (labor < 0) {
       setError("Labor cost cannot be negative.");
       return false;
     }
@@ -42,44 +47,52 @@ export default function FlooringCostCalculator() {
     return true;
   }
 
-  /* ---------------- CALCULATION ---------------- */
-  function calculateFlooringCost(e) {
-    e.preventDefault();
-    if (!validate()) return;
+  /* ---------------- CALCULATION ---------------- *//* ---------------- CALCULATION ---------------- */
+function calculateFlooringCost(e) {
+  e.preventDefault();
 
-    const l = Number(length);
-    const w = Number(width);
-    const materialRate = Number(tileCost);
-    const laborRate = Number(laborCost);
+  if (!validate()) return;
 
-    const areaSqM = l * w;
-    const areaSqFt = areaSqM * 10.764;
+  const l = Number(length);
+  const w = Number(width);
+  const materialRate = Number(tileCost);
+  const laborRate = Number(laborCost);
 
-    const materialCost = areaSqFt * materialRate;
-    const laborTotal = areaSqFt * laborRate;
-    const totalCost = materialCost + laborTotal;
+  const SQM_TO_SQFT = 10.7639;
 
-    setResult({
-      area: areaSqFt.toFixed(2),
-      material: materialCost.toFixed(0),
-      labor: laborTotal.toFixed(0),
-      total: totalCost.toFixed(0),
-    });
-  }
+  const areaSqM = l * w;
+  const areaSqFt = areaSqM * SQM_TO_SQFT;
 
+  const materialCost = areaSqFt * materialRate;
+  const laborTotal = areaSqFt * laborRate;
+  const totalCost = materialCost + laborTotal;
+
+  const formatter = new Intl.NumberFormat("en-IN");
+
+  setResult({
+    area: formatter.format(areaSqFt.toFixed(2)),
+    material: formatter.format(materialCost.toFixed(0)),
+    labor: formatter.format(laborTotal.toFixed(0)),
+    total: formatter.format(totalCost.toFixed(0)),
+  });
+}
   return (
     <section
       className="rounded-xl p-6 space-y-10"
       style={{
         backgroundColor: "var(--surface)",
         border: "1px solid var(--border)",
-      }}>
+      }}
+    >
       {/* ================= HEADER ================= */}
       <header>
-        <h1 className="text-2xl font-bold mb-1">Flooring Cost Calculator</h1>
+        <h1 className="text-2xl font-bold mb-1">
+          Flooring Cost Calculator
+        </h1>
+
         <p className="text-sm leading-relaxed">
-          Use this Flooring Cost Calculator to estimate total flooring cost
-          including material and labor for your home or office.
+          Estimate the total flooring cost including material and labor
+          charges for your home, office, or renovation project.
         </p>
       </header>
 
@@ -98,7 +111,7 @@ export default function FlooringCostCalculator() {
           value={width}
           onChange={setWidth}
           placeholder="4"
-           prefix=""
+               prefix=""
         />
 
         <AmountInput
@@ -106,17 +119,18 @@ export default function FlooringCostCalculator() {
           value={tileCost}
           onChange={setTileCost}
           placeholder="120"
-          
         />
 
-        <PercentageInput
+        <AmountInput
           label="Labor Cost (₹ per sq.ft)"
           value={laborCost}
           onChange={setLaborCost}
           placeholder="50"
         />
 
-        {error && <p className="text-sm text-red-500">{error}</p>}
+        {error && (
+          <p className="text-sm text-red-500">{error}</p>
+        )}
 
         <button
           type="submit"
@@ -124,7 +138,8 @@ export default function FlooringCostCalculator() {
           style={{
             backgroundColor: "var(--primary)",
             color: "#fff",
-          }}>
+          }}
+        >
           <Calculator size={18} />
           Calculate Flooring Cost
         </button>
@@ -163,54 +178,8 @@ export default function FlooringCostCalculator() {
         </div>
       )}
 
-      {/* ================= SEO BLOG CONTENT ================= */}
-      <article className="space-y-4 text-sm leading-relaxed">
-        <h2 className="font-semibold text-base">
-          How to Calculate Flooring Cost
-        </h2>
-
-        <p>
-          Flooring cost calculation helps homeowners and builders estimate the
-          total expense involved in installing tiles, marble, granite, or wooden
-          flooring. It includes material cost and labor charges.
-        </p>
-
-        <h3 className="font-semibold">Flooring Cost Formula</h3>
-
-        <p
-          className="font-mono text-xs p-3 rounded"
-          style={{ backgroundColor: "var(--surface-2)" }}>
-          Floor Area (sq.ft) = Length × Width × 10.764 Material Cost = Area ×
-          Rate per sq.ft Labor Cost = Area × Labor Rate Total Cost = Material
-          Cost + Labor Cost
-        </p>
-
-        <ul className="list-disc pl-5">
-          <li>Tile cost varies by material and brand</li>
-          <li>Labor charges depend on city and tile type</li>
-          <li>Extra cost may apply for patterns or skirting</li>
-        </ul>
-
-        <h3 className="font-semibold">Why Use a Flooring Cost Calculator?</h3>
-
-        <ul className="list-disc pl-5">
-          <li>Accurate flooring budget planning</li>
-          <li>Easy comparison between materials</li>
-          <li>Prevents cost overruns</li>
-          <li>Useful for homes & commercial spaces</li>
-        </ul>
-
-        <p>
-          This flooring cost calculator provides a quick and reliable estimate
-          for most residential and commercial flooring works.
-        </p>
-      </article>
-
-      {/* ================= DISCLAIMER ================= */}
-      <aside className="text-xs text-muted">
-        ⚠️ This calculator provides an estimate only. Actual flooring cost may
-        vary based on material brand, design, and site conditions.
-      </aside>
+      {/* ================= SEO ARTICLE ================= */}
+      <FlooringCostCalculatorArticle />
     </section>
   );
 }

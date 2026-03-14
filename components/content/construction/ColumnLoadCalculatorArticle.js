@@ -5,9 +5,9 @@ export default function ColumnLoadCalculatorArticle() {
     <article className="max-w-4xl mx-auto space-y-12 leading-relaxed text-sm sm:text-base text-[var(--text-main)]">
       {/* 1 Introduction */}
       <section className="space-y-4">
-        <h1 className="text-2xl font-bold">
+        <h2 className="text-2xl font-bold">
           Column Load Calculator – Estimate Structural Load on Building Columns
-        </h1>
+        </h2>
 
         <p>
           In structural engineering, columns play a critical role in maintaining
@@ -934,7 +934,7 @@ export default function ColumnLoadCalculatorArticle() {
 
         <ul className="list-disc pl-6 space-y-2">
           <li>
-            <Link href="/calculators/concrete-calculator">
+            <Link href="/construction/concrete-calculator">
               Concrete Calculator
             </Link>{" "}
             – Estimate the volume of concrete required for slabs, foundations,
@@ -942,7 +942,7 @@ export default function ColumnLoadCalculatorArticle() {
           </li>
 
           <li>
-            <Link href="/calculators/rcc-slab-calculator">
+            <Link href="/construction/rcc-slab-calculator">
               RCC Slab Calculator
             </Link>{" "}
             – Calculate the materials required for reinforced concrete slab
@@ -950,7 +950,7 @@ export default function ColumnLoadCalculatorArticle() {
           </li>
 
           <li>
-            <Link href="/calculators/steel-weight-calculator">
+            <Link href="/construction/steel-weight-calculator">
               Steel Weight Calculator
             </Link>{" "}
             – Determine the weight of reinforcement steel used in structural
@@ -958,7 +958,7 @@ export default function ColumnLoadCalculatorArticle() {
           </li>
 
           <li>
-            <Link href="/calculators/beam-load-calculator">
+            <Link href="/construction/beam-load-calculator">
               Beam Load Calculator
             </Link>{" "}
             – Estimate the structural load acting on beams and understand how

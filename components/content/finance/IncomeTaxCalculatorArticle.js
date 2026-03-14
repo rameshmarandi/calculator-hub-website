@@ -7,9 +7,9 @@ const IncomeTaxCalculatorArticle = () => {
       {/* ================= INTRODUCTION ================= */}
 
 <section className="space-y-5">
-  <h1 className="text-3xl font-bold">
+  <h2 className="text-3xl font-bold">
     Income Tax Calculator – Complete Guide to Calculating Your Tax
-  </h1>
+  </h2>
 
   <p>
     Income tax is one of the most important financial obligations for anyone

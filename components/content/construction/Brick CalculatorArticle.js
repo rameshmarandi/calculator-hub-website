@@ -5,10 +5,10 @@ const BrickCalculatorArticle = () => {
     <article className="max-w-4xl mx-auto space-y-12 leading-relaxed text-sm sm:text-base text-[var(--text-main)]">
       {/* 1 INTRODUCTION */}
       <section className="space-y-4">
-        <h1 className="text-3xl font-bold">
+        <h2 className="text-3xl font-bold">
           Brick Calculator – Estimate the Number of Bricks Required for
           Construction
-        </h1>
+        </h2>
 
         <p>
           Bricks are one of the most widely used building materials in

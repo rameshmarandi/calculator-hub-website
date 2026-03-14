@@ -6,9 +6,9 @@ const HRACalculatorArticle = () => {
       {/* ================= 1 INTRODUCTION ================= */}
 
       <section className="space-y-5">
-        <h1 className="text-3xl font-bold">
+        <h2 className="text-3xl font-bold">
           HRA Calculator – Complete Guide to House Rent Allowance Tax Exemption
-        </h1>
+        </h2>
 
         <p>
           House Rent Allowance (HRA) is one of the most important salary

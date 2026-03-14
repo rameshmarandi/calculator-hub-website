@@ -8,9 +8,9 @@ const SandQuantityArticle = () => {
       {/* ================================================= */}
 
       <section className="space-y-6">
-        <h1 className="text-3xl font-bold">
+        <h2 className="text-3xl font-bold">
           Sand Quantity Calculator – Calculate Sand Required for Construction
-        </h1>
+        </h2>
 
         <p>
           Sand is one of the most essential materials used in construction. It
