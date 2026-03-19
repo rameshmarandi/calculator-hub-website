@@ -3,8 +3,9 @@
 import { useState } from "react";
 import { Calculator, BarChart } from "lucide-react";
 
-import { PercentageInput } from "../../inputs/PercentageInput";
+import { AmountInput } from "../../inputs/AmountInput";
 import { ResultCard } from "../../ResultCard";
+import IdealWeightCalculatorArticle from "../../content/health/IdealWeightCalculatorArticle";
 
 export default function IdealWeightCalculator() {
   const [gender, setGender] = useState("male");
@@ -15,8 +16,15 @@ export default function IdealWeightCalculator() {
 
   /* ---------------- VALIDATION ---------------- */
   function validate() {
-    if (!height || Number(height) <= 0) {
-      setError("Please enter valid height.");
+    const h = Number(height);
+
+    if (!height || isNaN(h)) {
+      setError("Please enter your height.");
+      return false;
+    }
+
+    if (h < 120 || h > 230) {
+      setError("Height must be between 120 cm and 230 cm.");
       return false;
     }
 
@@ -41,8 +49,12 @@ export default function IdealWeightCalculator() {
       idealWeight = 45.5 + 2.3 * (hInches - 60);
     }
 
+    const ideal = Number(idealWeight.toFixed(1));
+
     setResult({
-      weight: idealWeight.toFixed(1),
+      weight: ideal,
+      min: (ideal - 7).toFixed(1),
+      max: (ideal + 7).toFixed(1),
     });
   }
 
@@ -52,7 +64,8 @@ export default function IdealWeightCalculator() {
       style={{
         backgroundColor: "var(--surface)",
         border: "1px solid var(--border)",
-      }}>
+      }}
+    >
       {/* ================= HEADER ================= */}
       <header>
         <h1 className="text-2xl font-bold mb-1">Ideal Weight Calculator</h1>
@@ -67,7 +80,8 @@ export default function IdealWeightCalculator() {
         {/* ===== Gender Tabs ===== */}
         <div
           className="flex rounded-md overflow-hidden"
-          style={{ border: "1px solid var(--border)" }}>
+          style={{ border: "1px solid var(--border)" }}
+        >
           <button
             type="button"
             onClick={() => setGender("male")}
@@ -76,7 +90,8 @@ export default function IdealWeightCalculator() {
               backgroundColor:
                 gender === "male" ? "var(--primary)" : "transparent",
               color: gender === "male" ? "#fff" : "var(--text)",
-            }}>
+            }}
+          >
             Male
           </button>
 
@@ -89,16 +104,19 @@ export default function IdealWeightCalculator() {
                 gender === "female" ? "var(--primary)" : "transparent",
               color: gender === "female" ? "#fff" : "var(--text)",
               borderLeft: "1px solid var(--border)",
-            }}>
+            }}
+          >
             Female
           </button>
         </div>
 
-        <PercentageInput
+        {/* ===== Height Input ===== */}
+        <AmountInput
           label="Height (cm)"
           value={height}
           onChange={setHeight}
           placeholder="170"
+          prefix=""
         />
 
         {error && <p className="text-sm text-red-500">{error}</p>}
@@ -109,7 +127,8 @@ export default function IdealWeightCalculator() {
           style={{
             backgroundColor: "var(--primary)",
             color: "#fff",
-          }}>
+          }}
+        >
           <Calculator size={18} />
           Calculate Ideal Weight
         </button>
@@ -117,72 +136,21 @@ export default function IdealWeightCalculator() {
 
       {/* ================= RESULT ================= */}
       {result && (
-        <div aria-live="polite">
+        <div aria-live="polite" className="space-y-2">
           <ResultCard
             variant="primary"
             icon={<BarChart size={20} />}
             label="Your Ideal Weight"
             value={`${result.weight} kg`}
           />
+
+          <p className="text-sm">
+            Healthy range: <strong>{result.min} – {result.max} kg</strong>
+          </p>
         </div>
       )}
 
-      {/* ================= SEO BLOG CONTENT ================= */}
-      <article className="space-y-4 text-sm leading-relaxed">
-        <h2 className="font-semibold text-base">What is Ideal Body Weight?</h2>
-
-        <p>
-          Ideal body weight is an estimated weight range associated with the
-          lowest risk of health problems. It depends mainly on height and
-          gender.
-        </p>
-
-        <h3 className="font-semibold">Ideal Weight Calculation Formula</h3>
-
-        <p
-          className="font-mono text-xs p-3 rounded"
-          style={{ backgroundColor: "var(--surface-2)" }}>
-          Men: 50 + 2.3 × (Height in inches − 60) Women: 45.5 + 2.3 × (Height in
-          inches − 60)
-        </p>
-
-        <ul className="list-disc pl-5">
-          <li>Height is converted from cm to inches</li>
-          <li>Formula is known as the Devine Formula</li>
-          <li>Commonly used by doctors & dietitians</li>
-        </ul>
-
-        <h3 className="font-semibold">Ideal Weight vs BMI</h3>
-
-        <ul className="list-disc pl-5">
-          <li>
-            <strong>Ideal Weight:</strong> Target weight estimate
-          </li>
-          <li>
-            <strong>BMI:</strong> Weight-to-height ratio
-          </li>
-        </ul>
-
-        <h3 className="font-semibold">Why Use an Ideal Weight Calculator?</h3>
-
-        <ul className="list-disc pl-5">
-          <li>Set realistic fitness goals</li>
-          <li>Plan weight loss or weight gain</li>
-          <li>Track health progress</li>
-          <li>Useful for diet & exercise planning</li>
-        </ul>
-
-        <p>
-          This ideal weight calculator gives a healthy reference value. Actual
-          ideal weight may vary based on body composition and lifestyle.
-        </p>
-      </article>
-
-      {/* ================= DISCLAIMER ================= */}
-      <aside className="text-xs text-muted">
-        ⚠️ Ideal weight is an estimate and should not be treated as a medical
-        diagnosis. Consult a healthcare professional for personalized advice.
-      </aside>
+      <IdealWeightCalculatorArticle />
     </section>
   );
 }

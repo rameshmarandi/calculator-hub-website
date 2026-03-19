@@ -8,6 +8,9 @@ const HEALTH_CALCULATOR_MAP = {
   "bmr-calculator": dynamic(() =>
     import("../components/calculators/health/BMRCalculator")
   ),
+   "calorie-calculator": dynamic(() =>
+    import("../components/calculators/health/CalorieCalculator")
+  ),
 
   "tdee-calculator": dynamic(() =>
     import("../components/calculators/health/TDEECalculator")

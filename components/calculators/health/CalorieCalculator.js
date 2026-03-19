@@ -5,9 +5,9 @@ import { Calculator, BarChart } from "lucide-react";
 
 import { AmountInput } from "../../inputs/AmountInput";
 import { ResultCard } from "../../ResultCard";
-import TDEECalculatorArticle from "../../content/health/TDEECalculatorArticle";
+import CalorieCalculatorArticle from "../../content/health/CalorieCalculatorArticle";
 
-export default function TDEECalculator() {
+export default function CalorieCalculator() {
   const [gender, setGender] = useState("male");
   const [age, setAge] = useState("");
   const [weight, setWeight] = useState("");
@@ -17,7 +17,6 @@ export default function TDEECalculator() {
   const [result, setResult] = useState(null);
   const [error, setError] = useState("");
 
-  /* ---------------- VALIDATION ---------------- */
   function validate() {
     if (!age || Number(age) <= 0) {
       setError("Please enter valid age.");
@@ -38,32 +37,29 @@ export default function TDEECalculator() {
     return true;
   }
 
-  /* ---------------- CALCULATION ---------------- */
-  function calculateTDEE(e) {
+  function calculateCalories(e) {
     e.preventDefault();
     if (!validate()) return;
 
     const a = Number(age);
     const w = Number(weight);
     const h = Number(height);
-    const factor = Number(activity);
+    const activityLevel = Number(activity);
 
-    let bmr = 0;
+    let bmr;
 
-    /* Mifflin-St Jeor Formula */
+    // Mifflin-St Jeor
     if (gender === "male") {
       bmr = 10 * w + 6.25 * h - 5 * a + 5;
     } else {
       bmr = 10 * w + 6.25 * h - 5 * a - 161;
     }
 
-    const tdee = bmr * factor;
+    const calories = bmr * activityLevel;
 
     setResult({
       bmr: Math.round(bmr),
-      tdee: Math.round(tdee),
-      weightLoss: Math.round(tdee - 500),
-      weightGain: Math.round(tdee + 300),
+      calories: Math.round(calories),
     });
   }
 
@@ -75,19 +71,18 @@ export default function TDEECalculator() {
         border: "1px solid var(--border)",
       }}
     >
-      {/* ================= HEADER ================= */}
+      {/* HEADER */}
       <header>
-        <h1 className="text-2xl font-bold mb-1">TDEE Calculator</h1>
+        <h1 className="text-2xl font-bold mb-1">Calorie Calculator</h1>
         <p className="text-sm leading-relaxed">
-          Use this TDEE Calculator to estimate your Total Daily Energy
-          Expenditure — the total calories your body burns each day based on
-          age, body measurements, and activity level.
+          Estimate how many calories you should consume each day based on your
+          age, gender, body measurements, and activity level.
         </p>
       </header>
 
-      {/* ================= FORM ================= */}
-      <form onSubmit={calculateTDEE} className="space-y-4">
-        {/* Gender Tabs */}
+      {/* FORM */}
+      <form onSubmit={calculateCalories} className="space-y-4">
+        {/* Gender */}
         <div
           className="flex rounded-md overflow-hidden"
           style={{ border: "1px solid var(--border)" }}
@@ -120,7 +115,6 @@ export default function TDEECalculator() {
           </button>
         </div>
 
-        {/* Age */}
         <AmountInput
           label="Age (years)"
           value={age}
@@ -129,62 +123,45 @@ export default function TDEECalculator() {
           prefix=""
         />
 
-        {/* Weight */}
         <AmountInput
           label="Weight (kg)"
           value={weight}
           onChange={setWeight}
           placeholder="70"
-          prefix=""
+           prefix=""
         />
 
-        {/* Height */}
         <AmountInput
           label="Height (cm)"
           value={height}
           onChange={setHeight}
-          placeholder="170"
-          prefix=""
+          placeholder="175"
+           prefix=""
         />
 
-        {/* Activity Level Dropdown */}
+        {/* Activity Level */}
         <div className="space-y-1">
           <label className="text-sm font-medium">Activity Level</label>
 
           <select
             value={activity}
             onChange={(e) => setActivity(e.target.value)}
-            className="w-full px-3 py-2 rounded-md text-sm"
+            className="w-full p-2 rounded-md"
             style={{
-              border: "1px solid var(--border)",
               backgroundColor: "var(--surface)",
+              border: "1px solid var(--border)",
             }}
           >
-            <option value="1.2">
-              Sedentary — Little or no exercise
-            </option>
-
-            <option value="1.375">
-              Lightly Active — Light physical activity during the week
-            </option>
-
-            <option value="1.55">
-              Moderately Active — Regular exercise and active lifestyle
-            </option>
-
-            <option value="1.725">
-              Very Active — Intense workouts or demanding routine
-            </option>
-
-            <option value="1.9">
-              Extra Active — Physically demanding job or athlete
-            </option>
+            <option value="1.2">Sedentary (little or no exercise)</option>
+            <option value="1.375">Light Exercise (1–3 days/week)</option>
+            <option value="1.55">Moderate Exercise (3–5 days/week)</option>
+            <option value="1.725">Heavy Exercise (6–7 days/week)</option>
+            <option value="1.9">Athlete / Very Active</option>
           </select>
         </div>
 
         {error && <p className="text-sm text-red-500">{error}</p>}
 
-        {/* Submit Button */}
         <button
           type="submit"
           className="w-full py-2.5 rounded-md font-medium flex items-center justify-center gap-2"
@@ -194,45 +171,30 @@ export default function TDEECalculator() {
           }}
         >
           <Calculator size={18} />
-          Calculate TDEE
+          Calculate Calories
         </button>
       </form>
 
-      {/* ================= RESULTS ================= */}
+      {/* RESULT */}
       {result && (
-        <div className="grid md:grid-cols-2 gap-4" aria-live="polite">
-          <ResultCard
-            variant="neutral"
-            icon={<BarChart size={20} />}
-            label="Basal Metabolic Rate (BMR)"
-            value={`${result.bmr} calories/day`}
-          />
-
+        <div className="space-y-4">
           <ResultCard
             variant="primary"
             icon={<BarChart size={20} />}
-            label="Total Daily Energy Expenditure (TDEE)"
-            value={`${result.tdee} calories/day`}
+            label="Estimated Daily Calories"
+            value={`${result.calories} calories/day`}
           />
 
-          <ResultCard
-            variant="neutral"
-            icon={<BarChart size={20} />}
-            label="Calories for Weight Loss"
-            value={`${result.weightLoss} calories/day`}
-          />
-
-          <ResultCard
-            variant="neutral"
-            icon={<BarChart size={20} />}
-            label="Calories for Weight Gain"
-            value={`${result.weightGain} calories/day`}
-          />
+          <p className="text-sm opacity-80">
+            Your Basal Metabolic Rate is approximately{" "}
+            <strong>{result.bmr} calories/day</strong>. Based on your activity
+            level, your estimated daily calorie requirement is{" "}
+            <strong>{result.calories} calories/day</strong>.
+          </p>
         </div>
       )}
 
-      {/* ================= SEO ARTICLE ================= */}
-      <TDEECalculatorArticle />
+      <CalorieCalculatorArticle/>
     </section>
   );
 }

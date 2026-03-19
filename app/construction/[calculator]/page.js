@@ -4,6 +4,7 @@ import CONSTRUCTION_CALCULATOR_MAP from "../../../data/construction";
 import calculators from "@/data/calculators";
 import { buildCalculatorMetadata } from "@/lib/seo";
 import CalculatorPager from "../../../components/CalculatorPager";
+import { FULL_BASE_URL } from "../../../lib/constant";
 
 /* =====================================
    ✅ SEO META
@@ -48,7 +49,7 @@ export default async function CalculatorPage({ params }) {
     name: `${title} Calculator`,
     applicationCategory: "BusinessApplication",
     operatingSystem: "All",
-    url: `https://yourdomain.com/construction/${calculator}`,
+    url: `${FULL_BASE_URL}/construction/${calculator}`,
     offers: {
       "@type": "Offer",
       price: "0",
@@ -64,19 +65,19 @@ export default async function CalculatorPage({ params }) {
         "@type": "ListItem",
         position: 1,
         name: "Home",
-        item: "https://yourdomain.com",
+        item: FULL_BASE_URL,
       },
       {
         "@type": "ListItem",
         position: 2,
         name: "Construction Calculators",
-        item: "https://yourdomain.com/construction",
+        item: `${FULL_BASE_URL}/construction`,
       },
       {
         "@type": "ListItem",
         position: 3,
         name: `${title} Calculator`,
-        item: `https://yourdomain.com/construction/${calculator}`,
+        item: `${FULL_BASE_URL}/construction/${calculator}`,
       },
     ],
   };

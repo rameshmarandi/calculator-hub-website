@@ -81,6 +81,7 @@ const calculators = {
     { slug: "bmi-calculator", name: "BMI Calculator", ui: "health" },
     { slug: "bmr-calculator", name: "BMR Calculator", ui: "health" },
     { slug: "tdee-calculator", name: "TDEE Calculator", ui: "health" },
+    { slug: "calorie-calculator", name: "Calorie Calculator", ui: "health" },
     { slug: "ideal-weight-calculator", name: "Ideal Weight Calculator", ui: "health" },
     { slug: "body-fat-percentage-calculator", name: "Body Fat Percentage Calculator", ui: "health" },
     { slug: "calorie-intake-calculator", name: "Calorie Intake Calculator", ui: "health" },

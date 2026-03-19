@@ -4,6 +4,7 @@ import ASTROLOGY_CALCULATOR_MAP from "../../../data/astrology";
 import calculators from "@/data/calculators";
 import { buildCalculatorMetadata } from "@/lib/seo";
 import CalculatorPager from "../../../components/CalculatorPager";
+import { FULL_BASE_URL } from "../../../lib/constant";
 
 /* =====================================
    STATIC PARAMS (REQUIRED FOR EXPORT)
@@ -64,19 +65,19 @@ export default async function CalculatorPage({ params }) {
         "@type": "ListItem",
         position: 1,
         name: "Home",
-        item: "https://yourdomain.com",
+        item:FULL_BASE_URL,
       },
       {
         "@type": "ListItem",
         position: 2,
         name: "Astrology Calculators",
-        item: "https://yourdomain.com/astrology",
+        item: `${FULL_BASE_URL}/astrology`,
       },
       {
         "@type": "ListItem",
         position: 3,
         name: `${title} Calculator`,
-        item: `https://yourdomain.com/astrology/${calculator}`,
+        item: `${FULL_BASE_URL}/astrology/${calculator}`,
       },
     ],
   };

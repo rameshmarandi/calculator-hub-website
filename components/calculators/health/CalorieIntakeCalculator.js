@@ -3,8 +3,9 @@
 import { useState } from "react";
 import { Calculator, BarChart } from "lucide-react";
 
-import { PercentageInput } from "../../inputs/PercentageInput";
+import { AmountInput } from "../../inputs/AmountInput";
 import { ResultCard } from "../../ResultCard";
+import CalorieIntakeCalculatorArticle from "../../content/health/CalorieIntakeCalculatorArticle";
 
 export default function CalorieIntakeCalculator() {
   const [gender, setGender] = useState("male");
@@ -18,25 +19,29 @@ export default function CalorieIntakeCalculator() {
   const [error, setError] = useState("");
 
   /* ---------------- VALIDATION ---------------- */
-  function validate() {
-    if (!age || Number(age) <= 0) {
-      setError("Please enter valid age.");
-      return false;
-    }
+ function validate() {
+  const a = Number(age);
+  const w = Number(weight);
+  const h = Number(height);
 
-    if (!weight || Number(weight) <= 0) {
-      setError("Please enter valid weight.");
-      return false;
-    }
-
-    if (!height || Number(height) <= 0) {
-      setError("Please enter valid height.");
-      return false;
-    }
-
-    setError("");
-    return true;
+  if (!a || a < 10 || a > 100) {
+    setError("Age must be between 10 and 100 years.");
+    return false;
   }
+
+  if (!w || w < 30 || w > 300) {
+    setError("Weight must be between 30 kg and 300 kg.");
+    return false;
+  }
+
+  if (!h || h < 100 || h > 250) {
+    setError("Height must be between 100 cm and 250 cm.");
+    return false;
+  }
+
+  setError("");
+  return true;
+}
 
   /* ---------------- CALCULATION ---------------- */
   function calculateCalories(e) {
@@ -48,19 +53,19 @@ export default function CalorieIntakeCalculator() {
     const h = Number(height);
     const factor = Number(activity);
 
-    // Harris-Benedict BMR
-    let bmr = 0;
+    /* -------- Mifflin-St Jeor BMR -------- */
+    let bmr;
+
     if (gender === "male") {
-      bmr = 88.36 + 13.4 * w + 4.8 * h - 5.7 * a;
+      bmr = 10 * w + 6.25 * h - 5 * a + 5;
     } else {
-      bmr = 447.6 + 9.2 * w + 3.1 * h - 4.3 * a;
+      bmr = 10 * w + 6.25 * h - 5 * a - 161;
     }
 
     const tdee = bmr * factor;
 
     let targetCalories = tdee;
 
-    // Goal adjustment
     if (goal === "lose") {
       targetCalories = tdee - 500;
     } else if (goal === "gain") {
@@ -80,22 +85,26 @@ export default function CalorieIntakeCalculator() {
       style={{
         backgroundColor: "var(--surface)",
         border: "1px solid var(--border)",
-      }}>
+      }}
+    >
       {/* ================= HEADER ================= */}
       <header>
         <h1 className="text-2xl font-bold mb-1">Calorie Intake Calculator</h1>
         <p className="text-sm leading-relaxed">
-          Use this Calorie Intake Calculator to find how many calories you
-          should eat daily to maintain, lose, or gain weight.
+          Use this Calorie Intake Calculator to estimate how many calories you
+          should eat daily to maintain, lose, or gain weight based on your body
+          and activity level.
         </p>
       </header>
 
       {/* ================= FORM ================= */}
       <form onSubmit={calculateCalories} className="space-y-4">
+
         {/* ===== Gender Tabs ===== */}
         <div
           className="flex rounded-md overflow-hidden"
-          style={{ border: "1px solid var(--border)" }}>
+          style={{ border: "1px solid var(--border)" }}
+        >
           <button
             type="button"
             onClick={() => setGender("male")}
@@ -104,7 +113,8 @@ export default function CalorieIntakeCalculator() {
               backgroundColor:
                 gender === "male" ? "var(--primary)" : "transparent",
               color: gender === "male" ? "#fff" : "var(--text)",
-            }}>
+            }}
+          >
             Male
           </button>
 
@@ -117,93 +127,92 @@ export default function CalorieIntakeCalculator() {
                 gender === "female" ? "var(--primary)" : "transparent",
               color: gender === "female" ? "#fff" : "var(--text)",
               borderLeft: "1px solid var(--border)",
-            }}>
+            }}
+          >
             Female
           </button>
         </div>
 
-        <PercentageInput
+        {/* Inputs */}
+        <AmountInput
           label="Age (years)"
           value={age}
           onChange={setAge}
           placeholder="30"
+          prefix=""
+          type="number"
+
         />
 
-        <PercentageInput
+        <AmountInput
           label="Weight (kg)"
           value={weight}
           onChange={setWeight}
           placeholder="70"
+          prefix=""
+          type="number"
         />
 
-        <PercentageInput
+        <AmountInput
           label="Height (cm)"
           value={height}
           onChange={setHeight}
           placeholder="170"
+          prefix=""
+          type="number"
         />
 
-        {/* ===== Activity Level ===== */}
-        <div className="space-y-2">
-          <p className="text-sm font-medium">Activity Level</p>
-
-          {[
-            { label: "Sedentary", value: "1.2" },
-            { label: "Lightly Active", value: "1.375" },
-            { label: "Moderately Active", value: "1.55" },
-            { label: "Very Active", value: "1.725" },
-            { label: "Extra Active", value: "1.9" },
-          ].map((item) => (
-            <button
-              key={item.value}
-              type="button"
-              onClick={() => setActivity(item.value)}
-              className="w-full text-left px-3 py-2 rounded text-sm"
-              style={{
-                border: "1px solid var(--border)",
-                backgroundColor:
-                  activity === item.value ? "var(--primary)" : "transparent",
-                color: activity === item.value ? "#fff" : "var(--text)",
-              }}>
-              {item.label}
-            </button>
-          ))}
+        {/* ===== Activity Level Select ===== */}
+        <div className="space-y-1">
+          <label className="text-sm font-medium">Activity Level</label>
+          <select
+            value={activity}
+            onChange={(e) => setActivity(e.target.value)}
+            className="w-full rounded-md px-3 py-2 text-sm"
+            style={{
+              border: "1px solid var(--border)",
+              backgroundColor: "var(--surface)",
+              color: "var(--text)",
+            }}
+          >
+            <option value="1.2">Sedentary</option>
+            <option value="1.375">Lightly Active</option>
+            <option value="1.55">Moderately Active</option>
+            <option value="1.725">Very Active</option>
+            <option value="1.9">Extra Active</option>
+          </select>
         </div>
 
-        {/* ===== Goal Selection ===== */}
-        <div className="space-y-2">
-          <p className="text-sm font-medium">Goal</p>
-
-          {[
-            { label: "Maintain Weight", value: "maintain" },
-            { label: "Lose Weight", value: "lose" },
-            { label: "Gain Weight", value: "gain" },
-          ].map((item) => (
-            <button
-              key={item.value}
-              type="button"
-              onClick={() => setGoal(item.value)}
-              className="w-full text-left px-3 py-2 rounded text-sm"
-              style={{
-                border: "1px solid var(--border)",
-                backgroundColor:
-                  goal === item.value ? "var(--primary)" : "transparent",
-                color: goal === item.value ? "#fff" : "var(--text)",
-              }}>
-              {item.label}
-            </button>
-          ))}
+        {/* ===== Goal Select ===== */}
+        <div className="space-y-1">
+          <label className="text-sm font-medium">Goal</label>
+          <select
+            value={goal}
+            onChange={(e) => setGoal(e.target.value)}
+            className="w-full rounded-md px-3 py-2 text-sm"
+            style={{
+              border: "1px solid var(--border)",
+              backgroundColor: "var(--surface)",
+              color: "var(--text)",
+            }}
+          >
+            <option value="maintain">Maintain Weight</option>
+            <option value="lose">Lose Weight</option>
+            <option value="gain">Gain Weight</option>
+          </select>
         </div>
 
         {error && <p className="text-sm text-red-500">{error}</p>}
 
+        {/* Calculate Button */}
         <button
           type="submit"
           className="w-full py-2.5 rounded-md font-medium flex items-center justify-center gap-2"
           style={{
             backgroundColor: "var(--primary)",
             color: "#fff",
-          }}>
+          }}
+        >
           <Calculator size={18} />
           Calculate Daily Calories
         </button>
@@ -235,55 +244,8 @@ export default function CalorieIntakeCalculator() {
         </div>
       )}
 
-      {/* ================= SEO BLOG CONTENT ================= */}
-      <article className="space-y-4 text-sm leading-relaxed">
-        <h2 className="font-semibold text-base">
-          How to Calculate Daily Calorie Intake
-        </h2>
-
-        <p>
-          Daily calorie intake is the number of calories you should eat each day
-          based on your body, activity level, and fitness goal. Eating the right
-          number of calories helps you maintain, lose, or gain weight safely.
-        </p>
-
-        <h3 className="font-semibold">Calorie Intake Formula</h3>
-
-        <p
-          className="font-mono text-xs p-3 rounded"
-          style={{ backgroundColor: "var(--surface-2)" }}>
-          BMR = Basal Metabolic Rate TDEE = BMR × Activity Factor Daily Calories
-          = TDEE ± Goal Adjustment
-        </p>
-
-        <ul className="list-disc pl-5">
-          <li>500 calorie deficit ≈ weight loss</li>
-          <li>500 calorie surplus ≈ weight gain</li>
-          <li>Maintenance calories keep weight stable</li>
-        </ul>
-
-        <h3 className="font-semibold">Why Use a Calorie Intake Calculator?</h3>
-
-        <ul className="list-disc pl-5">
-          <li>Plan diet effectively</li>
-          <li>Support fat loss or muscle gain</li>
-          <li>Avoid under-eating or overeating</li>
-          <li>Useful for fitness & nutrition tracking</li>
-        </ul>
-
-        <p>
-          This calorie intake calculator provides a realistic daily calorie
-          target. For best results, combine it with balanced nutrition and
-          regular exercise.
-        </p>
-      </article>
-
-      {/* ================= DISCLAIMER ================= */}
-      <aside className="text-xs text-muted">
-        ⚠️ Calorie needs are estimates and may vary based on metabolism, body
-        composition, and health conditions. Consult a professional for
-        personalized advice.
-      </aside>
+      {/* ================= SEO ARTICLE ================= */}
+      <CalorieIntakeCalculatorArticle />
     </section>
   );
 }
