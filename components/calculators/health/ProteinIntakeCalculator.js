@@ -3,8 +3,9 @@
 import { useState } from "react";
 import { Calculator, BarChart } from "lucide-react";
 
-import { PercentageInput } from "../../inputs/PercentageInput";
+import { AmountInput } from "../../inputs/AmountInput";
 import { ResultCard } from "../../ResultCard";
+import ProteinIntakeCalculatorArticle from "../../content/health/ProteinIntakeCalculatorArticle";
 
 export default function ProteinIntakeCalculator() {
   const [weight, setWeight] = useState("");
@@ -16,8 +17,15 @@ export default function ProteinIntakeCalculator() {
 
   /* ---------------- VALIDATION ---------------- */
   function validate() {
-    if (!weight || Number(weight) <= 0) {
-      setError("Please enter valid body weight.");
+    const w = Number(weight);
+
+    if (!weight || isNaN(w) || w <= 0) {
+      setError("Please enter a valid body weight.");
+      return false;
+    }
+
+    if (w > 400) {
+      setError("Weight value seems unrealistic.");
       return false;
     }
 
@@ -28,20 +36,25 @@ export default function ProteinIntakeCalculator() {
   /* ---------------- CALCULATION ---------------- */
   function calculateProtein(e) {
     e.preventDefault();
+
     if (!validate()) return;
 
     const w = Number(weight);
 
-    // Base protein per kg
-    let proteinPerKg = 0.8;
+    const activityFactor = {
+      sedentary: 0.8,
+      light: 1.0,
+      moderate: 1.2,
+      active: 1.5,
+    };
 
-    if (activity === "light") proteinPerKg = 1.0;
-    if (activity === "moderate") proteinPerKg = 1.2;
-    if (activity === "active") proteinPerKg = 1.5;
+    const goalAdjustment = {
+      maintain: 0,
+      lose: 0.2,
+      gain: 0.4,
+    };
 
-    // Goal adjustment
-    if (goal === "lose") proteinPerKg += 0.2;
-    if (goal === "gain") proteinPerKg += 0.4;
+    const proteinPerKg = activityFactor[activity] + goalAdjustment[goal];
 
     const protein = w * proteinPerKg;
 
@@ -57,98 +70,85 @@ export default function ProteinIntakeCalculator() {
       style={{
         backgroundColor: "var(--surface)",
         border: "1px solid var(--border)",
-      }}>
+      }}
+    >
       {/* ================= HEADER ================= */}
       <header>
         <h1 className="text-2xl font-bold mb-1">Protein Intake Calculator</h1>
+
         <p className="text-sm leading-relaxed">
-          Use this Protein Intake Calculator to find how much protein you should
-          consume daily based on your body weight, activity level, and fitness
-          goal.
+          Estimate how much protein your body needs daily based on your body
+          weight, activity level, and fitness goal.
         </p>
       </header>
 
       {/* ================= FORM ================= */}
       <form onSubmit={calculateProtein} className="space-y-4">
-        <PercentageInput
+        {/* Weight */}
+        <AmountInput
           label="Body Weight (kg)"
           value={weight}
           onChange={setWeight}
           placeholder="70"
+          prefix=""
         />
 
-        {/* ===== Activity Level ===== */}
+        {/* Activity Level */}
         <div className="space-y-2">
-          <p className="text-sm font-medium">Activity Level</p>
+          <label className="text-sm font-medium">Activity Level</label>
 
-          {[
-            {
-              label: "Sedentary",
-              value: "sedentary",
-              desc: "Little or no exercise",
-            },
-            { label: "Lightly Active", value: "light", desc: "1–3 days/week" },
-            {
-              label: "Moderately Active",
-              value: "moderate",
-              desc: "3–5 days/week",
-            },
-            {
-              label: "Very Active",
-              value: "active",
-              desc: "6–7 days/week / training",
-            },
-          ].map((item) => (
-            <button
-              key={item.value}
-              type="button"
-              onClick={() => setActivity(item.value)}
-              className="w-full text-left px-3 py-2 rounded text-sm"
-              style={{
-                border: "1px solid var(--border)",
-                backgroundColor:
-                  activity === item.value ? "var(--primary)" : "transparent",
-                color: activity === item.value ? "#fff" : "var(--text)",
-              }}>
-              <strong>{item.label}</strong> — {item.desc}
-            </button>
-          ))}
+          <select
+            value={activity}
+            onChange={(e) => setActivity(e.target.value)}
+            className="w-full px-3 py-2 rounded-md text-sm"
+            style={{
+              border: "1px solid var(--border)",
+              backgroundColor: "var(--surface)",
+            }}
+          >
+            <option value="sedentary">Sedentary (little or no exercise)</option>
+
+            <option value="light">Lightly Active (1–3 days/week)</option>
+
+            <option value="moderate">Moderately Active (3–5 days/week)</option>
+
+            <option value="active">
+              Very Active (6–7 days/week / training)
+            </option>
+          </select>
         </div>
 
-        {/* ===== Goal ===== */}
+        {/* Goal */}
         <div className="space-y-2">
-          <p className="text-sm font-medium">Fitness Goal</p>
+          <label className="text-sm font-medium">Fitness Goal</label>
 
-          {[
-            { label: "Maintain Weight", value: "maintain" },
-            { label: "Lose Fat", value: "lose" },
-            { label: "Gain Muscle", value: "gain" },
-          ].map((item) => (
-            <button
-              key={item.value}
-              type="button"
-              onClick={() => setGoal(item.value)}
-              className="w-full text-left px-3 py-2 rounded text-sm"
-              style={{
-                border: "1px solid var(--border)",
-                backgroundColor:
-                  goal === item.value ? "var(--primary)" : "transparent",
-                color: goal === item.value ? "#fff" : "var(--text)",
-              }}>
-              {item.label}
-            </button>
-          ))}
+          <select
+            value={goal}
+            onChange={(e) => setGoal(e.target.value)}
+            className="w-full px-3 py-2 rounded-md text-sm"
+            style={{
+              border: "1px solid var(--border)",
+              backgroundColor: "var(--surface)",
+            }}
+          >
+            <option value="maintain">Maintain Weight</option>
+            <option value="lose">Lose Fat</option>
+            <option value="gain">Gain Muscle</option>
+          </select>
         </div>
 
+        {/* Error */}
         {error && <p className="text-sm text-red-500">{error}</p>}
 
+        {/* Submit */}
         <button
           type="submit"
           className="w-full py-2.5 rounded-md font-medium flex items-center justify-center gap-2"
           style={{
             backgroundColor: "var(--primary)",
             color: "#fff",
-          }}>
+          }}
+        >
           <Calculator size={18} />
           Calculate Protein Intake
         </button>
@@ -173,53 +173,8 @@ export default function ProteinIntakeCalculator() {
         </div>
       )}
 
-      {/* ================= SEO BLOG CONTENT ================= */}
-      <article className="space-y-4 text-sm leading-relaxed">
-        <h2 className="font-semibold text-base">
-          How Much Protein Do You Need Per Day?
-        </h2>
-
-        <p>
-          Protein intake depends on body weight, physical activity, and fitness
-          goals. Protein is essential for muscle repair, metabolism, immunity,
-          and overall health.
-        </p>
-
-        <h3 className="font-semibold">Protein Intake Formula</h3>
-
-        <p
-          className="font-mono text-xs p-3 rounded"
-          style={{ backgroundColor: "var(--surface-2)" }}>
-          Daily Protein (g) = Body Weight (kg) × Protein per kg
-        </p>
-
-        <ul className="list-disc pl-5">
-          <li>Sedentary adults: 0.8 g/kg</li>
-          <li>Active individuals: 1.2 – 1.5 g/kg</li>
-          <li>Muscle gain: up to 2.0 g/kg</li>
-        </ul>
-
-        <h3 className="font-semibold">Why Use a Protein Intake Calculator?</h3>
-
-        <ul className="list-disc pl-5">
-          <li>Support muscle growth & recovery</li>
-          <li>Improve fat loss results</li>
-          <li>Prevent muscle loss during dieting</li>
-          <li>Plan balanced nutrition</li>
-        </ul>
-
-        <p>
-          This protein intake calculator provides a practical daily protein
-          target. Spread protein intake evenly across meals for best results.
-        </p>
-      </article>
-
-      {/* ================= DISCLAIMER ================= */}
-      <aside className="text-xs text-muted">
-        ⚠️ Protein needs are estimates. Excess protein intake may not be
-        suitable for individuals with kidney or medical conditions. Consult a
-        healthcare professional if needed.
-      </aside>
+      {/* ================= ARTICLE ================= */}
+      <ProteinIntakeCalculatorArticle />
     </section>
   );
 }

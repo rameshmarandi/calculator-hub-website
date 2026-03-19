@@ -3,14 +3,16 @@
 import { useState } from "react";
 import { Calculator, BarChart } from "lucide-react";
 
-import { PercentageInput } from "../../inputs/PercentageInput";
+import { AmountInput } from "../../inputs/AmountInput";
 import { ResultCard } from "../../ResultCard";
+import WeightGainCalculatorArticle from "../../content/health/WeightGainCalculatorArticle";
 
 export default function WeightGainCalculator() {
   const [gender, setGender] = useState("male");
   const [age, setAge] = useState("");
   const [weight, setWeight] = useState("");
   const [height, setHeight] = useState("");
+
   const [activity, setActivity] = useState("1.375");
   const [pace, setPace] = useState("slow");
 
@@ -20,17 +22,17 @@ export default function WeightGainCalculator() {
   /* ---------------- VALIDATION ---------------- */
   function validate() {
     if (!age || Number(age) <= 0) {
-      setError("Please enter valid age.");
+      setError("Please enter a valid age.");
       return false;
     }
 
     if (!weight || Number(weight) <= 0) {
-      setError("Please enter valid weight.");
+      setError("Please enter a valid weight.");
       return false;
     }
 
     if (!height || Number(height) <= 0) {
-      setError("Please enter valid height.");
+      setError("Please enter a valid height.");
       return false;
     }
 
@@ -48,8 +50,9 @@ export default function WeightGainCalculator() {
     const h = Number(height);
     const factor = Number(activity);
 
-    // Harris-Benedict BMR
+    // Harris-Benedict Formula
     let bmr = 0;
+
     if (gender === "male") {
       bmr = 88.36 + 13.4 * w + 4.8 * h - 5.7 * a;
     } else {
@@ -58,7 +61,8 @@ export default function WeightGainCalculator() {
 
     const tdee = bmr * factor;
 
-    let surplus = 300; // slow gain
+    let surplus = 300;
+
     if (pace === "moderate") surplus = 500;
     if (pace === "fast") surplus = 700;
 
@@ -78,22 +82,26 @@ export default function WeightGainCalculator() {
       style={{
         backgroundColor: "var(--surface)",
         border: "1px solid var(--border)",
-      }}>
+      }}
+    >
       {/* ================= HEADER ================= */}
       <header>
         <h1 className="text-2xl font-bold mb-1">Weight Gain Calculator</h1>
+
         <p className="text-sm leading-relaxed">
-          Use this Weight Gain Calculator to estimate how many calories you need
-          daily to gain weight safely based on your body and activity level.
+          Use this Weight Gain Calculator to estimate how many calories you
+          should consume daily to gain weight safely based on your body
+          measurements and activity level.
         </p>
       </header>
 
       {/* ================= FORM ================= */}
       <form onSubmit={calculateWeightGain} className="space-y-4">
-        {/* ===== Gender Tabs ===== */}
+        {/* Gender Tabs */}
         <div
           className="flex rounded-md overflow-hidden"
-          style={{ border: "1px solid var(--border)" }}>
+          style={{ border: "1px solid var(--border)" }}
+        >
           <button
             type="button"
             onClick={() => setGender("male")}
@@ -102,7 +110,8 @@ export default function WeightGainCalculator() {
               backgroundColor:
                 gender === "male" ? "var(--primary)" : "transparent",
               color: gender === "male" ? "#fff" : "var(--text)",
-            }}>
+            }}
+          >
             Male
           </button>
 
@@ -115,92 +124,87 @@ export default function WeightGainCalculator() {
                 gender === "female" ? "var(--primary)" : "transparent",
               color: gender === "female" ? "#fff" : "var(--text)",
               borderLeft: "1px solid var(--border)",
-            }}>
+            }}
+          >
             Female
           </button>
         </div>
 
-        <PercentageInput
+        {/* Inputs */}
+        <AmountInput
           label="Age (years)"
           value={age}
           onChange={setAge}
-          placeholder="25"
+          placeholder="30"
+          prefix=""
         />
 
-        <PercentageInput
+        <AmountInput
           label="Current Weight (kg)"
           value={weight}
           onChange={setWeight}
-          placeholder="60"
+          placeholder="70"
+          prefix=""
         />
 
-        <PercentageInput
+        <AmountInput
           label="Height (cm)"
           value={height}
           onChange={setHeight}
           placeholder="170"
+          prefix=""
         />
 
-        {/* ===== Activity Level ===== */}
+        {/* Activity Level */}
         <div className="space-y-2">
-          <p className="text-sm font-medium">Activity Level</p>
+          <label className="text-sm font-medium">Activity Level</label>
 
-          {[
-            { label: "Sedentary", value: "1.2" },
-            { label: "Lightly Active", value: "1.375" },
-            { label: "Moderately Active", value: "1.55" },
-            { label: "Very Active", value: "1.725" },
-          ].map((item) => (
-            <button
-              key={item.value}
-              type="button"
-              onClick={() => setActivity(item.value)}
-              className="w-full text-left px-3 py-2 rounded text-sm"
-              style={{
-                border: "1px solid var(--border)",
-                backgroundColor:
-                  activity === item.value ? "var(--primary)" : "transparent",
-                color: activity === item.value ? "#fff" : "var(--text)",
-              }}>
-              {item.label}
-            </button>
-          ))}
+          <select
+            value={activity}
+            onChange={(e) => setActivity(e.target.value)}
+            className="w-full p-2 rounded-md text-sm"
+            style={{
+              border: "1px solid var(--border)",
+              backgroundColor: "var(--surface)",
+            }}
+          >
+            <option value="1.2">Sedentary — little or no exercise</option>
+            <option value="1.375">Lightly Active — 1–3 days/week</option>
+            <option value="1.55">Moderately Active — 3–5 days/week</option>
+            <option value="1.725">Very Active — 6–7 days/week</option>
+          </select>
         </div>
 
-        {/* ===== Weight Gain Pace ===== */}
+        {/* Weight Gain Pace */}
         <div className="space-y-2">
-          <p className="text-sm font-medium">Weight Gain Pace</p>
+          <label className="text-sm font-medium">Weight Gain Pace</label>
 
-          {[
-            { label: "Slow (lean gain)", value: "slow", desc: "+300 kcal/day" },
-            { label: "Moderate", value: "moderate", desc: "+500 kcal/day" },
-            { label: "Fast", value: "fast", desc: "+700 kcal/day" },
-          ].map((item) => (
-            <button
-              key={item.value}
-              type="button"
-              onClick={() => setPace(item.value)}
-              className="w-full text-left px-3 py-2 rounded text-sm"
-              style={{
-                border: "1px solid var(--border)",
-                backgroundColor:
-                  pace === item.value ? "var(--primary)" : "transparent",
-                color: pace === item.value ? "#fff" : "var(--text)",
-              }}>
-              <strong>{item.label}</strong> — {item.desc}
-            </button>
-          ))}
+          <select
+            value={pace}
+            onChange={(e) => setPace(e.target.value)}
+            className="w-full p-2 rounded-md text-sm"
+            style={{
+              border: "1px solid var(--border)",
+              backgroundColor: "var(--surface)",
+            }}
+          >
+            <option value="slow">Slow (Lean Gain) — +300 kcal/day</option>
+            <option value="moderate">Moderate — +500 kcal/day</option>
+            <option value="fast">Fast — +700 kcal/day</option>
+          </select>
         </div>
 
         {error && <p className="text-sm text-red-500">{error}</p>}
 
+        {/* Submit */}
         <button
           type="submit"
           className="w-full py-2.5 rounded-md font-medium flex items-center justify-center gap-2"
           style={{
             backgroundColor: "var(--primary)",
             color: "#fff",
-          }}>
+          }}
+        >
           <Calculator size={18} />
           Calculate Weight Gain Calories
         </button>
@@ -232,51 +236,8 @@ export default function WeightGainCalculator() {
         </div>
       )}
 
-      {/* ================= SEO BLOG CONTENT ================= */}
-      <article className="space-y-4 text-sm leading-relaxed">
-        <h2 className="font-semibold text-base">How to Gain Weight Safely</h2>
-
-        <p>
-          Healthy weight gain requires consuming more calories than your body
-          burns while maintaining proper nutrition and strength training.
-          Gaining weight too fast can lead to excess fat instead of muscle.
-        </p>
-
-        <h3 className="font-semibold">Weight Gain Formula</h3>
-
-        <p
-          className="font-mono text-xs p-3 rounded"
-          style={{ backgroundColor: "var(--surface-2)" }}>
-          BMR = Basal Metabolic Rate TDEE = BMR × Activity Factor Weight Gain
-          Calories = TDEE + Calorie Surplus
-        </p>
-
-        <ul className="list-disc pl-5">
-          <li>+300 kcal/day → lean, slow gain</li>
-          <li>+500 kcal/day → balanced weight gain</li>
-          <li>+700 kcal/day → fast gain (more fat risk)</li>
-        </ul>
-
-        <h3 className="font-semibold">Tips for Healthy Weight Gain</h3>
-
-        <ul className="list-disc pl-5">
-          <li>Eat protein-rich foods</li>
-          <li>Strength train regularly</li>
-          <li>Increase calories gradually</li>
-          <li>Track progress weekly</li>
-        </ul>
-
-        <p>
-          This weight gain calculator provides a practical daily calorie target.
-          Combine it with a balanced diet and exercise for best results.
-        </p>
-      </article>
-
-      {/* ================= DISCLAIMER ================= */}
-      <aside className="text-xs text-muted">
-        ⚠️ Weight gain results vary by individual. Consult a healthcare or
-        fitness professional for personalized guidance.
-      </aside>
+      {/* Article */}
+      <WeightGainCalculatorArticle />
     </section>
   );
 }

@@ -3,8 +3,9 @@
 import { useState } from "react";
 import { Calculator, BarChart } from "lucide-react";
 
-import { PercentageInput } from "../../inputs/PercentageInput";
+import { AmountInput } from "../../inputs/AmountInput";
 import { ResultCard } from "../../ResultCard";
+import WaterIntakeCalculatorArticle from "../../content/health/WaterIntakeCalculatorArticle";
 
 export default function WaterIntakeCalculator() {
   const [weight, setWeight] = useState("");
@@ -15,8 +16,15 @@ export default function WaterIntakeCalculator() {
 
   /* ---------------- VALIDATION ---------------- */
   function validate() {
-    if (!weight || Number(weight) <= 0) {
-      setError("Please enter valid body weight.");
+    const w = Number(weight);
+
+    if (!weight || isNaN(w) || w <= 0) {
+      setError("Please enter a valid body weight.");
+      return false;
+    }
+
+    if (w < 20 || w > 300) {
+      setError("Body weight must be between 20 kg and 300 kg.");
       return false;
     }
 
@@ -27,19 +35,20 @@ export default function WaterIntakeCalculator() {
   /* ---------------- CALCULATION ---------------- */
   function calculateWater(e) {
     e.preventDefault();
+
     if (!validate()) return;
 
     const w = Number(weight);
 
-    // Base water requirement (ml per kg)
-    let mlPerKg = 35; // normal adult
+    // Base hydration multiplier
+    let mlPerKg = 35;
 
     if (activity === "active") mlPerKg = 40;
     if (activity === "veryActive") mlPerKg = 45;
 
     const totalMl = w * mlPerKg;
     const liters = totalMl / 1000;
-    const glasses = liters / 0.25; // 250ml glass
+    const glasses = totalMl / 250;
 
     setResult({
       liters: liters.toFixed(2),
@@ -53,71 +62,65 @@ export default function WaterIntakeCalculator() {
       style={{
         backgroundColor: "var(--surface)",
         border: "1px solid var(--border)",
-      }}>
+      }}
+    >
       {/* ================= HEADER ================= */}
       <header>
         <h1 className="text-2xl font-bold mb-1">Water Intake Calculator</h1>
+
         <p className="text-sm leading-relaxed">
-          Use this Water Intake Calculator to estimate how much water you should
-          drink daily based on your body weight and activity level.
+          Estimate how much water you should drink daily based on body weight
+          and activity level.
         </p>
       </header>
 
       {/* ================= FORM ================= */}
       <form onSubmit={calculateWater} className="space-y-4">
-        <PercentageInput
+        {/* ===== Body Weight ===== */}
+        <AmountInput
           label="Body Weight (kg)"
           value={weight}
           onChange={setWeight}
           placeholder="70"
+          prefix=""
         />
 
         {/* ===== Activity Level ===== */}
+        {/* ===== Activity Level ===== */}
         <div className="space-y-2">
-          <p className="text-sm font-medium">Activity Level</p>
+          <label className="text-sm font-medium">Activity Level</label>
 
-          {[
-            {
-              label: "Normal",
-              value: "normal",
-              desc: "Office work / low activity",
-            },
-            {
-              label: "Active",
-              value: "active",
-              desc: "Workout or physical job",
-            },
-            {
-              label: "Very Active",
-              value: "veryActive",
-              desc: "Intense exercise / hot climate",
-            },
-          ].map((item) => (
-            <button
-              key={item.value}
-              type="button"
-              onClick={() => setActivity(item.value)}
-              className="w-full text-left px-3 py-2 rounded text-sm"
-              style={{
-                border: "1px solid var(--border)",
-                backgroundColor:
-                  activity === item.value ? "var(--primary)" : "transparent",
-                color: activity === item.value ? "#fff" : "var(--text)",
-              }}>
-              <strong>{item.label}</strong> — {item.desc}
-            </button>
-          ))}
+          <select
+            value={activity}
+            onChange={(e) => setActivity(e.target.value)}
+            className="w-full px-3 py-2 rounded text-sm"
+            style={{
+              border: "1px solid var(--border)",
+              backgroundColor: "var(--surface)",
+              color: "var(--text)",
+            }}
+          >
+            <option value="normal">Normal — Office work / low activity</option>
+
+            <option value="active">Active — Workout or physical job</option>
+
+            <option value="veryActive">
+              Very Active — Intense exercise / hot climate
+            </option>
+          </select>
         </div>
 
         {error && <p className="text-sm text-red-500">{error}</p>}
 
+        {/* ===== Submit Button ===== */}
         <button
           type="submit"
           className="w-full py-2.5 rounded-md font-medium flex items-center justify-center gap-2"
           style={{
             backgroundColor: "var(--primary)",
             color: "#fff",
-          }}>
+          }}
+        >
           <Calculator size={18} />
           Calculate Water Intake
         </button>
@@ -142,54 +145,8 @@ export default function WaterIntakeCalculator() {
         </div>
       )}
 
-      {/* ================= SEO BLOG CONTENT ================= */}
-      <article className="space-y-4 text-sm leading-relaxed">
-        <h2 className="font-semibold text-base">
-          How Much Water Should You Drink Per Day?
-        </h2>
-
-        <p>
-          Daily water intake depends on body weight, physical activity, climate,
-          and overall health. Drinking enough water helps regulate body
-          temperature, improve digestion, and maintain energy levels.
-        </p>
-
-        <h3 className="font-semibold">Water Intake Calculation Formula</h3>
-
-        <p
-          className="font-mono text-xs p-3 rounded"
-          style={{ backgroundColor: "var(--surface-2)" }}>
-          Daily Water (ml) = Body Weight (kg) × Water per kg Daily Water
-          (liters) = ml ÷ 1000
-        </p>
-
-        <ul className="list-disc pl-5">
-          <li>Normal adults: ~35 ml per kg</li>
-          <li>Active individuals: ~40 ml per kg</li>
-          <li>Very active / hot climate: ~45 ml per kg</li>
-        </ul>
-
-        <h3 className="font-semibold">Why Use a Water Intake Calculator?</h3>
-
-        <ul className="list-disc pl-5">
-          <li>Maintain proper hydration</li>
-          <li>Improve digestion & metabolism</li>
-          <li>Support workouts & recovery</li>
-          <li>Prevent dehydration-related issues</li>
-        </ul>
-
-        <p>
-          This water intake calculator provides a practical daily hydration
-          target. Increase intake during exercise, illness, or hot weather.
-        </p>
-      </article>
-
-      {/* ================= DISCLAIMER ================= */}
-      <aside className="text-xs text-muted">
-        ⚠️ Water needs vary by individual. Pregnant women, athletes, and people
-        with medical conditions should consult a healthcare professional for
-        personalized hydration advice.
-      </aside>
+      {/* ================= SEO ARTICLE ================= */}
+      <WaterIntakeCalculatorArticle />
     </section>
   );
 }
