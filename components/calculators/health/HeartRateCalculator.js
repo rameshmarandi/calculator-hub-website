@@ -5,6 +5,8 @@ import { Calculator, Activity } from "lucide-react";
 
 import { PercentageInput } from "../../inputs/PercentageInput";
 import { ResultCard } from "../../ResultCard";
+import HeartRateCalculatorArticle from "./HeartRateCalculatorArticle";
+import { AmountInput } from "../../inputs/AmountInput";
 
 export default function HeartRateCalculator() {
   const [age, setAge] = useState("");
@@ -71,11 +73,12 @@ export default function HeartRateCalculator() {
 
       {/* ================= FORM ================= */}
       <form onSubmit={calculateHeartRate} className="space-y-4">
-        <PercentageInput
+        <AmountInput
           label="Age (years)"
           value={age}
           onChange={setAge}
           placeholder="30"
+          prefix=""
         />
 
         {error && <p className="text-sm text-red-500">{error}</p>}
@@ -93,98 +96,40 @@ export default function HeartRateCalculator() {
       </form>
 
       {/* ================= RESULT ================= */}
-      {result && (
+      {/* {result && ( */}
         <div className="grid md:grid-cols-3 gap-4" aria-live="polite">
           <ResultCard
             variant="primary"
             icon={<Activity size={20} />}
             label="Maximum Heart Rate"
-            value={`${result.maxHR} bpm`}
+            value={ result?.maxHR ? `${result?.maxHR} bpm` : "-" }
           />
 
           <ResultCard
             variant="neutral"
             icon={<Activity size={20} />}
             label="Fat Burn Zone"
-            value={`${result.zones.fatBurn.min} – ${result.zones.fatBurn.max} bpm`}
+            value={`${result?.zones?.fatBurn?.min} – ${result?.zones?.fatBurn.max} bpm`}
           />
 
           <ResultCard
             variant="neutral"
             icon={<Activity size={20} />}
             label="Cardio Zone"
-            value={`${result.zones.cardio.min} – ${result.zones.cardio.max} bpm`}
+            value={`${result?.zones?.cardio.min} – ${result?.zones?.cardio.max} bpm`}
           />
 
           <ResultCard
             variant="warning"
             icon={<Activity size={20} />}
             label="Peak Zone"
-            value={`${result.zones.peak.min} – ${result.zones.peak.max} bpm`}
+            value={`${result?.zones.peak.min} – ${result?.zones.peak.max} bpm`}
           />
         </div>
-      )}
+      {/* )} */}
 
       {/* ================= SEO BLOG CONTENT ================= */}
-      <article className="space-y-4 text-sm leading-relaxed">
-        <h2 className="font-semibold text-base">What is Heart Rate?</h2>
-
-        <p>
-          Heart rate refers to the number of times your heart beats per minute
-          (bpm). Monitoring heart rate during exercise helps you understand
-          workout intensity and optimize fitness results.
-        </p>
-
-        <h3 className="font-semibold">Maximum Heart Rate Formula</h3>
-
-        <p
-          className="font-mono text-xs p-3 rounded"
-          style={{ backgroundColor: "var(--surface-2)" }}>
-          Maximum Heart Rate (MHR) = 220 − Age
-        </p>
-
-        <ul className="list-disc pl-5">
-          <li>Simple and widely used formula</li>
-          <li>Provides a safe training reference</li>
-          <li>Actual MHR may vary slightly</li>
-        </ul>
-
-        <h3 className="font-semibold">Target Heart Rate Zones</h3>
-
-        <ul className="list-disc pl-5">
-          <li>
-            <strong>Fat Burn Zone:</strong> 50% – 60% of MHR
-          </li>
-          <li>
-            <strong>Cardio Zone:</strong> 60% – 75% of MHR
-          </li>
-          <li>
-            <strong>Peak Zone:</strong> 75% – 90% of MHR
-          </li>
-        </ul>
-
-        <h3 className="font-semibold">Why Use a Heart Rate Calculator?</h3>
-
-        <ul className="list-disc pl-5">
-          <li>Improve workout efficiency</li>
-          <li>Burn fat more effectively</li>
-          <li>Avoid overtraining</li>
-          <li>Optimize cardiovascular fitness</li>
-        </ul>
-
-        <p>
-          This heart rate calculator provides a safe estimate for training
-          purposes. Beginners should start with lower intensity zones and
-          increase gradually.
-        </p>
-      </article>
-
-      {/* ================= DISCLAIMER ================= */}
-      <aside className="text-xs text-muted">
-        ⚠️ Heart rate values are estimates. People with heart conditions or
-        medical issues should consult a doctor before starting an exercise
-        program.
-      </aside>
+      <HeartRateCalculatorArticle/>
     </section>
   );
 }

@@ -5,6 +5,8 @@ import { Calculator, CalendarDays } from "lucide-react";
 
 import { PercentageInput } from "../../inputs/PercentageInput";
 import { ResultCard } from "../../ResultCard";
+import OvulationCalculatorArticle from "../../content/health/OvulationCalculatorArticle";
+import { AmountInput } from "../../inputs/AmountInput";
 
 export default function OvulationCalculator() {
   const [lmp, setLmp] = useState("");
@@ -89,11 +91,13 @@ export default function OvulationCalculator() {
           />
         </div>
 
-        <PercentageInput
+        <AmountInput
           label="Average Cycle Length (days)"
           value={cycleLength}
           onChange={setCycleLength}
           placeholder="28"
+          prefix=""
+
         />
 
         {error && <p className="text-sm text-red-500">{error}</p>}
@@ -130,61 +134,7 @@ export default function OvulationCalculator() {
       )}
 
       {/* ================= SEO BLOG CONTENT ================= */}
-      <article className="space-y-4 text-sm leading-relaxed">
-        <h2 className="font-semibold text-base">What is Ovulation?</h2>
-
-        <p>
-          Ovulation is the process where an ovary releases an egg, making it
-          available for fertilization. It typically occurs once per menstrual
-          cycle and is the most fertile time for pregnancy.
-        </p>
-
-        <h3 className="font-semibold">Ovulation Calculation Formula</h3>
-
-        <p
-          className="font-mono text-xs p-3 rounded"
-          style={{ backgroundColor: "var(--surface-2)" }}>
-          Ovulation Date = Cycle Length − 14 days Fertile Window = 5 days before
-          ovulation + ovulation day
-        </p>
-
-        <ul className="list-disc pl-5">
-          <li>Sperm can live up to 5 days in the body</li>
-          <li>Egg survives for about 24 hours</li>
-          <li>Fertile window lasts about 6 days</li>
-        </ul>
-
-        <h3 className="font-semibold">Signs of Ovulation</h3>
-
-        <ul className="list-disc pl-5">
-          <li>Change in cervical mucus</li>
-          <li>Mild lower abdominal pain</li>
-          <li>Increased libido</li>
-          <li>Slight rise in body temperature</li>
-        </ul>
-
-        <h3 className="font-semibold">Why Use an Ovulation Calculator?</h3>
-
-        <ul className="list-disc pl-5">
-          <li>Increase chances of pregnancy</li>
-          <li>Understand menstrual cycle better</li>
-          <li>Plan conception naturally</li>
-          <li>Track fertility window easily</li>
-        </ul>
-
-        <p>
-          This ovulation calculator provides an estimate based on average cycle
-          patterns. Ovulation may vary due to stress, illness, or hormonal
-          changes.
-        </p>
-      </article>
-
-      {/* ================= DISCLAIMER ================= */}
-      <aside className="text-xs text-muted">
-        ⚠️ This calculator provides an estimate only and should not be used as a
-        medical diagnosis or contraceptive method. Consult a gynecologist for
-        personalized fertility advice.
-      </aside>
+      <OvulationCalculatorArticle/>
     </section>
   );
 }

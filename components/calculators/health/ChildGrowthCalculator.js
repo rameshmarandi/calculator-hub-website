@@ -5,6 +5,7 @@ import { Calculator, Activity } from "lucide-react";
 
 import { PercentageInput } from "../../inputs/PercentageInput";
 import { ResultCard } from "../../ResultCard";
+import ChildGrowthCalculatorArticle from "../../content/health/ChildGrowthCalculatorArticle";
 
 export default function ChildGrowthCalculator() {
   const [gender, setGender] = useState("male");
@@ -165,54 +166,7 @@ export default function ChildGrowthCalculator() {
       )}
 
       {/* ================= SEO BLOG CONTENT ================= */}
-      <article className="space-y-4 text-sm leading-relaxed">
-        <h2 className="font-semibold text-base">
-          How Child Growth is Assessed
-        </h2>
-
-        <p>
-          Child growth is typically monitored using height, weight, and age.
-          These measurements help identify whether a child is growing at a
-          healthy rate compared to age-based standards.
-        </p>
-
-        <h3 className="font-semibold">Growth Calculation Method</h3>
-
-        <p
-          className="font-mono text-xs p-3 rounded"
-          style={{ backgroundColor: "var(--surface-2)" }}>
-          BMI = Weight (kg) ÷ Height² (meters)
-        </p>
-
-        <ul className="list-disc pl-5">
-          <li>Used as a screening indicator</li>
-          <li>Adjusted for child age</li>
-          <li>Helps identify growth concerns early</li>
-        </ul>
-
-        <h3 className="font-semibold">Why Monitor Child Growth?</h3>
-
-        <ul className="list-disc pl-5">
-          <li>Ensure healthy physical development</li>
-          <li>Detect undernutrition or overweight early</li>
-          <li>Support proper diet and activity planning</li>
-          <li>Track long-term growth patterns</li>
-        </ul>
-
-        <p>
-          Regular growth monitoring helps parents and caregivers understand a
-          child’s development. Sudden changes in growth should always be
-          discussed with a pediatrician.
-        </p>
-      </article>
-
-      {/* ================= DISCLAIMER ================= */}
-      <aside className="text-xs text-muted">
-        ⚠️ This child growth calculator provides a basic screening only and does
-        not replace professional medical assessment. For accurate growth
-        percentiles and diagnosis, consult a pediatrician and use WHO or CDC
-        growth charts.
-      </aside>
+      <ChildGrowthCalculatorArticle/>
     </section>
   );
 }
