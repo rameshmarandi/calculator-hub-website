@@ -1,57 +1,40 @@
 "use client";
 
-import { useState } from "react";
-import { Calculator, Activity } from "lucide-react";
+import { useState, useMemo } from "react";
+import { Activity } from "lucide-react";
 
-import { PercentageInput } from "../../inputs/PercentageInput";
+import { AmountInput } from "../../inputs/AmountInput";
 import { ResultCard } from "../../ResultCard";
 import ChildGrowthCalculatorArticle from "../../content/health/ChildGrowthCalculatorArticle";
 
 export default function ChildGrowthCalculator() {
+  /* ---------------- DEFAULT PREFILLED DATA ---------------- */
   const [gender, setGender] = useState("male");
-  const [age, setAge] = useState("");
-  const [height, setHeight] = useState("");
-  const [weight, setWeight] = useState("");
+  const [age, setAge] = useState("6");
+  const [height, setHeight] = useState("120");
+  const [weight, setWeight] = useState("22");
 
-  const [result, setResult] = useState(null);
-  const [error, setError] = useState("");
-
-  /* ---------------- VALIDATION ---------------- */
-  function validate() {
-    if (!age || Number(age) <= 0 || Number(age) > 18) {
-      setError("Please enter a valid child age (0–18 years).");
-      return false;
-    }
-
-    if (!height || Number(height) <= 0) {
-      setError("Please enter valid height.");
-      return false;
-    }
-
-    if (!weight || Number(weight) <= 0) {
-      setError("Please enter valid weight.");
-      return false;
-    }
-
-    setError("");
-    return true;
-  }
-
-  /* ---------------- CALCULATION ---------------- */
-  function calculateGrowth(e) {
-    e.preventDefault();
-    if (!validate()) return;
-
-    const hMeters = Number(height) / 100;
-    const w = Number(weight);
+  /* ---------------- LIVE CALCULATION ---------------- */
+  const result = useMemo(() => {
     const a = Number(age);
+    const h = Number(height);
+    const w = Number(weight);
 
+    if (!a || !h || !w) {
+      return {
+        bmi: "--",
+        status: "Enter valid values",
+        variant: "primary",
+      };
+    }
+
+    const hMeters = h / 100;
     const bmi = w / (hMeters * hMeters);
 
     let status = "Normal Growth";
     let variant = "primary";
 
-    // Simplified BMI-for-age screening (non-diagnostic)
+    // Simplified BMI screening
     if (bmi < 14) {
       status = "Underweight for Age";
       variant = "warning";
@@ -63,12 +46,12 @@ export default function ChildGrowthCalculator() {
       variant = "warning";
     }
 
-    setResult({
+    return {
       bmi: bmi.toFixed(1),
       status,
       variant,
-    });
-  }
+    };
+  }, [age, height, weight]);
 
   return (
     <section
@@ -76,22 +59,24 @@ export default function ChildGrowthCalculator() {
       style={{
         backgroundColor: "var(--surface)",
         border: "1px solid var(--border)",
-      }}>
+      }}
+    >
       {/* ================= HEADER ================= */}
       <header>
         <h1 className="text-2xl font-bold mb-1">Child Growth Calculator</h1>
         <p className="text-sm leading-relaxed">
-          Use this Child Growth Calculator to get a basic understanding of your
+          Use this Child Growth Calculator to get a quick understanding of your
           child’s growth status based on age, height, and weight.
         </p>
       </header>
 
-      {/* ================= FORM ================= */}
-      <form onSubmit={calculateGrowth} className="space-y-4">
+      {/* ================= INPUTS ================= */}
+      <div className="space-y-4">
         {/* Gender */}
         <div
           className="flex rounded-md overflow-hidden"
-          style={{ border: "1px solid var(--border)" }}>
+          style={{ border: "1px solid var(--border)" }}
+        >
           <button
             type="button"
             onClick={() => setGender("male")}
@@ -100,7 +85,8 @@ export default function ChildGrowthCalculator() {
               backgroundColor:
                 gender === "male" ? "var(--primary)" : "transparent",
               color: gender === "male" ? "#fff" : "var(--text)",
-            }}>
+            }}
+          >
             Boy
           </button>
 
@@ -113,60 +99,49 @@ export default function ChildGrowthCalculator() {
                 gender === "female" ? "var(--primary)" : "transparent",
               color: gender === "female" ? "#fff" : "var(--text)",
               borderLeft: "1px solid var(--border)",
-            }}>
+            }}
+          >
             Girl
           </button>
         </div>
 
-        <PercentageInput
+        <AmountInput
           label="Age (years)"
           value={age}
           onChange={setAge}
           placeholder="6"
+          prefix=""
         />
 
-        <PercentageInput
+        <AmountInput
           label="Height (cm)"
           value={height}
           onChange={setHeight}
           placeholder="120"
+           prefix=""
         />
 
-        <PercentageInput
+        <AmountInput
           label="Weight (kg)"
           value={weight}
           onChange={setWeight}
           placeholder="22"
+           prefix=""
         />
+      </div>
 
-        {error && <p className="text-sm text-red-500">{error}</p>}
+      {/* ================= RESULT (ALWAYS VISIBLE) ================= */}
+      <div aria-live="polite">
+        <ResultCard
+          variant={result.variant}
+          icon={<Activity size={20} />}
+          label="Growth Result"
+          value={`BMI: ${result.bmi} — ${result.status}`}
+        />
+      </div>
 
-        <button
-          type="submit"
-          className="w-full py-2.5 rounded-md font-medium flex items-center justify-center gap-2"
-          style={{
-            backgroundColor: "var(--primary)",
-            color: "#fff",
-          }}>
-          <Calculator size={18} />
-          Check Child Growth
-        </button>
-      </form>
-
-      {/* ================= RESULT ================= */}
-      {result && (
-        <div aria-live="polite">
-          <ResultCard
-            variant={result.variant}
-            icon={<Activity size={20} />}
-            label="Growth Result"
-            value={`BMI: ${result.bmi} — ${result.status}`}
-          />
-        </div>
-      )}
-
-      {/* ================= SEO BLOG CONTENT ================= */}
-      <ChildGrowthCalculatorArticle/>
+      {/* ================= SEO ARTICLE ================= */}
+      <ChildGrowthCalculatorArticle />
     </section>
   );
 }

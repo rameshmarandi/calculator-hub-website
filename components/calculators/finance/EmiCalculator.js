@@ -4,9 +4,6 @@ import { useMemo, useState } from "react";
 
 import InputsGrid from "@/components/core/InputsGrid";
 import StatsGrid from "@/components/core/StatsGrid";
-// import DonutBreakdownChart from "@/components/core/DonutBreakdownChart";
-// import ComparisonMatrix from "@/components/core/ComparisonMatrix";
-// import DataTable from "@/components/core/DataTable";
 import ExplanationText from "@/components/core/ExplanationText";
 import CalculatorLayout from "@/components/core/CalculatorLayout";
 
@@ -18,51 +15,49 @@ import EMIArticle from "../../content/finance/EMIArticle";
 
 const DonutBreakdownChart = dynamic(
   () => import("@/components/core/DonutBreakdownChart"),
-  { ssr: false, loading: () => <div className="h-40">Loading chart...</div> },
+  { ssr: false, loading: () => <div className="h-40">Loading chart...</div> }
 );
+
 const ComparisonMatrix = dynamic(
   () => import("@/components/core/ComparisonMatrix"),
-  { ssr: false },
+  { ssr: false }
 );
-const DataTable = dynamic(() => import("@/components/core/DataTable"), {
-  ssr: false,
-});
 
-/*
-  PRO RULES:
-  - no prefilled fake values
-  - labels mandatory
-  - results only after valid input
-  - this file only orchestrates components
-*/
+const DataTable = dynamic(
+  () => import("@/components/core/DataTable"),
+  { ssr: false }
+);
 
 export default function EmiCalculator() {
-  /* ================= STATE ================= */
+
+  /* ================= DEFAULT STATE ================= */
 
   const [values, setValues] = useState({
-    loan: "",
-    rate: "",
-    years: "",
+    loan: 1000000,
+    rate: 9.5,
+    years: 10,
   });
 
-  /* ================= VALIDATION ================= */
+  /* ================= SAFE NUMBERS ================= */
 
-  const isValid =
-    Number(values.loan) > 0 &&
-    Number(values.rate) > 0 &&
-    Number(values.years) > 0;
+  const loan = Number(values.loan) || 0;
+  const rate = Number(values.rate) || 0;
+  const years = Number(values.years) || 0;
 
-  /* ================= CALC ================= */
+  /* ================= CALCULATION ================= */
 
   const result = useMemo(() => {
-    if (!isValid) return null;
+    if (loan <= 0 || rate <= 0 || years <= 0) {
+      return {
+        emi: 0,
+        totalInterest: 0,
+        totalPayment: 0,
+        schedule: [],
+      };
+    }
 
-    return calculateEmi(
-      Number(values.loan),
-      Number(values.rate),
-      Number(values.years),
-    );
-  }, [values, isValid]);
+    return calculateEmi(loan, rate, years);
+  }, [loan, rate, years]);
 
   /* ================= INPUT CONFIG ================= */
 
@@ -91,8 +86,6 @@ export default function EmiCalculator() {
     },
   ];
 
-  /* ================= EARLY RETURN ================= */
-
   return (
     <CalculatorLayout
       title="EMI Calculator"
@@ -102,88 +95,87 @@ export default function EmiCalculator() {
         "Instant Results",
         "Bank Formula Accurate",
         "No Signup Required",
-      ]}>
-      {/* INPUTS ALWAYS VISIBLE */}
+      ]}
+    >
+
       <InputsGrid inputs={inputs} values={values} setValues={setValues} />
 
-      {/* SHOW RESULTS ONLY AFTER VALID INPUT */}
-      {result && (
-        <>
-          {/* MAIN EMI */}
-          <ResultHero label="Monthly EMI" value={result.emi} showPerDay/>
+      {/* RESULT SECTION NEVER DISAPPEARS */}
 
-          {/* DONUT BREAKDOWN */}
-          <DonutBreakdownChart
-          title="Principal vs Interest Split"
+      <ResultHero
+        label="Monthly EMI"
+        value={result.emi}
+        showPerDay
+      />
 
-            data={[
-              { name: "Principal", value: Number(values.loan) },
-              { name: "Interest", value: result.totalInterest },
-            ]}
-          />
+      <DonutBreakdownChart
+        title="Principal vs Interest Split"
+        data={[
+          { name: "Principal", value: loan },
+          { name: "Interest", value: result.totalInterest },
+        ]}
+      />
 
-          {/* STATS */}
-          <StatsGrid
-            items={[
-              {
-                label: "Loan Amount",
-                value: formatINR(Number(values.loan)),
-                variant: "neutral",
-              },
-              {
-                label: "Total Interest",
-                value: formatINR(result.totalInterest),
-                variant: "danger", // red = money lost
-              },
-              {
-                label: "Total Payment",
-                value: formatINR(result.totalPayment),
-                variant: "warning", // amber = heavy amount
-              },
-              {
-                label: "Total Months",
-                value: Number(values.years) * 12,
-                variant: "info", // blue = time
-              },
-            ]}
-          />
+      <StatsGrid
+        items={[
+          {
+            label: "Loan Amount",
+            value: formatINR(loan),
+            variant: "neutral",
+          },
+          {
+            label: "Total Interest",
+            value: formatINR(result.totalInterest),
+            variant: "danger",
+          },
+          {
+            label: "Total Payment",
+            value: formatINR(result.totalPayment),
+            variant: "warning",
+          },
+          {
+            label: "Total Months",
+            value: years * 12,
+            variant: "info",
+          },
+        ]}
+      />
 
-          {/* EXPLANATION */}
-          <ExplanationText
-            text={`For a loan of ${formatINR(
-              Number(values.loan),
-            )} at ${values.rate}% for ${values.years} years, your EMI will be ${formatINR(
-              result.emi,
-            )} per month and total interest paid will be ${formatINR(
-              result.totalInterest,
-            )}.`}
-          />
+      <ExplanationText
+        text={`For a loan of ${formatINR(
+          loan
+        )} at ${rate}% for ${years} years, your EMI will be ${formatINR(
+          result.emi
+        )} per month and total interest paid will be ${formatINR(
+          result.totalInterest
+        )}.`}
+      />
 
-          {/* COMPARISON */}
-          <ComparisonMatrix
-            columns={["Tenure", "EMI", "Total Interest"]}
-            rows={[5, 10, 15, 20].map((y) => {
-              const r = calculateEmi(
-                Number(values.loan),
-                Number(values.rate),
-                y,
-              );
+      <ComparisonMatrix
+        columns={["Tenure", "EMI", "Total Interest"]}
+        rows={[5, 10, 15, 20].map((y) => {
+          const r = calculateEmi(
+            loan || 1000000,
+            rate || 9.5,
+            y
+          );
 
-              return [
-                `${y} years`,
-                formatINR(r.emi),
-                formatINR(r.totalInterest),
-              ];
-            })}
-          />
+          return [
+            `${y} years`,
+            formatINR(r.emi),
+            formatINR(r.totalInterest),
+          ];
+        })}
+      />
 
-          {/* SCHEDULE */}
-          <DataTable data={result.schedule} />
-        </>
+      {Array.isArray(result?.schedule) && result?.schedule?.length > 0 && (
+        <DataTable data={result?.schedule} />
       )}
+
       <section className="mt-20">
         <EMIArticle />
       </section>
+
     </CalculatorLayout>
   );
 }

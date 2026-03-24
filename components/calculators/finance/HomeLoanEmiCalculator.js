@@ -14,45 +14,38 @@ import ExplanationText from "@/components/core/ExplanationText";
 import { calculateEmi } from "@/lib/emiMath";
 import { formatINR } from "@/lib/format";
 
-import EMIArticle from "../../content/finance/EMIArticle";
 import HomeLoanEMIArticle from "../../content/finance/HomeLoanEMIArticle";
 
-/*
-  STRUCTURE RULES FOLLOWED:
-  - page orchestrates only
-  - math in lib
-  - layout reusable
-  - no default values
-  - results only after valid input
-*/
-
 export default function HomeLoanEmiCalculator() {
+
   /* ================= STATE ================= */
 
   const [values, setValues] = useState({
-    loan: "",
-    rate: "",
-    years: "",
+    loan: 5000000,
+    rate: 8.5,
+    years: 20,
   });
 
-  /* ================= VALIDATION ================= */
+  /* ================= SAFE VALUES ================= */
 
-  const isValid =
-    Number(values.loan) > 0 &&
-    Number(values.rate) > 0 &&
-    Number(values.years) > 0;
+  const loan = Number(values.loan) || 0;
+  const rate = Number(values.rate) || 0;
+  const years = Number(values.years) || 0;
 
   /* ================= CALCULATION ================= */
 
   const result = useMemo(() => {
-    if (!isValid) return null;
+    if (loan <= 0 || rate <= 0 || years <= 0) {
+      return {
+        emi: 0,
+        totalInterest: 0,
+        totalPayment: 0,
+        schedule: [],
+      };
+    }
 
-    return calculateEmi(
-      Number(values.loan),
-      Number(values.rate),
-      Number(values.years),
-    );
-  }, [values, isValid]);
+    return calculateEmi(loan, rate, years);
+  }, [loan, rate, years]);
 
   /* ================= INPUT CONFIG ================= */
 
@@ -82,8 +75,6 @@ export default function HomeLoanEmiCalculator() {
     },
   ];
 
-  /* ================= UI ================= */
-
   return (
     <CalculatorLayout
       title="Home Loan EMI Calculator"
@@ -93,95 +84,83 @@ export default function HomeLoanEmiCalculator() {
         "Instant Results",
         "Bank Formula Accurate",
         "No Signup Required",
-      ]}>
-      {/* ================= INPUTS ================= */}
+      ]}
+    >
+
+      {/* INPUTS */}
       <InputsGrid inputs={inputs} values={values} setValues={setValues} />
 
-      {/* ================= RESULTS ================= */}
-      {result && (
-        <>
-          {/* MAIN HERO RESULT */}
-          <ResultHero label="Monthly EMI" value={result.emi} showPerDay/>
+      {/* RESULTS (NEVER BLOCKED) */}
 
-          {/* DONUT BREAKDOWN */}
-          <DonutBreakdownChart
-          title="Principal vs Interest Split"
+      <ResultHero label="Monthly EMI" value={result.emi} showPerDay />
 
-            data={[
-              {
-                name: "Principal",
-                value: Number(values.loan),
-              },
-              {
-                name: "Interest",
-                value: result.totalInterest,
-              },
-            ]}
-          />
+      <DonutBreakdownChart
+        title="Principal vs Interest Split"
+        data={[
+          { name: "Principal", value: loan },
+          { name: "Interest", value: result.totalInterest },
+        ]}
+      />
 
-          {/* STATS GRID */}
-          <StatsGrid
-            items={[
-              {
-                label: "Loan Amount",
-                value: formatINR(Number(values.loan)),
-                variant: "neutral",
-              },
-              {
-                label: "Total Interest Payable",
-                value: formatINR(result.totalInterest),
-                variant: "danger",
-              },
-              {
-                label: "Total Payment",
-                value: formatINR(result.totalPayment),
-                variant: "warning",
-              },
-              {
-                label: "Total Months",
-                value: Number(values.years) * 12,
-                variant: "info",
-              },
-            ]}
-          />
+      <StatsGrid
+        items={[
+          {
+            label: "Loan Amount",
+            value: formatINR(loan),
+            variant: "neutral",
+          },
+          {
+            label: "Total Interest Payable",
+            value: formatINR(result.totalInterest),
+            variant: "danger",
+          },
+          {
+            label: "Total Payment",
+            value: formatINR(result.totalPayment),
+            variant: "warning",
+          },
+          {
+            label: "Total Months",
+            value: years * 12,
+            variant: "info",
+          },
+        ]}
+      />
 
-          {/* EXPLANATION SENTENCE (SEO + UX) */}
-          <ExplanationText
-            text={`For a home loan of ${formatINR(
-              Number(values.loan),
-            )} at ${values.rate}% interest for ${values.years} years, your monthly EMI will be ${formatINR(
-              result.emi,
-            )}. You will pay ${formatINR(
-              result.totalInterest,
-            )} as interest and ${formatINR(
-              result.totalPayment,
-            )} in total over the entire tenure.`}
-          />
+      <ExplanationText
+        text={`For a home loan of ${formatINR(
+          loan
+        )} at ${rate}% interest for ${years} years, your monthly EMI will be ${formatINR(
+          result.emi
+        )}. You will pay ${formatINR(
+          result.totalInterest
+        )} as interest and ${formatINR(
+          result.totalPayment
+        )} in total over the entire tenure.`}
+      />
 
-          {/* TENURE COMPARISON */}
-          <ComparisonMatrix
-            columns={["Tenure", "EMI", "Total Interest"]}
-            rows={[10, 15, 20, 25, 30].map((y) => {
-              const r = calculateEmi(
-                Number(values.loan),
-                Number(values.rate),
-                y,
-              );
+      <ComparisonMatrix
+        columns={["Tenure", "EMI", "Total Interest"]}
+        rows={[10, 15, 20, 25, 30].map((y) => {
+          const r = calculateEmi(
+            loan || 5000000,
+            rate || 8.5,
+            y
+          );
 
-              return [
-                `${y} years`,
-                formatINR(r.emi),
-                formatINR(r.totalInterest),
-              ];
-            })}
-          />
+          return [
+            `${y} years`,
+            formatINR(r.emi),
+            formatINR(r.totalInterest),
+          ];
+        })}
+      />
 
-          {/* FULL AMORTIZATION TABLE */}
-          <DataTable data={result.schedule} />
-        </>
+      {Array.isArray(result.schedule) && result?.schedule.length > 0 && (
+        <DataTable data={result.schedule} />
       )}
 
-      {/* ================= SEO CONTENT ================= */}
+      {/* ARTICLE */}
       <HomeLoanEMIArticle />
     </CalculatorLayout>
   );

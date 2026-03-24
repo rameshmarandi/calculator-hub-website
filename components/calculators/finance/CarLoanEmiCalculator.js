@@ -14,45 +14,38 @@ import ExplanationText from "@/components/core/ExplanationText";
 import { calculateEmi } from "@/lib/emiMath";
 import { formatINR } from "@/lib/format";
 
-import EMIArticle from "../../content/finance/EMIArticle";
 import CarLoanEMIArticle from "../../content/finance/CarLoanEMIArticle";
 
-/*
-  RULES:
-  - no EMI formula here
-  - no validation logic here
-  - no custom UI
-  - page only orchestrates
-  - reuse core components
-*/
-
 export default function CarLoanEmiCalculator() {
+
   /* ================= STATE ================= */
 
   const [values, setValues] = useState({
-    loan: "",
-    rate: "",
-    years: "",
+    loan: 800000,
+    rate: 9.5,
+    years: 5,
   });
 
-  /* ================= VALIDATION ================= */
+  /* ================= SAFE VALUES ================= */
 
-  const isValid =
-    Number(values.loan) > 0 &&
-    Number(values.rate) > 0 &&
-    Number(values.years) > 0;
+  const loan = Number(values.loan) || 0;
+  const rate = Number(values.rate) || 0;
+  const years = Number(values.years) || 0;
 
   /* ================= CALC ================= */
 
   const result = useMemo(() => {
-    if (!isValid) return null;
+    if (loan <= 0 || rate <= 0 || years <= 0) {
+      return {
+        emi: 0,
+        totalInterest: 0,
+        totalPayment: 0,
+        schedule: [],
+      };
+    }
 
-    return calculateEmi(
-      Number(values.loan),
-      Number(values.rate),
-      Number(values.years)
-    );
-  }, [values, isValid]);
+    return calculateEmi(loan, rate, years);
+  }, [loan, rate, years]);
 
   /* ================= INPUT CONFIG ================= */
 
@@ -82,8 +75,6 @@ export default function CarLoanEmiCalculator() {
     },
   ];
 
-  /* ================= UI ================= */
-
   return (
     <CalculatorLayout
       title="Car Loan EMI Calculator"
@@ -95,88 +86,82 @@ export default function CarLoanEmiCalculator() {
         "No Signup Required",
       ]}
     >
+
       {/* INPUTS */}
       <InputsGrid inputs={inputs} values={values} setValues={setValues} />
 
-      {/* RESULTS */}
-      {result && (
-        <>
-          {/* MAIN EMI */}
-          <ResultHero label="Monthly EMI" value={result.emi} showPerDay/>
+      {/* RESULTS (NEVER BLOCKED) */}
 
-          {/* BREAKDOWN */}
-          <DonutBreakdownChart
-          title="Principal vs Interest Split"
+      <ResultHero label="Monthly EMI" value={result.emi} showPerDay />
 
-            data={[
-              { name: "Principal", value: Number(values.loan) },
-              { name: "Interest", value: result.totalInterest },
-            ]}
-          />
+      <DonutBreakdownChart
+        title="Principal vs Interest Split"
+        data={[
+          { name: "Principal", value: loan },
+          { name: "Interest", value: result.totalInterest },
+        ]}
+      />
 
-          {/* STATS */}
-          <StatsGrid
-            items={[
-              {
-                label: "Loan Amount",
-                value: formatINR(Number(values.loan)),
-                variant: "neutral",
-              },
-              {
-                label: "Total Interest Payable",
-                value: formatINR(result.totalInterest),
-                variant: "danger",
-              },
-              {
-                label: "Total Payment",
-                value: formatINR(result.totalPayment),
-                variant: "warning",
-              },
-              {
-                label: "Total Months",
-                value: Number(values.years) * 12,
-                variant: "info",
-              },
-            ]}
-          />
+      <StatsGrid
+        items={[
+          {
+            label: "Loan Amount",
+            value: formatINR(loan),
+            variant: "neutral",
+          },
+          {
+            label: "Total Interest Payable",
+            value: formatINR(result.totalInterest),
+            variant: "danger",
+          },
+          {
+            label: "Total Payment",
+            value: formatINR(result.totalPayment),
+            variant: "warning",
+          },
+          {
+            label: "Total Months",
+            value: years * 12,
+            variant: "info",
+          },
+        ]}
+      />
 
-          {/* EXPLANATION */}
-          <ExplanationText
-            text={`For a car loan of ${formatINR(
-              Number(values.loan)
-            )} at ${values.rate}% for ${values.years} years, your EMI will be ${formatINR(
-              result.emi
-            )} per month. You will pay ${formatINR(
-              result.totalInterest
-            )} as interest and ${formatINR(
-              result.totalPayment
-            )} in total over the tenure.`}
-          />
+      <ExplanationText
+        text={`For a car loan of ${formatINR(
+          loan
+        )} at ${rate}% for ${years} years, your EMI will be ${formatINR(
+          result.emi
+        )} per month. You will pay ${formatINR(
+          result.totalInterest
+        )} as interest and ${formatINR(
+          result.totalPayment
+        )} in total over the tenure.`}
+      />
 
-          {/* TENURE COMPARISON */}
-          <ComparisonMatrix
-            columns={["Tenure", "EMI", "Total Interest"]}
-            rows={[3, 4, 5, 6, 7].map((y) => {
-              const r = calculateEmi(
-                Number(values.loan),
-                Number(values.rate),
-                y
-              );
+      <ComparisonMatrix
+        columns={["Tenure", "EMI", "Total Interest"]}
+        rows={[3, 4, 5, 6, 7].map((y) => {
+          const r = calculateEmi(
+            loan || 800000,
+            rate || 9.5,
+            y
+          );
 
-              return [
-                `${y} years`,
-                formatINR(r.emi),
-                formatINR(r.totalInterest),
-              ];
-            })}
-          />
+          return [
+            `${y} years`,
+            formatINR(r.emi),
+            formatINR(r.totalInterest),
+          ];
+        })}
+      />
 
-          {/* SCHEDULE */}
-          <DataTable data={result.schedule} />
-        </>
+      {/* SCHEDULE */}
+      {Array.isArray(result?.schedule) && result.schedule.length > 0 && (
+        <DataTable data={result.schedule} />
       )}
 
-      {/* SEO CONTENT */}
+      {/* ARTICLE */}
       <CarLoanEMIArticle />
     </CalculatorLayout>
   );
