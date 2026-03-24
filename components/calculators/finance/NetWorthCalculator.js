@@ -13,61 +13,74 @@ import { formatINR } from "@/lib/format";
 
 import NetWorthCalculatorArticle from "../../content/finance/NetWorthCalculatorArticle";
 
-/* =====================================================
-   FORMULA
-   Net Worth = Assets − Liabilities
-===================================================== */
+/*
+=====================================================
+FORMULA
+
+Net Worth = Assets − Liabilities
+=====================================================
+*/
 
 export default function NetWorthCalculator() {
+
   /* ================= STATE ================= */
 
   const [values, setValues] = useState({
-    cash: "",
-    investments: "",
-    property: "",
-    otherAssets: "",
-    loans: "",
-    creditCards: "",
-    otherLiabilities: "",
+    cash: "50000",
+    investments: "300000",
+    property: "2500000",
+    otherAssets: "50000",
+    loans: "1000000",
+    creditCards: "20000",
+    otherLiabilities: "0",
   });
 
-  /* ================= PARSE ONCE ================= */
+  /* ================= SAFE PARSING ================= */
 
   const parsed = useMemo(() => {
     return {
-      cash: Number(values.cash || 0),
-      investments: Number(values.investments || 0),
-      property: Number(values.property || 0),
-      otherAssets: Number(values.otherAssets || 0),
-      loans: Number(values.loans || 0),
-      creditCards: Number(values.creditCards || 0),
-      otherLiabilities: Number(values.otherLiabilities || 0),
+      cash: Number(values.cash) || 0,
+      investments: Number(values.investments) || 0,
+      property: Number(values.property) || 0,
+      otherAssets: Number(values.otherAssets) || 0,
+      loans: Number(values.loans) || 0,
+      creditCards: Number(values.creditCards) || 0,
+      otherLiabilities: Number(values.otherLiabilities) || 0,
     };
   }, [values]);
 
   /* ================= PURE CALCULATION ================= */
 
   const result = useMemo(() => {
+
     const assets =
-      parsed.cash + parsed.investments + parsed.property + parsed.otherAssets;
+      parsed.cash +
+      parsed.investments +
+      parsed.property +
+      parsed.otherAssets;
 
     const liabilities =
-      parsed.loans + parsed.creditCards + parsed.otherLiabilities;
+      parsed.loans +
+      parsed.creditCards +
+      parsed.otherLiabilities;
 
     const netWorth = assets - liabilities;
 
-    return { assets, liabilities, netWorth };
+    return {
+      assets,
+      liabilities,
+      netWorth,
+    };
+
   }, [parsed]);
 
-  /* ================= SHOW DONUT ONLY IF MEANINGFUL ================= */
+  /* ================= CHART DATA ================= */
 
-  const showBreakdown = useMemo(() => {
-    if (result.assets === 0) return false;
-
-    const ratio = result.liabilities / result.assets;
-
-    // hide if liabilities < 1%
-    return ratio > 0.01;
+  const chartData = useMemo(() => {
+    return [
+      { name: "Assets", value: result.assets || 0 },
+      { name: "Liabilities", value: result.liabilities || 0 },
+    ];
   }, [result]);
 
   /* ================= INPUT CONFIG ================= */
@@ -101,7 +114,12 @@ export default function NetWorthCalculator() {
       },
 
       /* Liabilities */
-      { key: "loans", label: "Loans", type: "amount", group: "Liabilities" },
+      {
+        key: "loans",
+        label: "Loans",
+        type: "amount",
+        group: "Liabilities",
+      },
       {
         key: "creditCards",
         label: "Credit Card Dues",
@@ -115,7 +133,7 @@ export default function NetWorthCalculator() {
         group: "Liabilities",
       },
     ],
-    [],
+    []
   );
 
   /* ================= UI ================= */
@@ -131,66 +149,63 @@ export default function NetWorthCalculator() {
         "No Signup Required",
       ]}
     >
+
       {/* INPUTS */}
       <InputsGrid inputs={inputs} values={values} setValues={setValues} />
 
-      {/* RESULTS */}
-      <>
-        {/* HERO */}
-        <ResultHero label="Your Net Worth" value={result.netWorth} />
+      {/* HERO RESULT */}
+      <ResultHero
+        label="Your Net Worth"
+        value={formatINR(result.netWorth)}
+      />
 
-        {/* NET WORTH BREAKDOWN */}
-        {showBreakdown && (
-          <div className="space-y-3">
-            <p className="text-sm font-medium text-center opacity-70">
-              Net Worth Breakdown
-            </p>
-
-            <DonutBreakdownChart
-              title="Assets vs Liabilities"
-              data={[
-                { name: "Assets", value: result.assets },
-                { name: "Liabilities", value: result.liabilities },
-              ]}
-            />
-          </div>
-        )}
-
-        {/* STATS */}
-        <StatsGrid
-          items={[
-            {
-              label: "Total Assets",
-              value: formatINR(result.assets),
-              variant: "primary",
-            },
-            {
-              label: "Total Liabilities",
-              value: formatINR(result.liabilities),
-              variant: "warning",
-            },
-            {
-              label: "Net Worth",
-              value: formatINR(result.netWorth),
-              variant: result.netWorth >= 0 ? "success" : "danger",
-            },
-          ]}
+      {/* DONUT CHART */}
+      {result.assets > 0 && (
+        <DonutBreakdownChart
+          title="Assets vs Liabilities"
+          data={chartData}
         />
+      )}
 
-        {/* EXPLANATION */}
-        <ExplanationText
-          text={`You own assets worth ${formatINR(
-            result.assets,
-          )} and owe ${formatINR(
-            result.liabilities,
-          )}. This results in a net worth of ${formatINR(
-            result.netWorth,
-          )}. Positive net worth indicates strong financial health.`}
-        />
-      </>
+      {/* STATS */}
+      <StatsGrid
+        items={[
+          {
+            label: "Total Assets",
+            value: formatINR(result.assets),
+            variant: "primary",
+          },
+          {
+            label: "Total Liabilities",
+            value: formatINR(result.liabilities),
+            variant: "warning",
+          },
+          {
+            label: "Net Worth",
+            value: formatINR(result.netWorth),
+            variant: result.netWorth >= 0 ? "success" : "danger",
+          },
+        ]}
+      />
+
+      {/* EXPLANATION */}
+      <ExplanationText
+        text={`You own assets worth ${formatINR(
+          result.assets
+        )} and owe ${formatINR(
+          result.liabilities
+        )}. This results in a net worth of ${formatINR(
+          result.netWorth
+        )}. ${
+          result.netWorth >= 0
+            ? "A positive net worth indicates strong financial health."
+            : "A negative net worth means liabilities exceed assets."
+        }`}
+      />
 
       {/* SEO ARTICLE */}
       <NetWorthCalculatorArticle />
+
     </CalculatorLayout>
   );
 }

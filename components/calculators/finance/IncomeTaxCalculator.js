@@ -12,7 +12,7 @@ import { formatINR } from "@/lib/format";
 import IncomeTaxCalculatorArticle from "../../content/finance/IncomeTaxCalculatorArticle";
 
 /* ======================================================
-   TAX ENGINE (PRODUCTION SAFE)
+   TAX ENGINE
 ====================================================== */
 
 const STANDARD_DEDUCTION = 50000;
@@ -27,8 +27,7 @@ function calculateTaxNew(taxable) {
   else if (taxable <= 1500000) tax = 90000 + (taxable - 1200000) * 0.2;
   else tax = 150000 + (taxable - 1500000) * 0.3;
 
-  // ✅ rebate 87A
-  if (taxable <= 700000) tax = 0;
+  if (taxable <= 700000) tax = 0; // rebate 87A
 
   return tax;
 }
@@ -49,15 +48,21 @@ function calculateTaxOld(taxable) {
 ====================================================== */
 
 export default function IncomeTaxCalculator() {
+
+  /* ================= STATE ================= */
+
   const [values, setValues] = useState({
-    income: "",
+    income: "1000000",
     regime: "new",
   });
 
-  const income = Number(values.income);
+  /* ================= SAFE PARSE ================= */
+
+  const income = Number(values.income) || 0;
+
+  /* ================= CALCULATION ================= */
 
   const result = useMemo(() => {
-    if (!income || income <= 0) return null;
 
     const taxable = Math.max(0, income - STANDARD_DEDUCTION);
 
@@ -67,7 +72,9 @@ export default function IncomeTaxCalculator() {
         : calculateTaxOld(taxable);
 
     const cess = baseTax * 0.04;
+
     const totalTax = baseTax + cess;
+
     const netIncome = income - totalTax;
 
     return {
@@ -77,7 +84,10 @@ export default function IncomeTaxCalculator() {
       totalTax: Math.round(totalTax),
       net: Math.round(netIncome),
     };
+
   }, [income, values.regime]);
+
+  /* ================= INPUT CONFIG ================= */
 
   const inputs = [
     {
@@ -97,6 +107,8 @@ export default function IncomeTaxCalculator() {
     },
   ];
 
+  /* ================= UI ================= */
+
   return (
     <CalculatorLayout
       title="Income Tax Calculator"
@@ -106,33 +118,45 @@ export default function IncomeTaxCalculator() {
         "Instant Results",
         "Accurate",
         "No Signup Required",
-      ]}>
+      ]}
+    >
       <InputsGrid inputs={inputs} values={values} setValues={setValues} />
 
-      {result && (
-        <>
-          <ResultHero label="Total Tax Payable" value={result.totalTax} />
+      <ResultHero
+        label="Total Tax Payable"
+        value={formatINR(result.totalTax)}
+      />
 
-          <StatsGrid
-            items={[
-              { label: "Taxable Income", value: formatINR(result.taxable) },
-              { label: "Income Tax", value: formatINR(result.tax) },
-              { label: "Cess (4%)", value: formatINR(result.cess) },
-              {
-                label: "Net Income",
-                value: formatINR(result.net),
-                variant: "success",
-              },
-            ]}
-          />
+      <StatsGrid
+        items={[
+          {
+            label: "Taxable Income",
+            value: formatINR(result.taxable),
+          },
+          {
+            label: "Income Tax",
+            value: formatINR(result.tax),
+          },
+          {
+            label: "Cess (4%)",
+            value: formatINR(result.cess),
+          },
+          {
+            label: "Net Income",
+            value: formatINR(result.net),
+            variant: "success",
+          },
+        ]}
+      />
 
-          <ExplanationText
-            text={`After ₹50,000 standard deduction, your taxable income becomes ${formatINR(
-              result.taxable,
-            )}. Total tax including cess is ${formatINR(result.totalTax)}.`}
-          />
-        </>
-      )}
+      <ExplanationText
+        text={`After ₹50,000 standard deduction, your taxable income becomes ${formatINR(
+          result.taxable
+        )}. Total tax including 4% cess is ${formatINR(
+          result.totalTax
+        )}.`}
+      />
+
       <IncomeTaxCalculatorArticle />
     </CalculatorLayout>
   );

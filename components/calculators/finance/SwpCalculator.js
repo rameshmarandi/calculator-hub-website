@@ -13,36 +13,27 @@ import { formatINR } from "@/lib/format";
 import { calculateSWP } from "../../../lib/formulas";
 import SwpCalculatorArticle from "../../content/finance/SwpCalculatorArticle";
 
-/* =====================================================
-   PURE FORMULA
-   withdraw first -> then grow
-===================================================== */
-
-
-
 export default function SwpCalculator() {
+
   /* ================= STATE ================= */
 
   const [values, setValues] = useState({
-    principal: "",
-    withdrawal: "",
+    principal: "1000000",
+    withdrawal: "10000",
     rate: "8",
-    years: "",
+    years: "20",
   });
-
-  const P = Number(values.principal);
-  const W = Number(values.withdrawal);
-  const r = Number(values.rate);
-  const y = Number(values.years);
-
-  const isValid = P > 0 && W > 0 && r >= 0 && y > 0;
 
   /* ================= CALC ================= */
 
   const result = useMemo(() => {
-    if (!isValid) return null;
+    const P = Number(values.principal) || 0;
+    const W = Number(values.withdrawal) || 0;
+    const r = Number(values.rate) || 0;
+    const y = Number(values.years) || 0;
+
     return calculateSWP(P, W, r, y);
-  }, [P, W, r, y, isValid]);
+  }, [values]);
 
   /* ================= INPUT CONFIG ================= */
 
@@ -69,8 +60,15 @@ export default function SwpCalculator() {
       label: "Withdrawal Duration (Years)",
       type: "number",
       min: 1,
+      placeholder: "20",
     },
   ];
+
+  /* ================= NORMALIZED VALUES ================= */
+
+  const P = Number(values.principal) || 0;
+  const W = Number(values.withdrawal) || 0;
+  const r = Number(values.rate) || 0;
 
   /* ================= UI ================= */
 
@@ -85,69 +83,61 @@ export default function SwpCalculator() {
         "No Signup Required",
       ]}
     >
-      {/* INPUTS */}
+
       <InputsGrid inputs={inputs} values={values} setValues={setValues} />
 
-      {result && (
-        <>
-          {/* HERO */}
-          <ResultHero
-            label="Final Balance"
-            value={result.finalBalance}
-          />
+      <ResultHero
+        label="Final Balance"
+        value={result.finalBalance}
+      />
 
-          {/* DONUT */}
-          <DonutBreakdownChart
-          title="Withdrawn vs Remaining Balance"
+      <DonutBreakdownChart
+        title="Withdrawn vs Remaining Balance"
+        data={[
+          { name: "Withdrawn", value: result.withdrawn },
+          { name: "Remaining", value: result.finalBalance },
+        ]}
+      />
 
-            data={[
-              { name: "Withdrawn", value: result.withdrawn },
-              { name: "Remaining", value: result.finalBalance },
-            ]}
-          />
+      <StatsGrid
+        items={[
+          {
+            label: "Total Withdrawn",
+            value: formatINR(result.withdrawn),
+            variant: "warning",
+          },
+          {
+            label: "Final Balance",
+            value: formatINR(result.finalBalance),
+            variant: "primary",
+          },
+          {
+            label: "Months Lasted",
+            value: result.monthsLasted,
+            variant: "info",
+          },
+          {
+            label: "Years Lasted",
+            value: (result.monthsLasted / 12).toFixed(1),
+            variant: "neutral",
+          },
+        ]}
+      />
 
-          {/* STATS */}
-          <StatsGrid
-            items={[
-              {
-                label: "Total Withdrawn",
-                value: formatINR(result.withdrawn),
-                variant: "warning",
-              },
-              {
-                label: "Final Balance",
-                value: formatINR(result.finalBalance),
-                variant: "primary",
-              },
-              {
-                label: "Months Lasted",
-                value: result.monthsLasted,
-                variant: "info",
-              },
-              {
-                label: "Years Lasted",
-                value: (result.monthsLasted / 12).toFixed(1),
-                variant: "neutral",
-              },
-            ]}
-          />
-
-          {/* EXPLANATION */}
-          <ExplanationText
-            text={`Starting with ${formatINR(
-              P
-            )} and withdrawing ${formatINR(
-              W
-            )} monthly at ${r}% returns, your corpus lasts ${(
-              result.monthsLasted / 12
-            ).toFixed(1)} years and ends with ${formatINR(
-              result.finalBalance
-            )}.`}
-          />
-        </>
-      )}
+      <ExplanationText
+        text={`Starting with ${formatINR(
+          P
+        )} and withdrawing ${formatINR(
+          W
+        )} monthly at ${r}% returns, your corpus lasts ${(
+          result.monthsLasted / 12
+        ).toFixed(1)} years and ends with ${formatINR(
+          result.finalBalance
+        )}.`}
+      />
 
       <SwpCalculatorArticle/>
+
     </CalculatorLayout>
   );
 }

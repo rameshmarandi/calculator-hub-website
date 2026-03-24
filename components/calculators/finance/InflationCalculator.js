@@ -9,45 +9,31 @@ import StatsGrid from "@/components/core/StatsGrid";
 import ExplanationText from "@/components/core/ExplanationText";
 
 import { formatINR } from "@/lib/format";
-import InflationArticle from "../../content/finance/InflationArticle";
 import InflationCalculatorArticle from "../../content/finance/InflationArticle";
 
-/* =====================================================
-   PURE FORMULA
-   FV = P × (1 + r)^n
-===================================================== */
-
 export default function InflationCalculator() {
+
   /* ================= STATE ================= */
 
   const [values, setValues] = useState({
-    amount: "",
+    amount: "100000",
     rate: "6",
-    years: "",
+    years: "10",
   });
 
-  /* ================= PARSE ONCE ================= */
+  /* ================= SAFE PARSING ================= */
 
   const parsed = useMemo(() => {
-    const P = Number(values.amount);
-    const r = Number(values.rate) / 100;
-    const n = Number(values.years);
-
-    return { P, r, n };
+    return {
+      P: Number(values.amount) || 0,
+      r: (Number(values.rate) || 0) / 100,
+      n: Number(values.years) || 0,
+    };
   }, [values]);
-
-  /* ================= VALIDATION ================= */
-
-  const isValid = useMemo(() => {
-    const { P, r, n } = parsed;
-    return P > 0 && n > 0 && r >= 0;
-  }, [parsed]);
 
   /* ================= CALCULATION ================= */
 
   const result = useMemo(() => {
-    if (!isValid) return null;
-
     const { P, r, n } = parsed;
 
     const futureValue = P * Math.pow(1 + r, n);
@@ -58,7 +44,7 @@ export default function InflationCalculator() {
       loss,
       todayValue: P,
     };
-  }, [parsed, isValid]);
+  }, [parsed]);
 
   /* ================= INPUT CONFIG ================= */
 
@@ -98,49 +84,44 @@ export default function InflationCalculator() {
         "No Signup Required",
       ]}
     >
-    
       {/* INPUTS */}
       <InputsGrid inputs={inputs} values={values} setValues={setValues} />
 
-      {result && (
-        <>
-          {/* HERO RESULT */}
-          <ResultHero
-            label="Future Value Needed"
-            value={result.futureValue}
-          />
+      {/* HERO RESULT */}
+      <ResultHero
+        label="Future Value Needed"
+        value={formatINR(result.futureValue)}
+      />
 
-          {/* STATS GRID */}
-          <StatsGrid
-            items={[
-              {
-                label: "Loss of Purchasing Power",
-                value: formatINR(result.loss),
-                variant: "warning",
-              },
-              {
-                label: "Today's Value",
-                value: formatINR(result.todayValue),
-                variant: "neutral",
-              },
-              {
-                label: "Inflation Rate",
-                value: `${values.rate}%`,
-                variant: "info",
-              },
-            ]}
-          />
+      {/* STATS GRID */}
+      <StatsGrid
+        items={[
+          {
+            label: "Loss of Purchasing Power",
+            value: formatINR(result.loss),
+            variant: "warning",
+          },
+          {
+            label: "Today's Value",
+            value: formatINR(result.todayValue),
+            variant: "neutral",
+          },
+          {
+            label: "Inflation Rate",
+            value: `${values.rate || 0}%`,
+            variant: "info",
+          },
+        ]}
+      />
 
-          {/* EXPLANATION */}
-          <ExplanationText
-            text={`₹${formatINR(parsed.P)} today becomes ₹${formatINR(
-              result.futureValue
-            )} after ${parsed.n} years at ${values.rate}% inflation. Your money effectively loses ₹${formatINR(
-              result.loss
-            )} of purchasing power.`}
-          />
-        </>
-      )}
+      {/* EXPLANATION */}
+      <ExplanationText
+        text={`₹${formatINR(result.todayValue)} today becomes ₹${formatINR(
+          result.futureValue
+        )} after ${values.years || 0} years at ${
+          values.rate || 0
+        }% inflation.`}
+      />
 
       {/* SEO ARTICLE */}
       <InflationCalculatorArticle />

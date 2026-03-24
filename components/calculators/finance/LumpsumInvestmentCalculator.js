@@ -9,35 +9,40 @@ import DonutBreakdownChart from "@/components/core/DonutBreakdownChart";
 import StatsGrid from "@/components/core/StatsGrid";
 import ExplanationText from "@/components/core/ExplanationText";
 
-
 import { formatINR } from "@/lib/format";
 import { calculateLumpsum } from "../../../lib/formulas";
 import LumpsumInvestmentArticle from "../../content/finance/LumpsumInvestmentArticle";
 
 export default function LumpsumInvestmentCalculator() {
+
   /* ================= STATE ================= */
 
   const [values, setValues] = useState({
-    amount: "",
-    rate: "",
-    years: "",
+    amount: 100000,
+    rate: 12,
+    years: 10,
   });
 
-  /* ================= NORMALIZED ================= */
+  /* ================= SAFE NUMBERS ================= */
 
-  const amount = Number(values.amount);
-  const rate = Number(values.rate);
-  const years = Number(values.years);
-
-  const isValid = amount > 0 && rate >= 0 && years > 0;
+  const amount = Number(values.amount) || 0;
+  const rate = Number(values.rate) || 0;
+  const years = Number(values.years) || 0;
 
   /* ================= CALC ================= */
 
   const result = useMemo(() => {
-    if (!isValid) return null;
+    if (amount <= 0 || years <= 0) {
+      return {
+        invested: 0,
+        gains: 0,
+        futureValue: 0,
+        months: 0,
+      };
+    }
 
-    return calculateLumpsum (amount, rate, years);
-  }, [amount, rate, years, isValid]);
+    return calculateLumpsum(amount, rate, years);
+  }, [amount, rate, years]);
 
   /* ================= INPUT CONFIG ================= */
 
@@ -66,8 +71,6 @@ export default function LumpsumInvestmentCalculator() {
     },
   ];
 
-  /* ================= UI ================= */
-
   return (
     <CalculatorLayout
       title="Lumpsum Investment Calculator"
@@ -79,61 +82,57 @@ export default function LumpsumInvestmentCalculator() {
         "No Signup Required",
       ]}
     >
+
+      {/* INPUTS */}
       <InputsGrid inputs={inputs} values={values} setValues={setValues} />
 
-      {result && (
-        <>
-          {/* HERO */}
-          <ResultHero label="Future Value" value={result.futureValue} />
+      {/* RESULTS (NEVER BLOCKED) */}
 
-          {/* BREAKDOWN */}
-          <DonutBreakdownChart
-          title="Principal vs Growth"
+      <ResultHero label="Future Value" value={result.futureValue} />
 
-            data={[
-              { name: "Invested", value: result.invested },
-              { name: "Gains", value: result.gains },
-            ]}
-          />
+      <DonutBreakdownChart
+        title="Principal vs Growth"
+        data={[
+          { name: "Invested", value: result.invested },
+          { name: "Gains", value: result.gains },
+        ]}
+      />
 
-          {/* STATS */}
-          <StatsGrid
-            items={[
-              {
-                label: "Total Investment",
-                value: formatINR(result.invested),
-                variant: "neutral",
-              },
-              {
-                label: "Total Gains",
-                value: formatINR(result.gains),
-                variant: "success",
-              },
-              {
-                label: "Future Value",
-                value: formatINR(result.futureValue),
-                variant: "primary",
-              },
-              {
-                label: "Total Months",
-                value: result.months,
-                variant: "info",
-              },
-            ]}
-          />
+      <StatsGrid
+        items={[
+          {
+            label: "Total Investment",
+            value: formatINR(result.invested),
+            variant: "neutral",
+          },
+          {
+            label: "Total Gains",
+            value: formatINR(result.gains),
+            variant: "success",
+          },
+          {
+            label: "Future Value",
+            value: formatINR(result.futureValue),
+            variant: "primary",
+          },
+          {
+            label: "Total Months",
+            value: result.months,
+            variant: "info",
+          },
+        ]}
+      />
 
-          {/* EXPLANATION */}
-          <ExplanationText
-            text={`A one-time investment of ${formatINR(
-              amount
-            )} growing at ${rate}% annually for ${years} years can grow to ${formatINR(
-              result.futureValue
-            )} through compounding.`}
-          />
-        </>
-      )}
+      <ExplanationText
+        text={`A one-time investment of ${formatINR(
+          amount
+        )} growing at ${rate}% annually for ${years} years can grow to ${formatINR(
+          result.futureValue
+        )} through compounding.`}
+      />
 
-      <LumpsumInvestmentArticle/>
+      <LumpsumInvestmentArticle />
+
     </CalculatorLayout>
   );
 }

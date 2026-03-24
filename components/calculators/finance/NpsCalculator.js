@@ -13,39 +13,26 @@ import { formatINR } from "@/lib/format";
 import { calculateNps } from "../../../lib/formulas";
 import NPSCalculatorArticle from "../../content/finance/NPSCalculatorArticle";
 
-
 export default function NpsCalculator() {
   /* ================= STATE ================= */
 
   const [values, setValues] = useState({
-    monthly: "",
-    rate: "",
-    currentAge: "",
-    retirementAge: "",
+    monthly: "5000",
+    rate: "10",
+    currentAge: "25",
+    retirementAge: "60",
   });
-
-  /* ================= NORMALIZE ================= */
-
-  const monthly = Number(values.monthly);
-  const rate = Number(values.rate);
-  const currentAge = Number(values.currentAge);
-  const retirementAge = Number(values.retirementAge);
-
-  /* ================= VALIDATION ================= */
-
-  const isValid =
-    monthly > 0 &&
-    rate >= 0 &&
-    currentAge > 0 &&
-    retirementAge > currentAge;
 
   /* ================= CALC ================= */
 
   const result = useMemo(() => {
-    if (!isValid) return null;
+    const monthly = Number(values.monthly) || 0;
+    const rate = Number(values.rate) || 0;
+    const currentAge = Number(values.currentAge) || 0;
+    const retirementAge = Number(values.retirementAge) || 0;
 
     return calculateNps(monthly, rate, currentAge, retirementAge);
-  }, [monthly, rate, currentAge, retirementAge, isValid]);
+  }, [values]);
 
   /* ================= INPUT CONFIG ================= */
 
@@ -67,14 +54,23 @@ export default function NpsCalculator() {
       label: "Current Age",
       type: "number",
       min: 18,
+      placeholder: "25",
     },
     {
       key: "retirementAge",
       label: "Retirement Age",
       type: "number",
       min: 40,
+      placeholder: "60",
     },
   ];
+
+  /* ================= NORMALIZED VALUES ================= */
+
+  const monthly = Number(values.monthly) || 0;
+  const rate = Number(values.rate) || 0;
+  const currentAge = Number(values.currentAge) || 0;
+  const retirementAge = Number(values.retirementAge) || 0;
 
   /* ================= UI ================= */
 
@@ -91,54 +87,49 @@ export default function NpsCalculator() {
     >
       <InputsGrid inputs={inputs} values={values} setValues={setValues} />
 
-      {result && (
-        <>
-          <ResultHero label="Retirement Corpus" value={result.corpus} />
+      <ResultHero label="Retirement Corpus" value={result.corpus} />
 
-          <DonutBreakdownChart
-          title="Invested Amount vs Interest Earned"
+      <DonutBreakdownChart
+        title="Invested Amount vs Returns Earned"
+        data={[
+          { name: "Investment", value: result.invested },
+          { name: "Returns", value: result.gains },
+        ]}
+      />
 
-            data={[
-              { name: "Investment", value: result.invested },
-              { name: "Returns", value: result.gains },
-            ]}
-          />
+      <StatsGrid
+        items={[
+          {
+            label: "Total Investment",
+            value: formatINR(result.invested),
+          },
+          {
+            label: "Total Returns",
+            value: formatINR(result.gains),
+            variant: "success",
+          },
+          {
+            label: "Retirement Corpus",
+            value: formatINR(result.corpus),
+            variant: "primary",
+          },
+          {
+            label: "Total Months",
+            value: result.months,
+            variant: "info",
+          },
+        ]}
+      />
 
-          <StatsGrid
-            items={[
-              {
-                label: "Total Investment",
-                value: formatINR(result.invested),
-              },
-              {
-                label: "Total Returns",
-                value: formatINR(result.gains),
-                variant: "success",
-              },
-              {
-                label: "Corpus",
-                value: formatINR(result.corpus),
-                variant: "primary",
-              },
-              {
-                label: "Total Months",
-                value: result.months,
-                variant: "info",
-              },
-            ]}
-          />
+      <ExplanationText
+        text={`Contributing ${formatINR(
+          monthly
+        )} monthly from age ${currentAge} to ${retirementAge} at ${rate}% expected returns can grow to ${formatINR(
+          result.corpus
+        )}.`}
+      />
 
-          <ExplanationText
-            text={`Contributing ${formatINR(
-              monthly
-            )} monthly from age ${currentAge} to ${retirementAge} at ${rate}% returns can build a corpus of ${formatINR(
-              result.corpus
-            )}.`}
-          />
-        </>
-      )}
-
-      <NPSCalculatorArticle/>
+      <NPSCalculatorArticle />
     </CalculatorLayout>
   );
 }

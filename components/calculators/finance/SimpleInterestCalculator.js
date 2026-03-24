@@ -13,24 +13,20 @@ import { formatINR } from "@/lib/format";
 import { calculateSimpleInterest } from "../../../lib/formulas";
 import SimpleInterestArticle from "../../content/finance/CalculateSimpleInterest";
 
-
 export default function SimpleInterestCalculator() {
   const [values, setValues] = useState({
-    principal: "",
-    rate: "",
-    years: "",
+    principal: "100000",
+    rate: "10",
+    years: "5",
   });
 
-  const P = Number(values.principal);
-  const r = Number(values.rate);
-  const y = Number(values.years);
-
-  const isValid = P > 0 && r >= 0 && y > 0;
-
   const result = useMemo(() => {
-    if (!isValid) return null;
+    const P = Number(values.principal) || 0;
+    const r = Number(values.rate) || 0;
+    const y = Number(values.years) || 0;
+
     return calculateSimpleInterest(P, r, y);
-  }, [P, r, y, isValid]);
+  }, [values]);
 
   const inputs = [
     {
@@ -66,55 +62,52 @@ export default function SimpleInterestCalculator() {
     >
       <InputsGrid inputs={inputs} values={values} setValues={setValues} />
 
-      {result && (
-        <>
-          <ResultHero label="Total Amount" value={result.finalValue} />
+      <ResultHero label="Total Amount" value={result.finalValue} />
 
-          <DonutBreakdownChart
-          title="Principal vs Interest Earned"
+      <DonutBreakdownChart
+        title="Principal vs Interest Earned"
+        data={[
+          { name: "Principal", value: result.invested },
+          { name: "Interest", value: result.interest },
+        ]}
+      />
 
-            data={[
-              { name: "Principal", value: result.invested },
-              { name: "Interest", value: result.interest },
-            ]}
-          />
+      <StatsGrid
+        items={[
+          {
+            label: "Principal",
+            value: formatINR(result.invested),
+            variant: "neutral",
+          },
+          {
+            label: "Interest Earned",
+            value: formatINR(result.interest),
+            variant: "success",
+          },
+          {
+            label: "Total Amount",
+            value: formatINR(result.finalValue),
+            variant: "primary",
+          },
+          {
+            label: "Total Months",
+            value: result.months,
+            variant: "info",
+          },
+        ]}
+      />
 
-          <StatsGrid
-            items={[
-              {
-                label: "Principal",
-                value: formatINR(result.invested),
-                variant: "neutral",
-              },
-              {
-                label: "Interest Earned",
-                value: formatINR(result.interest),
-                variant: "success",
-              },
-              {
-                label: "Total Amount",
-                value: formatINR(result.finalValue),
-                variant: "primary",
-              },
-              {
-                label: "Total Months",
-                value: result.months,
-                variant: "info",
-              },
-            ]}
-          />
+      <ExplanationText
+        text={`A principal of ${formatINR(
+          Number(values.principal) || 0
+        )} at ${Number(values.rate) || 0}% for ${
+          Number(values.years) || 0
+        } years generates ${formatINR(
+          result.interest
+        )} interest, totaling ${formatINR(result.finalValue)}.`}
+      />
 
-          <ExplanationText
-            text={`A principal of ${formatINR(
-              P
-            )} at ${r}% for ${y} years generates ${formatINR(
-              result.interest
-            )} interest, totaling ${formatINR(result.finalValue)}.`}
-          />
-        </>
-      )}
-
-      <SimpleInterestArticle/>
+      <SimpleInterestArticle />
     </CalculatorLayout>
   );
 }

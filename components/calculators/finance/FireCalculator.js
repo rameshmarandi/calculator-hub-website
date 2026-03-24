@@ -8,53 +8,39 @@ import ResultHero from "@/components/core/ResultHero";
 import StatsGrid from "@/components/core/StatsGrid";
 import ExplanationText from "@/components/core/ExplanationText";
 import DonutBreakdownChart from "@/components/core/DonutBreakdownChart";
+
 import { formatINR } from "@/lib/format";
 
 import FireCalculatorArticle from "../../content/finance/FireCalculatorArticle";
 
-/* =====================================================
-   FORMULA
-
-   Annual Expense = monthly × 12
-   FIRE Corpus = annual ÷ withdrawalRate
-===================================================== */
-
 export default function FireCalculator() {
+
   /* ================= STATE ================= */
 
   const [values, setValues] = useState({
-    expense: "",
+    expense: "40000",
     rate: "4",
   });
 
-  /* ================= PARSE ONCE ================= */
+  /* ================= SAFE PARSING ================= */
 
   const parsed = useMemo(() => {
     return {
-      monthly: Number(values.expense),
-      rate: Number(values.rate) / 100,
+      monthly: Number(values.expense) || 0,
+      rate: (Number(values.rate) || 0) / 100,
     };
   }, [values]);
 
-  /* ================= VALIDATION ================= */
-
-  const isValid = useMemo(() => {
-    const { monthly, rate } = parsed;
-    return monthly > 0 && rate > 0;
-  }, [parsed]);
-
-  /* ================= PURE CALC ================= */
+  /* ================= CALCULATION ================= */
 
   const result = useMemo(() => {
-    if (!isValid) return null;
-
     const { monthly, rate } = parsed;
 
     const annual = monthly * 12;
-    const corpus = annual / rate;
+    const corpus = rate > 0 ? annual / rate : 0;
 
     return { monthly, annual, corpus };
-  }, [parsed, isValid]);
+  }, [parsed]);
 
   /* ================= INPUT CONFIG ================= */
 
@@ -75,6 +61,13 @@ export default function FireCalculator() {
     []
   );
 
+  /* ================= SAFE CHART VALUES ================= */
+
+  const corpusExtra =
+    result.corpus > result.annual
+      ? result.corpus - result.annual
+      : 0;
+
   /* ================= UI ================= */
 
   return (
@@ -88,63 +81,51 @@ export default function FireCalculator() {
         "No Signup Required",
       ]}
     >
-      {/* INPUTS */}
       <InputsGrid inputs={inputs} values={values} setValues={setValues} />
 
-      {result && (
-        <>
-          {/* MAIN RESULT */}
-          <ResultHero
-            label="Required FIRE Corpus"
-            value={result.corpus}
-          />
-<DonutBreakdownChart
-title="Expense vs FIRE Corpus"
+      <ResultHero
+        label="Required FIRE Corpus"
+        value={formatINR(result.corpus)}
+      />
 
-  data={[
-    { name: "1 Year Expense", value: result.annual },
-    {
-      name: "Corpus Needed",
-      value: result.corpus - result.annual,
-    },
-  ]}
-/>
+      <DonutBreakdownChart
+        title="Expense vs FIRE Corpus"
+        data={[
+          { name: "1 Year Expense", value: result.annual },
+          { name: "Corpus Needed", value: corpusExtra },
+        ]}
+      />
 
-          {/* STATS */}
-          <StatsGrid
-            items={[
-              {
-                label: "Monthly Expenses",
-                value: formatINR(result.monthly),
-                variant: "neutral",
-              },
-              {
-                label: "Annual Expenses",
-                value: formatINR(result.annual),
-                variant: "info",
-              },
-              {
-                label: "Withdrawal Rate",
-                value: `${values.rate}%`,
-                variant: "warning",
-              },
-            ]}
-          />
+      <StatsGrid
+        items={[
+          {
+            label: "Monthly Expenses",
+            value: formatINR(result.monthly),
+            variant: "neutral",
+          },
+          {
+            label: "Annual Expenses",
+            value: formatINR(result.annual),
+            variant: "info",
+          },
+          {
+            label: "Withdrawal Rate",
+            value: `${values.rate || 0}%`,
+            variant: "warning",
+          },
+        ]}
+      />
 
-          {/* EXPLANATION */}
-          <ExplanationText
-            text={`With monthly expenses of ${formatINR(
-              result.monthly
-            )}, you need ${formatINR(
-              result.annual
-            )} per year. Using a ${values.rate}% safe withdrawal rate, your required FIRE corpus is approximately ${formatINR(
-              result.corpus
-            )}.`}
-          />
-        </>
-      )}
+      <ExplanationText
+        text={`With monthly expenses of ${formatINR(
+          result.monthly
+        )}, you need ${formatINR(
+          result.annual
+        )} per year. Using a ${values.rate || 0}% safe withdrawal rate, your required FIRE corpus is approximately ${formatINR(
+          result.corpus
+        )}.`}
+      />
 
-      {/* SEO ARTICLE */}
       <FireCalculatorArticle />
     </CalculatorLayout>
   );

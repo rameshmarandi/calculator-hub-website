@@ -14,41 +14,36 @@ import { formatINR } from "@/lib/format";
 import { calculateSip } from "../../../lib/formulas";
 import SIPCalculatorArticle from "../../content/finance/SIPCalculatorArticle";
 
-/*
-  RULES:
-  - no math here
-  - no form submit
-  - no custom cards
-  - only orchestrate shared components
-*/
-
 export default function SipCalculator() {
+
   /* ================= STATE ================= */
 
   const [values, setValues] = useState({
-    monthly: "",
-    rate: "",
-    years: "",
+    monthly: 5000,
+    rate: 12,
+    years: 10,
   });
 
-  /* ================= VALIDATION ================= */
+  /* ================= SAFE VALUES ================= */
 
-  const isValid =
-    Number(values.monthly) > 0 &&
-    Number(values.rate) >= 0 &&
-    Number(values.years) > 0;
+  const monthly = Number(values.monthly) || 0;
+  const rate = Number(values.rate) || 0;
+  const years = Number(values.years) || 0;
 
   /* ================= CALC ================= */
 
   const result = useMemo(() => {
-    if (!isValid) return null;
+    if (monthly <= 0 || years <= 0) {
+      return {
+        invested: 0,
+        gains: 0,
+        futureValue: 0,
+        months: 0,
+      };
+    }
 
-    return calculateSip(
-      Number(values.monthly),
-      Number(values.rate),
-      Number(values.years)
-    );
-  }, [values, isValid]);
+    return calculateSip(monthly, rate, years);
+  }, [monthly, rate, years]);
 
   /* ================= INPUT CONFIG ================= */
 
@@ -77,8 +72,6 @@ export default function SipCalculator() {
     },
   ];
 
-  /* ================= UI ================= */
-
   return (
     <CalculatorLayout
       title="SIP Calculator"
@@ -90,82 +83,74 @@ export default function SipCalculator() {
         "No Signup Required",
       ]}
     >
+
       {/* INPUTS */}
       <InputsGrid inputs={inputs} values={values} setValues={setValues} />
 
-      {/* RESULTS */}
-      {result && (
-        <>
-          {/* MAIN RESULT */}
-          <ResultHero label="Future Value" value={result.futureValue} />
+      {/* RESULTS (NEVER BLOCKED) */}
 
-          {/* DONUT BREAKDOWN */}
-          <DonutBreakdownChart
-          title="Investment vs Returns"
+      <ResultHero label="Future Value" value={result.futureValue} />
 
-            data={[
-              { name: "Invested", value: result.invested },
-              { name: "Gains", value: result.gains },
-            ]}
-          />
+      <DonutBreakdownChart
+        title="Investment vs Returns"
+        data={[
+          { name: "Invested", value: result.invested },
+          { name: "Gains", value: result.gains },
+        ]}
+      />
 
-          {/* STATS */}
-          <StatsGrid
-            items={[
-              {
-                label: "Total Investment",
-                value: formatINR(result.invested),
-                variant: "neutral",
-              },
-              {
-                label: "Total Gains",
-                value: formatINR(result.gains),
-                variant: "success",
-              },
-              {
-                label: "Future Value",
-                value: formatINR(result.futureValue),
-                variant: "primary",
-              },
-              {
-                label: "Total Months",
-                value: result.months,
-                variant: "info",
-              },
-            ]}
-          />
+      <StatsGrid
+        items={[
+          {
+            label: "Total Investment",
+            value: formatINR(result.invested),
+            variant: "neutral",
+          },
+          {
+            label: "Total Gains",
+            value: formatINR(result.gains),
+            variant: "success",
+          },
+          {
+            label: "Future Value",
+            value: formatINR(result.futureValue),
+            variant: "primary",
+          },
+          {
+            label: "Total Months",
+            value: result.months,
+            variant: "info",
+          },
+        ]}
+      />
 
-          {/* EXPLANATION */}
-          <ExplanationText
-            text={`If you invest ${formatINR(
-              Number(values.monthly)
-            )} every month for ${values.years} years at an expected return of ${
-              values.rate
-            }%, your investment can grow to ${formatINR(
-              result.futureValue
-            )}, generating ${formatINR(result.gains)} in gains.`}
-          />
+      <ExplanationText
+        text={`If you invest ${formatINR(
+          monthly
+        )} every month for ${years} years at an expected return of ${rate}%, your investment can grow to ${formatINR(
+          result.futureValue
+        )}, generating ${formatINR(result.gains)} in gains.`}
+      />
 
-          {/* COMPARISON */}
-          <ComparisonMatrix
-            columns={["Years", "Invested", "Future Value"]}
-            rows={[5, 10, 15, 20, 25].map((y) => {
-              const r = calculateSip(
-                Number(values.monthly),
-                Number(values.rate),
-                y
-              );
+      <ComparisonMatrix
+        columns={["Years", "Invested", "Future Value"]}
+        rows={[5, 10, 15, 20, 25].map((y) => {
+          const r = calculateSip(
+            monthly || 5000,
+            rate || 12,
+            y
+          );
 
-              return [
-                `${y} years`,
-                formatINR(r.invested),
-                formatINR(r.futureValue),
-              ];
-            })}
-          />
-        </>
-      )}
-      <SIPCalculatorArticle/>
+          return [
+            `${y} years`,
+            formatINR(r.invested),
+            formatINR(r.futureValue),
+          ];
+        })}
+      />
+
+      <SIPCalculatorArticle />
+
     </CalculatorLayout>
   );
 }

@@ -14,53 +14,48 @@ import { formatINR } from "@/lib/format";
 import { calculateSip, calculateStepUpSip } from "@/lib/formulas";
 import StepUpSIPCalculatorArticle from "../../content/finance/StepUpSIPCalculatorArticle";
 
-/*
-  RULES FOLLOWED:
-  - page only orchestrates
-  - math in lib
-  - no logic in JSX
-  - memoized calculations
-  - clean scalable structure
-*/
-
 export default function StepUpSipCalculator() {
+
   /* ================= STATE ================= */
 
   const [values, setValues] = useState({
-    monthly: "",
-    rate: "",
-    stepUp: "",
-    years: "",
+    monthly: 5000,
+    rate: 12,
+    stepUp: 10,
+    years: 15,
   });
 
-  /* ================= NORMALIZED NUMBERS ================= */
+  /* ================= SAFE NUMBERS ================= */
 
-  const monthly = Number(values.monthly);
-  const rate = Number(values.rate);
-  const stepUp = Number(values.stepUp);
-  const years = Number(values.years);
-
-  /* ================= VALIDATION ================= */
-
-  const isValid =
-    monthly > 0 &&
-    rate >= 0 &&
-    stepUp >= 0 &&
-    years > 0;
+  const monthly = Number(values.monthly) || 0;
+  const rate = Number(values.rate) || 0;
+  const stepUp = Number(values.stepUp) || 0;
+  const years = Number(values.years) || 0;
 
   /* ================= CALCULATIONS ================= */
 
   const result = useMemo(() => {
-    if (!isValid) return null;
+    if (monthly <= 0 || years <= 0) {
+      return {
+        invested: 0,
+        gains: 0,
+        futureValue: 0,
+        months: 0,
+      };
+    }
 
     return calculateStepUpSip(monthly, rate, stepUp, years);
-  }, [monthly, rate, stepUp, years, isValid]);
+  }, [monthly, rate, stepUp, years]);
 
   const regularSip = useMemo(() => {
-    if (!isValid) return null;
+    if (monthly <= 0 || years <= 0) {
+      return {
+        futureValue: 0,
+      };
+    }
 
     return calculateSip(monthly, rate, years);
-  }, [monthly, rate, years, isValid]);
+  }, [monthly, rate, years]);
 
   /* ================= INPUT CONFIG ================= */
 
@@ -96,8 +91,6 @@ export default function StepUpSipCalculator() {
     },
   ];
 
-  /* ================= UI ================= */
-
   return (
     <CalculatorLayout
       title="Step-Up SIP Calculator"
@@ -109,69 +102,65 @@ export default function StepUpSipCalculator() {
         "No Signup Required",
       ]}
     >
+
+      {/* INPUTS */}
       <InputsGrid inputs={inputs} values={values} setValues={setValues} />
 
-      {result && (
-        <>
-          {/* HERO */}
-          <ResultHero label="Future Value" value={result.futureValue} />
+      {/* RESULTS (NEVER BLOCKED) */}
 
-          {/* BREAKDOWN */}
-          <DonutBreakdownChart
-          title="Investment vs Returns"
+      <ResultHero label="Future Value" value={result.futureValue} />
 
-            data={[
-              { name: "Invested", value: result.invested },
-              { name: "Gains", value: result.gains },
-            ]}
-          />
+      <DonutBreakdownChart
+        title="Investment vs Returns"
+        data={[
+          { name: "Invested", value: result.invested },
+          { name: "Gains", value: result.gains },
+        ]}
+      />
 
-          {/* STATS */}
-          <StatsGrid
-            items={[
-              {
-                label: "Total Investment",
-                value: formatINR(result.invested),
-                variant: "neutral",
-              },
-              {
-                label: "Total Gains",
-                value: formatINR(result.gains),
-                variant: "success",
-              },
-              {
-                label: "Future Value",
-                value: formatINR(result.futureValue),
-                variant: "primary",
-              },
-              {
-                label: "Total Months",
-                value: result.months,
-                variant: "info",
-              },
-            ]}
-          />
+      <StatsGrid
+        items={[
+          {
+            label: "Total Investment",
+            value: formatINR(result.invested),
+            variant: "neutral",
+          },
+          {
+            label: "Total Gains",
+            value: formatINR(result.gains),
+            variant: "success",
+          },
+          {
+            label: "Future Value",
+            value: formatINR(result.futureValue),
+            variant: "primary",
+          },
+          {
+            label: "Total Months",
+            value: result.months,
+            variant: "info",
+          },
+        ]}
+      />
 
-          {/* EXPLANATION */}
-          <ExplanationText
-            text={`With a starting SIP of ${formatINR(
-              monthly
-            )} increasing ${stepUp}% yearly for ${years} years at ${rate}% returns, your corpus can grow to ${formatINR(
-              result.futureValue
-            )}.`}
-          />
+      <ExplanationText
+        text={`With a starting SIP of ${formatINR(
+          monthly
+        )} increasing ${stepUp}% yearly for ${years} years at ${rate}% returns, your corpus can grow to ${formatINR(
+          result.futureValue
+        )}.`}
+      />
 
-          {/* COMPARISON */}
-          <ComparisonMatrix
-            columns={["Type", "Future Value"]}
-            rows={[
-              ["Regular SIP", formatINR(regularSip.futureValue)],
-              ["Step-Up SIP", formatINR(result.futureValue)],
-            ]}
-          />
-        </>
-      )}
-      <StepUpSIPCalculatorArticle/>
+      <ComparisonMatrix
+        columns={["Type", "Future Value"]}
+        rows={[
+          ["Regular SIP", formatINR(regularSip.futureValue)],
+          ["Step-Up SIP", formatINR(result.futureValue)],
+        ]}
+      />
+
+      <StepUpSIPCalculatorArticle />
+
     </CalculatorLayout>
   );
 }

@@ -9,7 +9,6 @@ import DonutBreakdownChart from "@/components/core/DonutBreakdownChart";
 import StatsGrid from "@/components/core/StatsGrid";
 import ExplanationText from "@/components/core/ExplanationText";
 
-
 import { formatINR } from "@/lib/format";
 import { calculateFD } from "../../../lib/formulas";
 import FixedDepositArticle from "../../content/finance/FixedDepositArticle";
@@ -18,32 +17,22 @@ export default function FixedDepositCalculator() {
   /* ================= STATE ================= */
 
   const [values, setValues] = useState({
-    amount: "",
-    rate: "",
-    years: "",
-    frequency: "4", // quarterly default
+    amount: "100000",
+    rate: "7.5",
+    years: "5",
+    frequency: "4",
   });
-
-  /* ================= NORMALIZED ================= */
-
-  const amount = Number(values.amount);
-  const rate = Number(values.rate);
-  const years = Number(values.years);
-  const frequency = Number(values.frequency);
-
-  const isValid =
-    amount > 0 &&
-    rate >= 0 &&
-    years > 0 &&
-    frequency > 0;
 
   /* ================= CALC ================= */
 
   const result = useMemo(() => {
-    if (!isValid) return null;
+    const amount = Number(values.amount) || 0;
+    const rate = Number(values.rate) || 0;
+    const years = Number(values.years) || 0;
+    const frequency = Number(values.frequency) || 0;
 
     return calculateFD(amount, rate, years, frequency);
-  }, [amount, rate, years, frequency, isValid]);
+  }, [values]);
 
   /* ================= INPUT CONFIG ================= */
 
@@ -84,6 +73,13 @@ export default function FixedDepositCalculator() {
     },
   ];
 
+  /* ================= NORMALIZED VALUES ================= */
+
+  const amount = Number(values.amount) || 0;
+  const rate = Number(values.rate) || 0;
+  const years = Number(values.years) || 0;
+  const frequency = Number(values.frequency) || 0;
+
   /* ================= UI ================= */
 
   return (
@@ -97,62 +93,52 @@ export default function FixedDepositCalculator() {
         "No Signup Required",
       ]}
     >
-      {/* INPUTS */}
       <InputsGrid inputs={inputs} values={values} setValues={setValues} />
 
-      {/* RESULTS */}
-      {result && (
-        <>
-          {/* HERO */}
-          <ResultHero label="Maturity Amount" value={result.maturity} />
+      <ResultHero label="Maturity Amount" value={result.maturity} />
 
-          {/* BREAKDOWN */}
-          <DonutBreakdownChart
-          title="Invested Amount vs Interest Earned"
+      <DonutBreakdownChart
+        title="Invested Amount vs Interest Earned"
+        data={[
+          { name: "Principal", value: result.principal },
+          { name: "Interest", value: result.interest },
+        ]}
+      />
 
-            data={[
-              { name: "Principal", value: result.principal },
-              { name: "Interest", value: result.interest },
-            ]}
-          />
+      <StatsGrid
+        items={[
+          {
+            label: "Deposit Amount",
+            value: formatINR(result.principal),
+            variant: "neutral",
+          },
+          {
+            label: "Interest Earned",
+            value: formatINR(result.interest),
+            variant: "success",
+          },
+          {
+            label: "Maturity Amount",
+            value: formatINR(result.maturity),
+            variant: "primary",
+          },
+          {
+            label: "Total Months",
+            value: result.months,
+            variant: "info",
+          },
+        ]}
+      />
 
-          {/* STATS */}
-          <StatsGrid
-            items={[
-              {
-                label: "Deposit Amount",
-                value: formatINR(result.principal),
-                variant: "neutral",
-              },
-              {
-                label: "Interest Earned",
-                value: formatINR(result.interest),
-                variant: "success",
-              },
-              {
-                label: "Maturity Amount",
-                value: formatINR(result.maturity),
-                variant: "primary",
-              },
-              {
-                label: "Total Months",
-                value: result.months,
-                variant: "info",
-              },
-            ]}
-          />
+      <ExplanationText
+        text={`A fixed deposit of ${formatINR(
+          amount
+        )} at ${rate}% interest compounded ${frequency} time(s) per year for ${years} years grows to ${formatINR(
+          result.maturity
+        )}.`}
+      />
 
-          {/* EXPLANATION */}
-          <ExplanationText
-            text={`A fixed deposit of ${formatINR(
-              amount
-            )} at ${rate}% interest compounded ${frequency} time(s) per year for ${years} years grows to ${formatINR(
-              result.maturity
-            )}.`}
-          />
-        </>
-      )}
-      <FixedDepositArticle/>
+      <FixedDepositArticle />
     </CalculatorLayout>
   );
 }

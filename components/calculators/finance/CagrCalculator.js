@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+
 import DonutBreakdownChart from "@/components/core/DonutBreakdownChart";
 import CalculatorLayout from "@/components/core/CalculatorLayout";
 import InputsGrid from "@/components/core/InputsGrid";
@@ -13,22 +14,25 @@ import { calculateCagr } from "../../../lib/formulas";
 import CAGRCalculatorArticle from "../../content/finance/CAGRCalculatorArticle";
 
 export default function CagrCalculator() {
+  /* ================= STATE ================= */
+
   const [values, setValues] = useState({
-    initial: "",
-    final: "",
-    years: "",
+    initial: "100000",
+    final: "250000",
+    years: "5",
   });
 
-  const initial = Number(values.initial);
-  const finalVal = Number(values.final);
-  const years = Number(values.years);
-
-  const isValid = initial > 0 && finalVal > initial && years > 0;
+  /* ================= CALC ================= */
 
   const result = useMemo(() => {
-    if (!isValid) return null;
+    const initial = Number(values.initial) || 0;
+    const finalVal = Number(values.final) || 0;
+    const years = Number(values.years) || 0;
+
     return calculateCagr(initial, finalVal, years);
-  }, [initial, finalVal, years, isValid]);
+  }, [values]);
+
+  /* ================= INPUT CONFIG ================= */
 
   const inputs = [
     {
@@ -48,8 +52,17 @@ export default function CagrCalculator() {
       label: "Investment Duration (Years)",
       type: "number",
       min: 1,
+      placeholder: "5",
     },
   ];
+
+  /* ================= NORMALIZED VALUES ================= */
+
+  const initial = Number(values.initial) || 0;
+  const finalVal = Number(values.final) || 0;
+  const years = Number(values.years) || 0;
+
+  /* ================= UI ================= */
 
   return (
     <CalculatorLayout
@@ -64,48 +77,46 @@ export default function CagrCalculator() {
     >
       <InputsGrid inputs={inputs} values={values} setValues={setValues} />
 
-      {result && (
-        <>
-          <ResultHero label="CAGR" value={result.cagr} />
+      <ResultHero label="CAGR" value={`${result.cagr}%`} />
 
-          <DonutBreakdownChart
-            data={[
-              { name: "Investment", value: result.invested },
-              { name: "Growth", value: result.growth },
-            ]}
-          />
+      <DonutBreakdownChart
+        title="Investment vs Growth"
+        data={[
+          { name: "Investment", value: result.invested },
+          { name: "Growth", value: result.growth },
+        ]}
+      />
 
-          <StatsGrid
-            items={[
-              {
-                label: "Initial Value",
-                value: formatINR(result.invested),
-              },
-              {
-                label: "Final Value",
-                value: formatINR(result.final),
-                variant: "success",
-              },
-              {
-                label: "Absolute Growth",
-                value: formatINR(result.growth),
-                variant: "primary",
-              },
-              {
-                label: "Total Months",
-                value: result.months,
-                variant: "info",
-              },
-            ]}
-          />
+      <StatsGrid
+        items={[
+          {
+            label: "Initial Value",
+            value: formatINR(result.invested),
+          },
+          {
+            label: "Final Value",
+            value: formatINR(result.final),
+            variant: "success",
+          },
+          {
+            label: "Absolute Growth",
+            value: formatINR(result.growth),
+            variant: "primary",
+          },
+          {
+            label: "Total Months",
+            value: result.months,
+            variant: "info",
+          },
+        ]}
+      />
 
-          <ExplanationText
-            text={`Your investment grew from ${formatINR(initial)} to ${formatINR(
-              finalVal,
-            )} in ${years} years with a CAGR of ${result.cagr}%.`}
-          />
-        </>
-      )}
+      <ExplanationText
+        text={`Your investment grew from ${formatINR(initial)} to ${formatINR(
+          finalVal
+        )} in ${years} years with a CAGR of ${result.cagr}%.`}
+      />
+
       <CAGRCalculatorArticle />
     </CalculatorLayout>
   );

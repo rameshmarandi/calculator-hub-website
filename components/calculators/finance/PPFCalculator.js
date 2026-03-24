@@ -13,35 +13,42 @@ import { formatINR } from "@/lib/format";
 import { calculatePPF } from "../../../lib/formulas";
 import PPFCalculatorArticle from "../../content/finance/PPFCalculatorArticle";
 
-
 export default function PPFCalculator() {
-  /* ================= STATE ================= */
+/*************  ✨ Windsurf Command ⭐  *************/
+/**
+ * PPFCalculator component
+ *
+ * A React component that calculates the maturity amount of a PPF investment
+ * given the yearly investment amount, interest rate and tenure (years).
+ *
+ * The component uses the `calculatePPF` function from the `formulas` module to
+ * calculate the maturity amount.
+ *
+ * The component renders a form to input the yearly investment amount, interest rate
+ * and tenure, and then renders the maturity amount along with a breakdown of
+ * the invested amount vs interest earned and some statistics.
+ *
+ * The component also renders an explanation text that explains the calculation
+ * and the results.
+ *
+ * @returns {React.Component} The PPFCalculator component
+/*******  1d0f9ebb-7263-42b7-b964-6763407776e5  *******/  /* ================= STATE ================= */
 
   const [values, setValues] = useState({
-    yearly: "",
-    rate: "",
-    years: "",
+    yearly: "150000",
+    rate: "7.1",
+    years: "15",
   });
-
-  /* ================= NORMALIZED ================= */
-
-  const yearly = Number(values.yearly);
-  const rate = Number(values.rate);
-  const years = Number(values.years);
-
-  /* ================= VALIDATION ================= */
-
-  const isValid =
-    yearly > 0 &&
-    rate >= 0 &&
-    years >= 15; // ✅ enforce PPF rule
 
   /* ================= CALC ================= */
 
   const result = useMemo(() => {
-    if (!isValid) return null;
+    const yearly = Number(values.yearly) || 0;
+    const rate = Number(values.rate) || 0;
+    const years = Math.max(Number(values.years) || 0, 15);
+
     return calculatePPF(yearly, rate, years);
-  }, [yearly, rate, years, isValid]);
+  }, [values]);
 
   /* ================= INPUT CONFIG ================= */
 
@@ -70,6 +77,12 @@ export default function PPFCalculator() {
     },
   ];
 
+  /* ================= NORMALIZED VALUES ================= */
+
+  const yearly = Number(values.yearly) || 0;
+  const rate = Number(values.rate) || 0;
+  const years = Math.max(Number(values.years) || 0, 15);
+
   /* ================= UI ================= */
 
   return (
@@ -85,59 +98,50 @@ export default function PPFCalculator() {
     >
       <InputsGrid inputs={inputs} values={values} setValues={setValues} />
 
-      {result && (
-        <>
-          {/* HERO */}
-          <ResultHero label="Maturity Amount" value={result.maturity} />
+      <ResultHero label="Maturity Amount" value={result.maturity} />
 
-          {/* BREAKDOWN */}
-          <DonutBreakdownChart
-          title="Invested Amount vs Interest Earned"
+      <DonutBreakdownChart
+        title="Invested Amount vs Interest Earned"
+        data={[
+          { name: "Investment", value: result.invested },
+          { name: "Interest", value: result.interest },
+        ]}
+      />
 
-            data={[
-              { name: "Investment", value: result.invested },
-              { name: "Interest", value: result.interest },
-            ]}
-          />
+      <StatsGrid
+        items={[
+          {
+            label: "Total Investment",
+            value: formatINR(result.invested),
+            variant: "neutral",
+          },
+          {
+            label: "Interest Earned",
+            value: formatINR(result.interest),
+            variant: "success",
+          },
+          {
+            label: "Maturity Amount",
+            value: formatINR(result.maturity),
+            variant: "primary",
+          },
+          {
+            label: "Total Months",
+            value: result.months,
+            variant: "info",
+          },
+        ]}
+      />
 
-          {/* STATS */}
-          <StatsGrid
-            items={[
-              {
-                label: "Total Investment",
-                value: formatINR(result.invested),
-                variant: "neutral",
-              },
-              {
-                label: "Interest Earned",
-                value: formatINR(result.interest),
-                variant: "success",
-              },
-              {
-                label: "Maturity Amount",
-                value: formatINR(result.maturity),
-                variant: "primary",
-              },
-              {
-                label: "Total Months",
-                value: result.months,
-                variant: "info",
-              },
-            ]}
-          />
+      <ExplanationText
+        text={`Investing ${formatINR(
+          yearly
+        )} every year for ${years} years at ${rate}% grows to ${formatINR(
+          result.maturity
+        )} with annual compounding.`}
+      />
 
-          {/* EXPLANATION */}
-          <ExplanationText
-            text={`Investing ${formatINR(
-              yearly
-            )} every year for ${years} years at ${rate}% grows to ${formatINR(
-              result.maturity
-            )} with annual compounding.`}
-          />
-        </>
-      )}
-
-      <PPFCalculatorArticle/>
+      <PPFCalculatorArticle />
     </CalculatorLayout>
   );
 }

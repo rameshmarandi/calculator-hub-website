@@ -14,26 +14,27 @@ import { calculateRD } from "../../../lib/formulas";
 import RecurringDepositArticle from "../../content/finance/RecurringDepositArticle";
 
 export default function RecurringDepositCalculator() {
+  /* ================= STATE ================= */
+
   const [values, setValues] = useState({
-    monthly: "",
-    rate: "",
-    years: "",
+    monthly: "5000",
+    rate: "7",
+    years: "5",
     frequency: "4",
   });
 
-  const monthly = Number(values.monthly);
-  const rate = Number(values.rate);
-  const years = Number(values.years);
-  const frequency = Number(values.frequency);
-
-  const isValid =
-    monthly > 0 && rate >= 0 && years > 0 && frequency > 0;
+  /* ================= CALC ================= */
 
   const result = useMemo(() => {
-    if (!isValid) return null;
+    const monthly = Number(values.monthly) || 0;
+    const rate = Number(values.rate) || 0;
+    const years = Number(values.years) || 0;
+    const frequency = Number(values.frequency) || 0;
 
     return calculateRD(monthly, rate, years, frequency);
-  }, [monthly, rate, years, frequency, isValid]);
+  }, [values]);
+
+  /* ================= INPUT CONFIG ================= */
 
   const inputs = [
     {
@@ -55,6 +56,7 @@ export default function RecurringDepositCalculator() {
       label: "Tenure (Years)",
       type: "number",
       min: 1,
+      placeholder: "5",
     },
     {
       key: "frequency",
@@ -69,6 +71,14 @@ export default function RecurringDepositCalculator() {
     },
   ];
 
+  /* ================= NORMALIZED VALUES ================= */
+
+  const monthly = Number(values.monthly) || 0;
+  const rate = Number(values.rate) || 0;
+  const years = Number(values.years) || 0;
+
+  /* ================= UI ================= */
+
   return (
     <CalculatorLayout
       title="Recurring Deposit Calculator"
@@ -82,54 +92,50 @@ export default function RecurringDepositCalculator() {
     >
       <InputsGrid inputs={inputs} values={values} setValues={setValues} />
 
-      {result && (
-        <>
-          <ResultHero label="Maturity Amount" value={result.maturity} />
+      <ResultHero label="Maturity Amount" value={result.maturity} />
 
-          <DonutBreakdownChart
-          title="Invested Amount vs Interest Earned"
+      <DonutBreakdownChart
+        title="Invested Amount vs Interest Earned"
+        data={[
+          { name: "Invested", value: result.invested },
+          { name: "Interest", value: result.interest },
+        ]}
+      />
 
-            data={[
-              { name: "Invested", value: result.invested },
-              { name: "Interest", value: result.interest },
-            ]}
-          />
+      <StatsGrid
+        items={[
+          {
+            label: "Total Investment",
+            value: formatINR(result.invested),
+            variant: "neutral",
+          },
+          {
+            label: "Interest Earned",
+            value: formatINR(result.interest),
+            variant: "success",
+          },
+          {
+            label: "Maturity Amount",
+            value: formatINR(result.maturity),
+            variant: "primary",
+          },
+          {
+            label: "Total Months",
+            value: result.months,
+            variant: "info",
+          },
+        ]}
+      />
 
-          <StatsGrid
-            items={[
-              {
-                label: "Total Investment",
-                value: formatINR(result.invested),
-                variant: "neutral",
-              },
-              {
-                label: "Interest Earned",
-                value: formatINR(result.interest),
-                variant: "success",
-              },
-              {
-                label: "Maturity Amount",
-                value: formatINR(result.maturity),
-                variant: "primary",
-              },
-              {
-                label: "Total Months",
-                value: result.months,
-                variant: "info",
-              },
-            ]}
-          />
+      <ExplanationText
+        text={`Depositing ${formatINR(
+          monthly
+        )} monthly for ${years} years at ${rate}% interest grows to ${formatINR(
+          result.maturity
+        )}.`}
+      />
 
-          <ExplanationText
-            text={`Depositing ${formatINR(
-              monthly
-            )} monthly for ${years} years at ${rate}% interest grows to ${formatINR(
-              result.maturity
-            )}.`}
-          />
-        </>
-      )}
-      <RecurringDepositArticle/>
+      <RecurringDepositArticle />
     </CalculatorLayout>
   );
 }

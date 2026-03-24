@@ -13,30 +13,32 @@ import { formatINR } from "@/lib/format";
 import { calculateSip, calculateLumpsum } from "../../../lib/formulas";
 import MutualFundReturnCalculatorArticle from "../../content/finance/MutualFundReturnCalculatorArticle";
 
-// import { calculateSip, calculateLumpsum } from "@/lib/formulas";
-
 export default function MutualFundReturnCalculator() {
+  /* ================= MODE ================= */
+
   const [mode, setMode] = useState("sip");
 
+  /* ================= STATE ================= */
+
   const [values, setValues] = useState({
-    amount: "",
-    rate: "",
-    years: "",
+    amount: "5000",
+    rate: "12",
+    years: "10",
   });
 
-  const amount = Number(values.amount);
-  const rate = Number(values.rate);
-  const years = Number(values.years);
-
-  const isValid = amount > 0 && rate >= 0 && years > 0;
+  /* ================= CALC ================= */
 
   const result = useMemo(() => {
-    if (!isValid) return null;
+    const amount = Number(values.amount) || 0;
+    const rate = Number(values.rate) || 0;
+    const years = Number(values.years) || 0;
 
     return mode === "sip"
       ? calculateSip(amount, rate, years)
       : calculateLumpsum(amount, rate, years);
-  }, [amount, rate, years, mode, isValid]);
+  }, [values, mode]);
+
+  /* ================= INPUT CONFIG ================= */
 
   const inputs = [
     {
@@ -55,10 +57,18 @@ export default function MutualFundReturnCalculator() {
       key: "years",
       label: "Investment Duration (Years)",
       type: "number",
-      placeholder: "Ex: 5",
       min: 1,
+      placeholder: "10",
     },
   ];
+
+  /* ================= NORMALIZED VALUES ================= */
+
+  const amount = Number(values.amount) || 0;
+  const rate = Number(values.rate) || 0;
+  const years = Number(values.years) || 0;
+
+  /* ================= UI ================= */
 
   return (
     <CalculatorLayout
@@ -72,18 +82,17 @@ export default function MutualFundReturnCalculator() {
       ]}
     >
       {/* MODE SWITCH */}
-      {/* MODE SWITCH */}
       <div
         className="
-    inline-flex
-    rounded-lg
-    p-1
-    bg-[var(--surface-2)]
-    border
-    border-[var(--border)]
-    w-fit
-    mb-4
-  "
+        inline-flex
+        rounded-lg
+        p-1
+        bg-[var(--surface-2)]
+        border
+        border-[var(--border)]
+        w-fit
+        mb-4
+      "
       >
         {["sip", "lumpsum"].map((type) => {
           const active = mode === type;
@@ -94,19 +103,18 @@ export default function MutualFundReturnCalculator() {
               type="button"
               onClick={() => setMode(type)}
               className={`
-          px-5 py-2
-          text-sm
-          font-medium
-          rounded-md
-          transition-all
-          duration-200
-
-          ${
-            active
-              ? "bg-[var(--primary)] text-white shadow-sm"
-              : "text-[var(--text-muted)] hover:bg-[var(--surface)]"
-          }
-        `}
+                px-5 py-2
+                text-sm
+                font-medium
+                rounded-md
+                transition-all
+                duration-200
+                ${
+                  active
+                    ? "bg-[var(--primary)] text-white shadow-sm"
+                    : "text-[var(--text-muted)] hover:bg-[var(--surface)]"
+                }
+              `}
             >
               {type === "sip" ? "SIP" : "Lumpsum"}
             </button>
@@ -116,64 +124,49 @@ export default function MutualFundReturnCalculator() {
 
       <InputsGrid inputs={inputs} values={values} setValues={setValues} />
 
-      {result && (
-        <>
-          {/* <ResultHero label="Final Value" value={result.finalValue} /> */}
-          <ResultHero label="Final Value" value={result.futureValue} />
-          <DonutBreakdownChart
-          title="Investment vs Profit"
+      <ResultHero label="Final Value" value={result.futureValue} />
 
-            data={[
-              { name: "Investment", value: result.invested },
-              { name: "Returns", value: result.gains },
-            ]}
-          />
+      <DonutBreakdownChart
+        title="Investment vs Profit"
+        data={[
+          { name: "Investment", value: result.invested },
+          { name: "Returns", value: result.gains },
+        ]}
+      />
 
-          {/* <StatsGrid
-            items={[
-              { label: "Total Investment", value: formatINR(result.invested) },
-              {
-                label: "Total Returns",
-                value: formatINR(result.gains),
-                variant: "success",
-              },
-              {
-                label: "Final Value",
-                value: formatINR(result.finalValue),
-                variant: "primary",
-              },
-              { label: "Total Months", value: result.months, variant: "info" },
-            ]}
-          /> */}
+      <StatsGrid
+        items={[
+          {
+            label: "Total Investment",
+            value: formatINR(result.invested),
+          },
+          {
+            label: "Total Returns",
+            value: formatINR(result.gains),
+            variant: "success",
+          },
+          {
+            label: "Final Value",
+            value: formatINR(result.futureValue),
+            variant: "primary",
+          },
+          {
+            label: "Total Months",
+            value: result.months,
+            variant: "info",
+          },
+        ]}
+      />
 
-          <StatsGrid
-            items={[
-              { label: "Total Investment", value: formatINR(result.invested) },
-              {
-                label: "Total Returns",
-                value: formatINR(result.gains),
-                variant: "success",
-              },
-              {
-                label: "Final Value",
-                value: formatINR(result.futureValue),
-                variant: "primary",
-              },
-              { label: "Total Months", value: result.months, variant: "info" },
-            ]}
-          />
+      <ExplanationText
+        text={`Investing ${formatINR(amount)} ${
+          mode === "sip" ? "monthly" : "once"
+        } for ${years} years at ${rate}% can grow to ${formatINR(
+          result.futureValue
+        )}.`}
+      />
 
-          <ExplanationText
-            text={`Investing ${formatINR(amount)} ${
-              mode === "sip" ? "monthly" : "once"
-            } for ${years} years at ${rate}% can grow to ${formatINR(
-              result.futureValue,
-            )}.`}
-          />
-        </>
-      )}
-
-      <MutualFundReturnCalculatorArticle/>
+      <MutualFundReturnCalculatorArticle />
     </CalculatorLayout>
   );
 }
