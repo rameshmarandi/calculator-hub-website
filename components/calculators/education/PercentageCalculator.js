@@ -1,50 +1,28 @@
 "use client";
 
 import { useState } from "react";
-import { Calculator, Percent } from "lucide-react";
+import { Percent } from "lucide-react";
 
-import { PercentageInput } from "../../inputs/PercentageInput";
+import { AmountInput } from "../../inputs/AmountInput";
 import { ResultCard } from "../../ResultCard";
 
+import { percentageCalculator } from "../../../lib/formulas";
+
 export default function PercentageCalculator() {
-  const [value, setValue] = useState("");
-  const [percentage, setPercentage] = useState("");
 
-  const [result, setResult] = useState(null);
-  const [error, setError] = useState("");
+  /* ---------------- PREFILLED VALUES ---------------- */
+  const [totalNumber, setTotalNumber] = useState("200");
+  const [percentage, setPercentage] = useState("15");
 
-  /* ---------------- VALIDATION ---------------- */
-  function validate() {
-    if (!value || isNaN(value)) {
-      setError("Please enter a valid number.");
-      return false;
-    }
-
-    if (!percentage || isNaN(percentage)) {
-      setError("Please enter a valid percentage.");
-      return false;
-    }
-
-    setError("");
-    return true;
-  }
+  /* ---------------- SAFE INPUTS ---------------- */
+  const safeTotalNumber = Number(totalNumber) || 0;
+  const safePercentage = Number(percentage) || 0;
 
   /* ---------------- CALCULATION ---------------- */
-  function calculatePercentage(e) {
-    e.preventDefault();
-    if (!validate()) return;
-
-    const v = Number(value);
-    const p = Number(percentage);
-
-    const calculatedValue = (v * p) / 100;
-
-    setResult({
-      value: calculatedValue.toFixed(2),
-      percentage: p,
-      base: v,
-    });
-  }
+  const result = percentageCalculator({
+    totalNumber: safeTotalNumber,
+    percentage: safePercentage
+  });
 
   return (
     <section
@@ -52,103 +30,114 @@ export default function PercentageCalculator() {
       style={{
         backgroundColor: "var(--surface)",
         border: "1px solid var(--border)",
-      }}>
+      }}
+    >
+
       {/* ================= HEADER ================= */}
       <header>
-        <h1 className="text-2xl font-bold mb-1">Percentage Calculator</h1>
+        <h1 className="text-2xl font-bold mb-1">
+          Percentage Calculator
+        </h1>
+
         <p className="text-sm leading-relaxed">
-          Use this Percentage Calculator to quickly calculate percentages,
-          increases, discounts, and comparisons with accurate results.
+          Use this Percentage Calculator to quickly calculate what
+          percentage of a number is. Enter a total number and the
+          percentage to get instant results.
         </p>
       </header>
 
-      {/* ================= FORM ================= */}
-      <form onSubmit={calculatePercentage} className="space-y-4">
-        <PercentageInput
-          label="Value"
-          value={value}
-          onChange={setValue}
+
+      {/* ================= INPUTS ================= */}
+      <div className="space-y-4">
+
+        <AmountInput
+          label="Total Number"
+          value={totalNumber}
+          onChange={setTotalNumber}
+          prefix=""
           placeholder="200"
         />
 
-        <PercentageInput
+        <AmountInput
           label="Percentage (%)"
           value={percentage}
           onChange={setPercentage}
+          prefix=""
           placeholder="15"
         />
 
-        {error && <p className="text-sm text-red-500">{error}</p>}
+      </div>
 
-        <button
-          type="submit"
-          className="w-full py-2.5 rounded-md font-medium flex items-center justify-center gap-2"
-          style={{
-            backgroundColor: "var(--primary)",
-            color: "#fff",
-          }}>
-          <Calculator size={18} />
-          Calculate Percentage
-        </button>
-      </form>
 
       {/* ================= RESULT ================= */}
-      {result && (
-        <div aria-live="polite">
-          <ResultCard
-            variant="primary"
-            icon={<Percent size={20} />}
-            label={`${result.percentage}% of ${result.base}`}
-            value={result.value}
-          />
-        </div>
-      )}
+      <div aria-live="polite">
+        <ResultCard
+          variant="primary"
+          icon={<Percent size={20} />}
+          label={`${safePercentage}% of ${safeTotalNumber}`}
+          value={result.percentageValue || 0}
+        />
+      </div>
 
-      {/* ================= SEO BLOG CONTENT ================= */}
+
+      {/* ================= SEO CONTENT ================= */}
       <article className="space-y-4 text-sm leading-relaxed">
-        <h2 className="font-semibold text-base">What Is a Percentage?</h2>
+
+        <h2 className="font-semibold text-base">
+          What Is a Percentage?
+        </h2>
 
         <p>
-          A percentage represents a portion of a whole expressed as a fraction
-          of 100. It is commonly used in finance, education, shopping discounts,
-          statistics, and daily calculations.
+          A percentage represents a portion of a number expressed
+          as a fraction of 100. It is widely used in mathematics,
+          education, statistics, finance, and daily life to compare
+          quantities and measure change.
         </p>
 
-        <h3 className="font-semibold">Percentage Formula</h3>
+        <h3 className="font-semibold">
+          Percentage Formula
+        </h3>
 
         <p
           className="font-mono text-xs p-3 rounded"
-          style={{ backgroundColor: "var(--surface-2)" }}>
-          Percentage Value = (Base Value × Percentage) ÷ 100
+          style={{ backgroundColor: "var(--surface-2)" }}
+        >
+          Percentage Value = (Total Number × Percentage) ÷ 100
         </p>
 
         <ul className="list-disc pl-5">
-          <li>Helps calculate discounts and offers</li>
-          <li>Used to find tax, interest, and growth</li>
-          <li>Essential for comparisons and analysis</li>
+          <li>Used to calculate discounts and price reductions</li>
+          <li>Helps determine tax, growth, and interest</li>
+          <li>Common in academic math problems</li>
+          <li>Useful for comparisons and data analysis</li>
         </ul>
 
-        <h3 className="font-semibold">Why Use a Percentage Calculator?</h3>
+        <h3 className="font-semibold">
+          Why Use a Percentage Calculator?
+        </h3>
 
         <ul className="list-disc pl-5">
-          <li>Eliminates manual calculation errors</li>
-          <li>Saves time in daily math tasks</li>
-          <li>Useful for business, students, and professionals</li>
-          <li>Instant and accurate results</li>
+          <li>Provides instant and accurate results</li>
+          <li>Reduces manual calculation mistakes</li>
+          <li>Helpful for students and professionals</li>
+          <li>Simplifies everyday percentage calculations</li>
         </ul>
 
         <p>
-          This percentage calculator provides quick results and is ideal for
-          everyday calculations involving growth, reduction, or comparisons.
+          This calculator instantly determines the percentage value
+          of a number using a simple mathematical formula.
         </p>
+
       </article>
+
 
       {/* ================= DISCLAIMER ================= */}
       <aside className="text-xs text-muted">
-        ⚠️ Results are calculated using standard mathematical formulas. Always
-        verify important financial or academic calculations when precision is
-        critical.
+        ⚠️ Results are calculated using standard mathematical
+        formulas. Always verify important academic or financial
+        calculations when precision is critical.
       </aside>
+
     </section>
   );
 }

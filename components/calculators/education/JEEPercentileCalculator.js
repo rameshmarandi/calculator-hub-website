@@ -1,79 +1,34 @@
 "use client";
 
 import { useState } from "react";
-import { Calculator, Trophy } from "lucide-react";
+import { Trophy } from "lucide-react";
 
-import { PercentageInput } from "../../inputs/PercentageInput";
+import { AmountInput } from "../../inputs/AmountInput";
 import { ResultCard } from "../../ResultCard";
 
+import { jeePercentileCalculator } from "../../../lib/formulas";
+
 export default function JEEPercentileCalculator() {
-  const [yourMarks, setYourMarks] = useState("");
+
+  /* ---------------- PREFILLED VALUES ---------------- */
+  const [yourMarks, setYourMarks] = useState("180");
   const [maxMarks, setMaxMarks] = useState("300");
-  const [totalCandidates, setTotalCandidates] = useState("");
-  const [candidatesBelow, setCandidatesBelow] = useState("");
+  const [totalCandidates, setTotalCandidates] = useState("900000");
+  const [candidatesBelow, setCandidatesBelow] = useState("850000");
 
-  const [result, setResult] = useState(null);
-  const [error, setError] = useState("");
-
-  /* ---------------- VALIDATION ---------------- */
-  function validate() {
-    if (!yourMarks || isNaN(yourMarks)) {
-      setError("Please enter valid marks obtained.");
-      return false;
-    }
-
-    if (!maxMarks || isNaN(maxMarks) || Number(maxMarks) <= 0) {
-      setError("Please enter valid maximum marks.");
-      return false;
-    }
-
-    if (Number(yourMarks) < 0 || Number(yourMarks) > Number(maxMarks)) {
-      setError("Marks must be between 0 and maximum marks.");
-      return false;
-    }
-
-    if (
-      !totalCandidates ||
-      isNaN(totalCandidates) ||
-      Number(totalCandidates) <= 0
-    ) {
-      setError("Please enter valid total number of candidates.");
-      return false;
-    }
-
-    if (
-      !candidatesBelow ||
-      isNaN(candidatesBelow) ||
-      Number(candidatesBelow) < 0 ||
-      Number(candidatesBelow) > Number(totalCandidates)
-    ) {
-      setError("Please enter valid number of candidates below your score.");
-      return false;
-    }
-
-    setError("");
-    return true;
-  }
+  /* ---------------- SAFE INPUTS ---------------- */
+  const safeYourMarks = Number(yourMarks) || 0;
+  const safeMaxMarks = Number(maxMarks) || 0;
+  const safeTotalCandidates = Number(totalCandidates) || 0;
+  const safeCandidatesBelow = Number(candidatesBelow) || 0;
 
   /* ---------------- CALCULATION ---------------- */
-  function calculatePercentile(e) {
-    e.preventDefault();
-    if (!validate()) return;
-
-    const below = Number(candidatesBelow);
-    const total = Number(totalCandidates);
-
-    /*
-      Official NTA Percentile Formula (Conceptual)
-      Percentile = (Number of candidates with score ≤ yours ÷ Total candidates) × 100
-    */
-
-    const percentile = (below / total) * 100;
-
-    setResult({
-      percentile: percentile.toFixed(4),
-    });
-  }
+  const result = jeePercentileCalculator({
+    yourMarks: safeYourMarks,
+    maxMarks: safeMaxMarks,
+    totalCandidates: safeTotalCandidates,
+    candidatesBelow: safeCandidatesBelow
+  });
 
   return (
     <section
@@ -81,116 +36,101 @@ export default function JEEPercentileCalculator() {
       style={{
         backgroundColor: "var(--surface)",
         border: "1px solid var(--border)",
-      }}>
-      {/* ================= HEADER ================= */}
+      }}
+    >
+
+      {/* HEADER */}
       <header>
-        <h1 className="text-2xl font-bold mb-1">JEE Percentile Calculator</h1>
+        <h1 className="text-2xl font-bold mb-1">
+          JEE Percentile Calculator
+        </h1>
+
         <p className="text-sm leading-relaxed">
-          Estimate your JEE Main percentile score using this JEE Percentile
-          Calculator based on NTA’s percentile calculation methodology.
+          Estimate your JEE Main percentile using candidate ranking data.
         </p>
       </header>
 
-      {/* ================= FORM ================= */}
-      <form onSubmit={calculatePercentile} className="space-y-4">
-        <PercentageInput
+      {/* INPUTS */}
+      <div className="space-y-4">
+
+        <AmountInput
           label="Marks Obtained"
           value={yourMarks}
           onChange={setYourMarks}
+          prefix=""
           placeholder="180"
+          min={0}
         />
 
-        <PercentageInput
+        <AmountInput
           label="Maximum Marks"
           value={maxMarks}
           onChange={setMaxMarks}
+          prefix=""
           placeholder="300"
+          min={1}
         />
 
-        <PercentageInput
+        <AmountInput
           label="Total Number of Candidates"
           value={totalCandidates}
           onChange={setTotalCandidates}
+          prefix=""
           placeholder="900000"
+          min={1}
         />
 
-        <PercentageInput
+        <AmountInput
           label="Candidates Scoring Less Than You"
           value={candidatesBelow}
           onChange={setCandidatesBelow}
+          prefix=""
           placeholder="850000"
+          min={0}
         />
 
-        {error && <p className="text-sm text-red-500">{error}</p>}
+      </div>
 
-        <button
-          type="submit"
-          className="w-full py-2.5 rounded-md font-medium flex items-center justify-center gap-2"
-          style={{
-            backgroundColor: "var(--primary)",
-            color: "#fff",
-          }}>
-          <Calculator size={18} />
-          Calculate Percentile
-        </button>
-      </form>
+      {/* RESULT */}
+      <div aria-live="polite">
+        <ResultCard
+          variant="primary"
+          icon={<Trophy size={20} />}
+          label="Estimated JEE Percentile"
+          value={`${result.percentile || 0}%`}
+        />
+      </div>
 
-      {/* ================= RESULT ================= */}
-      {result && (
-        <div aria-live="polite">
-          <ResultCard
-            variant="primary"
-            icon={<Trophy size={20} />}
-            label="Estimated JEE Percentile"
-            value={`${result.percentile}%`}
-          />
-        </div>
-      )}
-
-      {/* ================= SEO BLOG CONTENT ================= */}
+      {/* SEO CONTENT */}
       <article className="space-y-4 text-sm leading-relaxed">
-        <h2 className="font-semibold text-base">What Is JEE Percentile?</h2>
+
+        <h2 className="font-semibold text-base">
+          What Is JEE Percentile?
+        </h2>
 
         <p>
-          JEE percentile score indicates the percentage of candidates who scored
-          equal to or below your score in the examination. It is not the same as
-          percentage of marks.
+          JEE percentile represents the percentage of candidates who scored
+          equal to or less than your score in the exam.
         </p>
 
-        <h3 className="font-semibold">JEE Percentile Formula</h3>
+        <h3 className="font-semibold">
+          Percentile Formula
+        </h3>
 
         <p
           className="font-mono text-xs p-3 rounded"
-          style={{ backgroundColor: "var(--surface-2)" }}>
+          style={{ backgroundColor: "var(--surface-2)" }}
+        >
           Percentile = (Candidates with Score ≤ Yours ÷ Total Candidates) × 100
         </p>
 
-        <ul className="list-disc pl-5">
-          <li>Used by NTA for JEE Main ranking</li>
-          <li>Normalizes difficulty across shifts</li>
-          <li>Higher percentile means better rank</li>
-        </ul>
-
-        <h3 className="font-semibold">Why Use a JEE Percentile Calculator?</h3>
-
-        <ul className="list-disc pl-5">
-          <li>Estimate percentile before official results</li>
-          <li>Understand relative performance</li>
-          <li>Plan rank-based college options</li>
-          <li>Reduce post-exam uncertainty</li>
-        </ul>
-
-        <p>
-          This calculator provides an estimated percentile. Official JEE
-          percentiles are calculated by NTA using shift-wise normalization.
-        </p>
       </article>
 
-      {/* ================= DISCLAIMER ================= */}
       <aside className="text-xs text-muted">
-        ⚠️ This JEE percentile is an estimate only. Final percentile and rank
-        are determined by NTA using official normalization methods.
+        ⚠️ This calculator provides an estimated percentile. Official JEE
+        percentile is calculated by NTA using normalization.
       </aside>
+
     </section>
   );
 }

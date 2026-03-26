@@ -1,39 +1,3 @@
-// export function InputField({
-//   icon,
-//   label,
-//   value,
-//   onChange,
-//   placeholder,
-//   min,
-//   max,
-//   hasError = false,
-// }) {
-//   return (
-//     <label className="block space-y-1">
-//       <span className="text-sm flex items-center gap-2">
-//         {icon}
-//         {label}
-//       </span>
-
-//       <input
-//         type="number"
-//         value={value}
-//         placeholder={placeholder}
-//         min={min}
-//         max={max}
-//         onChange={e => onChange(e.target.value)}
-//         className={`w-full rounded-md px-3 py-2 border transition ${
-//           hasError ? "border-red-400" : ""
-//         }`}
-//         style={{
-//           backgroundColor: "var(--surface-2)",
-//           borderColor: hasError ? "#f87171" : "var(--border)",
-//         }}
-//       />
-//     </label>
-//   );
-// }
-
 export function InputField({
   icon,
   label,
@@ -44,10 +8,18 @@ export function InputField({
   max,
   hasError = false,
 }) {
+
   function handleChange(e) {
     let raw = e.target.value;
 
-    raw = raw.replace(/[^0-9]/g, "");
+    /* allow digits + single decimal */
+    raw = raw.replace(/[^0-9.]/g, "");
+
+    /* prevent multiple decimals */
+    const parts = raw.split(".");
+    if (parts.length > 2) {
+      raw = parts[0] + "." + parts.slice(1).join("");
+    }
 
     const num = raw === "" ? "" : Number(raw);
 
@@ -66,7 +38,7 @@ export function InputField({
 
       <input
         type="text"
-        inputMode="numeric"
+        inputMode="decimal"
         value={value}
         placeholder={placeholder}
         onChange={handleChange}

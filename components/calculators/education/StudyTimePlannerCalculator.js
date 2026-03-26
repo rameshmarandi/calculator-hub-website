@@ -1,57 +1,31 @@
 "use client";
 
 import { useState } from "react";
-import { Calculator, Clock } from "lucide-react";
+import { Clock } from "lucide-react";
 
-import { PercentageInput } from "../../inputs/PercentageInput";
+import { AmountInput } from "../../inputs/AmountInput";
 import { ResultCard } from "../../ResultCard";
 
+import { studyTimePlannerCalculator } from "../../../lib/formulas";
+
 export default function StudyTimePlannerCalculator() {
-  const [totalSyllabusHours, setTotalSyllabusHours] = useState("");
-  const [daysAvailable, setDaysAvailable] = useState("");
-  const [dailyFreeHours, setDailyFreeHours] = useState("");
 
-  const [result, setResult] = useState(null);
-  const [error, setError] = useState("");
+  /* ---------------- PREFILLED VALUES ---------------- */
+  const [totalSyllabusHours, setTotalSyllabusHours] = useState("300");
+  const [daysAvailable, setDaysAvailable] = useState("90");
+  const [dailyFreeHours, setDailyFreeHours] = useState("6");
 
-  /* ---------------- VALIDATION ---------------- */
-  function validate() {
-    if (!totalSyllabusHours || isNaN(totalSyllabusHours) || Number(totalSyllabusHours) <= 0) {
-      setError("Please enter valid total syllabus hours.");
-      return false;
-    }
-
-    if (!daysAvailable || isNaN(daysAvailable) || Number(daysAvailable) <= 0) {
-      setError("Please enter valid number of days.");
-      return false;
-    }
-
-    if (!dailyFreeHours || isNaN(dailyFreeHours) || Number(dailyFreeHours) <= 0) {
-      setError("Please enter valid daily free hours.");
-      return false;
-    }
-
-    setError("");
-    return true;
-  }
+  /* ---------------- SAFE INPUTS ---------------- */
+  const safeSyllabus = Number(totalSyllabusHours) || 0;
+  const safeDays = Number(daysAvailable) || 0;
+  const safeFreeHours = Number(dailyFreeHours) || 0;
 
   /* ---------------- CALCULATION ---------------- */
-  function calculateStudyPlan(e) {
-    e.preventDefault();
-    if (!validate()) return;
-
-    const syllabus = Number(totalSyllabusHours);
-    const days = Number(daysAvailable);
-    const freeHours = Number(dailyFreeHours);
-
-    const requiredDailyHours = syllabus / days;
-    const feasible = requiredDailyHours <= freeHours;
-
-    setResult({
-      dailyHours: requiredDailyHours.toFixed(2),
-      feasible,
-    });
-  }
+  const result = studyTimePlannerCalculator({
+    totalSyllabusHours: safeSyllabus,
+    daysAvailable: safeDays,
+    dailyFreeHours: safeFreeHours
+  });
 
   return (
     <section
@@ -61,86 +35,79 @@ export default function StudyTimePlannerCalculator() {
         border: "1px solid var(--border)",
       }}
     >
-      {/* ================= HEADER ================= */}
+
+      {/* HEADER */}
       <header>
         <h1 className="text-2xl font-bold mb-1">
           Study Time Planner Calculator
         </h1>
+
         <p className="text-sm leading-relaxed">
-          Plan your daily study time efficiently using this Study Time
-          Planner Calculator. Find out how many hours you need to study
-          each day to complete your syllabus on time.
+          Estimate how many hours you need to study daily to complete
+          your syllabus within the available time.
         </p>
       </header>
 
-      {/* ================= FORM ================= */}
-      <form onSubmit={calculateStudyPlan} className="space-y-4">
-        <PercentageInput
+
+      {/* INPUTS */}
+      <div className="space-y-4">
+
+        <AmountInput
           label="Total Syllabus Study Hours"
           value={totalSyllabusHours}
           onChange={setTotalSyllabusHours}
+          prefix=""
           placeholder="300"
+          min={1}
         />
 
-        <PercentageInput
+        <AmountInput
           label="Days Available"
           value={daysAvailable}
           onChange={setDaysAvailable}
+          prefix=""
           placeholder="90"
+          min={1}
         />
 
-        <PercentageInput
+        <AmountInput
           label="Daily Free Hours Available"
           value={dailyFreeHours}
           onChange={setDailyFreeHours}
+          prefix=""
           placeholder="6"
+          min={1}
         />
 
-        {error && (
-          <p className="text-sm text-red-500">
-            {error}
-          </p>
-        )}
+      </div>
 
-        <button
-          type="submit"
-          className="w-full py-2.5 rounded-md font-medium flex items-center justify-center gap-2"
-          style={{
-            backgroundColor: "var(--primary)",
-            color: "#fff",
-          }}
-        >
-          <Calculator size={18} />
-          Plan Study Time
-        </button>
-      </form>
 
-      {/* ================= RESULT ================= */}
-      {result && (
-        <div aria-live="polite">
-          <ResultCard
-            variant={result.feasible ? "success" : "danger"}
-            icon={<Clock size={20} />}
-            label="Required Daily Study Time"
-            value={`${result.dailyHours} hours/day`}
-          />
-        </div>
-      )}
+      {/* RESULT */}
+      <div aria-live="polite">
+        <ResultCard
+          variant={result.feasible ? "success" : "danger"}
+          icon={<Clock size={20} />}
+          label="Required Daily Study Time"
+          value={`${result.dailyHours || 0} hours/day`}
+        />
+      </div>
 
-      {/* ================= SEO BLOG CONTENT ================= */}
+
+      {/* SEO CONTENT */}
       <article className="space-y-4 text-sm leading-relaxed">
+
         <h2 className="font-semibold text-base">
-          How a Study Time Planner Works
+          How Study Planning Works
         </h2>
 
         <p>
-          A study time planner helps students distribute their syllabus
-          workload evenly across the available days. This prevents
-          last-minute cramming and improves long-term retention.
+          A study planner distributes the total syllabus workload
+          across the available preparation days. This helps maintain
+          consistency and prevents last-minute exam stress.
         </p>
 
         <h3 className="font-semibold">
-          Study Time Calculation Formula
+          Study Time Formula
         </h3>
 
         <p
@@ -150,35 +117,14 @@ export default function StudyTimePlannerCalculator() {
           Daily Study Hours = Total Syllabus Hours ÷ Days Available
         </p>
 
-        <ul className="list-disc pl-5">
-          <li>Helps set realistic daily study goals</li>
-          <li>Balances study with rest and revision</li>
-          <li>Improves consistency and discipline</li>
-        </ul>
-
-        <h3 className="font-semibold">
-          Why Use a Study Time Planner Calculator?
-        </h3>
-
-        <ul className="list-disc pl-5">
-          <li>Avoids last-minute exam stress</li>
-          <li>Improves time management</li>
-          <li>Helps plan long-term preparation</li>
-          <li>Useful for board, competitive, and entrance exams</li>
-        </ul>
-
-        <p>
-          This calculator provides a practical daily study estimate.
-          Adjust your plan based on breaks, revision days, and mock tests.
-        </p>
       </article>
 
-      {/* ================= DISCLAIMER ================= */}
+
       <aside className="text-xs text-muted">
-        ⚠️ Study plans are estimates. Actual productivity depends on
-        focus, study quality, and consistency. Adjust your schedule as
-        needed.
+        ⚠️ Study schedules are estimates. Adjust for revision,
+        practice tests, and rest days.
       </aside>
+
     </section>
   );
 }

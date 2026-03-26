@@ -1,64 +1,29 @@
 "use client";
 
 import { useState } from "react";
-import { Calculator, Activity } from "lucide-react";
+import { Activity } from "lucide-react";
 
 import { PercentageInput } from "../../inputs/PercentageInput";
+import { AmountInput } from "../../inputs/AmountInput";
 import { ResultCard } from "../../ResultCard";
 
+import { neetRankPredictorCalculator } from "../../../lib/formulas";
+
 export default function NEETRankPredictorCalculator() {
-  const [percentage, setPercentage] = useState("");
-  const [totalCandidates, setTotalCandidates] = useState("");
 
-  const [result, setResult] = useState(null);
-  const [error, setError] = useState("");
+  /* ---------------- PREFILLED VALUES ---------------- */
+  const [percentage, setPercentage] = useState("94");
+  const [totalCandidates, setTotalCandidates] = useState("2000000");
 
-  /* ---------------- VALIDATION ---------------- */
-  function validate() {
-    if (!percentage || isNaN(percentage)) {
-      setError("Please enter a valid percentage.");
-      return false;
-    }
-
-    if (Number(percentage) < 0 || Number(percentage) > 100) {
-      setError("Percentage must be between 0 and 100.");
-      return false;
-    }
-
-    if (!totalCandidates || isNaN(totalCandidates)) {
-      setError("Please enter valid total candidates.");
-      return false;
-    }
-
-    if (Number(totalCandidates) <= 0) {
-      setError("Total candidates must be greater than zero.");
-      return false;
-    }
-
-    setError("");
-    return true;
-  }
+  /* ---------------- SAFE INPUTS ---------------- */
+  const safePercentage = Number(percentage) || 0;
+  const safeTotalCandidates = Number(totalCandidates) || 0;
 
   /* ---------------- CALCULATION ---------------- */
-  function calculateRank(e) {
-    e.preventDefault();
-    if (!validate()) return;
-
-    const p = Number(percentage);
-    const total = Number(totalCandidates);
-
-    /*
-      NEET Rank Predictor Logic (Approximation)
-      Rank ≈ (100 − Percentage) × Total Candidates ÷ 100
-    */
-
-    const predictedRank = Math.max(1, Math.round(((100 - p) * total) / 100));
-
-    setResult({
-      rank: predictedRank,
-      percentage: p,
-    });
-  }
+  const result = neetRankPredictorCalculator({
+    percentage: safePercentage,
+    totalCandidates: safeTotalCandidates
+  });
 
   return (
     <section
@@ -66,18 +31,25 @@ export default function NEETRankPredictorCalculator() {
       style={{
         backgroundColor: "var(--surface)",
         border: "1px solid var(--border)",
-      }}>
-      {/* ================= HEADER ================= */}
+      }}
+    >
+
+      {/* HEADER */}
       <header>
-        <h1 className="text-2xl font-bold mb-1">NEET Rank Predictor</h1>
+        <h1 className="text-2xl font-bold mb-1">
+          NEET Rank Predictor
+        </h1>
+
         <p className="text-sm leading-relaxed">
-          Predict your expected NEET rank based on your percentage score and the
-          total number of candidates using this NEET Rank Predictor.
+          Estimate your expected NEET rank using your percentage score
+          and the total number of candidates appearing in the exam.
         </p>
       </header>
 
-      {/* ================= FORM ================= */}
-      <form onSubmit={calculateRank} className="space-y-4">
+
+      {/* INPUTS */}
+      <div className="space-y-4">
+
         <PercentageInput
           label="Your Percentage (%)"
           value={percentage}
@@ -85,84 +57,61 @@ export default function NEETRankPredictorCalculator() {
           placeholder="94"
         />
 
-        <PercentageInput
+        <AmountInput
           label="Total Number of Candidates"
           value={totalCandidates}
           onChange={setTotalCandidates}
+          prefix=""
           placeholder="2000000"
+          min={1}
         />
 
-        {error && <p className="text-sm text-red-500">{error}</p>}
+      </div>
 
-        <button
-          type="submit"
-          className="w-full py-2.5 rounded-md font-medium flex items-center justify-center gap-2"
-          style={{
-            backgroundColor: "var(--primary)",
-            color: "#fff",
-          }}>
-          <Calculator size={18} />
-          Predict Rank
-        </button>
-      </form>
 
-      {/* ================= RESULT ================= */}
-      {result && (
-        <div aria-live="polite">
-          <ResultCard
-            variant="primary"
-            icon={<Activity size={20} />}
-            label={`Predicted NEET Rank for ${result.percentage}%`}
-            value={`~ ${result.rank}`}
-          />
-        </div>
-      )}
+      {/* RESULT */}
+      <div aria-live="polite">
+        <ResultCard
+          variant="primary"
+          icon={<Activity size={20} />}
+          label={`Predicted NEET Rank for ${safePercentage}%`}
+          value={`~ ${result.rank || 0}`}
+        />
+      </div>
 
-      {/* ================= SEO BLOG CONTENT ================= */}
+
+      {/* SEO CONTENT */}
       <article className="space-y-4 text-sm leading-relaxed">
-        <h2 className="font-semibold text-base">What Is NEET Rank?</h2>
+
+        <h2 className="font-semibold text-base">
+          What Is NEET Rank?
+        </h2>
 
         <p>
-          NEET rank represents your position among all candidates who appeared
-          for the NEET examination. It is determined based on percentile score,
-          normalization, and official evaluation by NTA.
+          NEET rank represents a candidate's position among all students
+          appearing for the NEET examination. Higher percentile scores
+          generally correspond to better ranks.
         </p>
 
-        <h3 className="font-semibold">NEET Rank Prediction Formula</h3>
+        <h3 className="font-semibold">
+          Rank Prediction Formula
+        </h3>
 
         <p
           className="font-mono text-xs p-3 rounded"
-          style={{ backgroundColor: "var(--surface-2)" }}>
+          style={{ backgroundColor: "var(--surface-2)" }}
+        >
           Predicted Rank ≈ (100 − Percentage) × Total Candidates ÷ 100
         </p>
 
-        <ul className="list-disc pl-5">
-          <li>Higher percentage leads to better rank</li>
-          <li>Used for preliminary estimation</li>
-          <li>Helps understand competition level</li>
-        </ul>
-
-        <h3 className="font-semibold">Why Use a NEET Rank Predictor?</h3>
-
-        <ul className="list-disc pl-5">
-          <li>Estimate rank before official results</li>
-          <li>Plan MBBS/BDS college options</li>
-          <li>Understand admission chances</li>
-          <li>Reduce post-exam anxiety</li>
-        </ul>
-
-        <p>
-          This NEET rank predictor provides an approximate rank. Final ranks are
-          published by NTA after official normalization.
-        </p>
       </article>
 
-      {/* ================= DISCLAIMER ================= */}
+
       <aside className="text-xs text-muted">
-        ⚠️ This NEET rank prediction is an estimate only. Actual NEET ranks may
-        vary based on official normalization, tie-breaking rules, and
-        category-wise allocation.
+        ⚠️ This rank prediction is an estimate only. Official NEET ranks
+        are calculated by NTA using normalization methods.
       </aside>
+
     </section>
   );
 }

@@ -1,65 +1,28 @@
 "use client";
 
 import { useState } from "react";
-import { Calculator, Percent } from "lucide-react";
+import { Percent } from "lucide-react";
 
-import { PercentageInput } from "../../inputs/PercentageInput";
+import { AmountInput } from "../../inputs/AmountInput";
 import { ResultCard } from "../../ResultCard";
 
+import { marksToPercentageCalculator } from "../../../lib/formulas";
+
 export default function MarksToPercentageCalculator() {
-  const [obtainedMarks, setObtainedMarks] = useState("");
-  const [totalMarks, setTotalMarks] = useState("");
 
-  const [result, setResult] = useState(null);
-  const [error, setError] = useState("");
+  /* ---------------- PREFILLED VALUES ---------------- */
+  const [obtainedMarks, setObtainedMarks] = useState("425");
+  const [totalMarks, setTotalMarks] = useState("500");
 
-  /* ---------------- VALIDATION ---------------- */
-  function validate() {
-    if (!obtainedMarks || isNaN(obtainedMarks)) {
-      setError("Please enter valid obtained marks.");
-      return false;
-    }
-
-    if (!totalMarks || isNaN(totalMarks)) {
-      setError("Please enter valid total marks.");
-      return false;
-    }
-
-    if (Number(obtainedMarks) < 0) {
-      setError("Obtained marks cannot be negative.");
-      return false;
-    }
-
-    if (Number(totalMarks) <= 0) {
-      setError("Total marks must be greater than zero.");
-      return false;
-    }
-
-    if (Number(obtainedMarks) > Number(totalMarks)) {
-      setError("Obtained marks cannot exceed total marks.");
-      return false;
-    }
-
-    setError("");
-    return true;
-  }
+  /* ---------------- SAFE INPUTS ---------------- */
+  const safeObtainedMarks = Number(obtainedMarks) || 0;
+  const safeTotalMarks = Number(totalMarks) || 0;
 
   /* ---------------- CALCULATION ---------------- */
-  function calculatePercentage(e) {
-    e.preventDefault();
-    if (!validate()) return;
-
-    const obtained = Number(obtainedMarks);
-    const total = Number(totalMarks);
-
-    const percentage = (obtained / total) * 100;
-
-    setResult({
-      obtained,
-      total,
-      percentage: percentage.toFixed(2),
-    });
-  }
+  const result = marksToPercentageCalculator({
+    obtainedMarks: safeObtainedMarks,
+    totalMarks: safeTotalMarks
+  });
 
   return (
     <section
@@ -67,108 +30,96 @@ export default function MarksToPercentageCalculator() {
       style={{
         backgroundColor: "var(--surface)",
         border: "1px solid var(--border)",
-      }}>
-      {/* ================= HEADER ================= */}
+      }}
+    >
+
+      {/* HEADER */}
       <header>
         <h1 className="text-2xl font-bold mb-1">
           Marks to Percentage Calculator
         </h1>
+
         <p className="text-sm leading-relaxed">
-          Convert your exam marks into percentage instantly using this Marks to
-          Percentage Calculator. Suitable for all boards and universities.
+          Convert your exam marks into percentage instantly using this
+          Marks to Percentage Calculator. Works for any board or university.
         </p>
       </header>
 
-      {/* ================= FORM ================= */}
-      <form onSubmit={calculatePercentage} className="space-y-4">
-        <PercentageInput
+
+      {/* INPUTS */}
+      <div className="space-y-4">
+
+        <AmountInput
           label="Obtained Marks"
           value={obtainedMarks}
           onChange={setObtainedMarks}
+          prefix=""
           placeholder="425"
+          min={0}
         />
 
-        <PercentageInput
+        <AmountInput
           label="Total Marks"
           value={totalMarks}
           onChange={setTotalMarks}
+          prefix=""
           placeholder="500"
+          min={1}
         />
 
-        {error && <p className="text-sm text-red-500">{error}</p>}
+      </div>
 
-        <button
-          type="submit"
-          className="w-full py-2.5 rounded-md font-medium flex items-center justify-center gap-2"
-          style={{
-            backgroundColor: "var(--primary)",
-            color: "#fff",
-          }}>
-          <Calculator size={18} />
-          Calculate Percentage
-        </button>
-      </form>
 
-      {/* ================= RESULT ================= */}
-      {result && (
-        <div aria-live="polite">
-          <ResultCard
-            variant="primary"
-            icon={<Percent size={20} />}
-            label={`${result.obtained} out of ${result.total}`}
-            value={`${result.percentage}%`}
-          />
-        </div>
-      )}
+      {/* RESULT */}
+      <div aria-live="polite">
+        <ResultCard
+          variant="primary"
+          icon={<Percent size={20} />}
+          label={`${safeObtainedMarks} out of ${safeTotalMarks}`}
+          value={`${result.percentage || 0}%`}
+        />
+      </div>
 
-      {/* ================= SEO BLOG CONTENT ================= */}
+
+      {/* SEO CONTENT */}
       <article className="space-y-4 text-sm leading-relaxed">
+
         <h2 className="font-semibold text-base">
           How Marks Are Converted to Percentage
         </h2>
 
         <p>
-          Percentage is one of the most common ways to represent academic
-          performance. It shows how much of the total marks a student has scored
-          in an exam or assessment.
+          Percentage is a common way to represent academic performance.
+          It shows how much of the total marks a student has achieved in
+          an exam or assessment.
         </p>
 
-        <h3 className="font-semibold">Marks to Percentage Formula</h3>
+        <h3 className="font-semibold">
+          Marks to Percentage Formula
+        </h3>
 
         <p
           className="font-mono text-xs p-3 rounded"
-          style={{ backgroundColor: "var(--surface-2)" }}>
+          style={{ backgroundColor: "var(--surface-2)" }}
+        >
           Percentage = (Obtained Marks ÷ Total Marks) × 100
         </p>
 
         <ul className="list-disc pl-5">
           <li>Used by schools, colleges, and universities</li>
-          <li>Helpful for results, admissions, and applications</li>
+          <li>Helpful for admissions and applications</li>
           <li>Standard academic conversion method</li>
         </ul>
 
-        <h3 className="font-semibold">
-          Why Use a Marks to Percentage Calculator?
-        </h3>
-
-        <ul className="list-disc pl-5">
-          <li>Instant and accurate results</li>
-          <li>Eliminates manual calculation errors</li>
-          <li>Works for any exam pattern</li>
-          <li>Simple and easy to use</li>
-        </ul>
-
-        <p>
-          This calculator provides quick percentage results based on the marks
-          entered. Always verify results with official scorecards when required.
-        </p>
       </article>
 
-      {/* ================= DISCLAIMER ================= */}
+
+      {/* DISCLAIMER */}
       <aside className="text-xs text-muted">
-        ⚠️ This calculator uses standard mathematical formulas. Academic
-        evaluation rules may vary by board or institution.
+        ⚠️ Results are calculated using standard mathematical formulas.
+        Academic evaluation rules may vary by institution.
       </aside>
+
     </section>
   );
 }
