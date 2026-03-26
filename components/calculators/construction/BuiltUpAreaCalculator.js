@@ -1,88 +1,79 @@
 "use client";
 
-import { useState } from "react";
-import { Calculator, BarChart } from "lucide-react";
-import { PercentageInput } from "../../inputs/PercentageInput";
+import { useMemo, useState } from "react";
+import { BarChart } from "lucide-react";
+
 import { AmountInput } from "../../inputs/AmountInput";
+import { PercentageInput } from "../../inputs/PercentageInput";
 import { ResultCard } from "../../ResultCard";
 import BuiltUpAreaCalculatorArticle from "../../content/construction/BuiltUpAreaCalculatorArticle";
 
+/* ---------- SAFE NUMBER PARSER ---------- */
+
+function parseNumber(value) {
+  const num = Number(String(value).replace(/,/g, ""));
+  return Number.isFinite(num) ? num : 0;
+}
+
+function formatNumber(value) {
+  return Number(value).toLocaleString("en-IN", {
+    maximumFractionDigits: 2
+  });
+}
+
 export default function BuiltUpAreaCalculator() {
-  const [carpetArea, setCarpetArea] = useState("");
+
+  const [carpetArea, setCarpetArea] = useState("1200");
   const [wallPercentage, setWallPercentage] = useState("15");
 
-  const [result, setResult] = useState(null);
-  const [error, setError] = useState("");
+  /* ---------- LIVE CALCULATION ---------- */
 
-  /* ---------------- FORMAT HELPER ---------------- */
-  function parseNumber(value) {
-    return Number(value.toString().replace(/,/g, ""));
-  }
-
-  function formatNumber(value) {
-    return new Intl.NumberFormat("en-IN").format(value);
-  }
-
-  /* ---------------- VALIDATION ---------------- */
-  function validate() {
-    const carpet = parseNumber(carpetArea);
-
-    if (!carpet || carpet <= 0) {
-      setError("Please enter valid carpet area.");
-      return false;
-    }
-
-    if (Number(wallPercentage) < 5 || Number(wallPercentage) > 30) {
-      setError("Wall area percentage should be between 5% and 30%.");
-      return false;
-    }
-
-    setError("");
-    return true;
-  }
-
-  /* ---------------- CALCULATION ---------------- */
-  function calculateBuiltUpArea(e) {
-    e.preventDefault();
-    if (!validate()) return;
+  const result = useMemo(() => {
 
     const carpet = parseNumber(carpetArea);
-    const wallPercent = Number(wallPercentage);
+    const wallPercent = parseNumber(wallPercentage);
 
     const wallArea = (carpet * wallPercent) / 100;
     const builtUpArea = carpet + wallArea;
 
-    setResult({
-      carpet: formatNumber(carpet.toFixed(2)),
-      wall: formatNumber(wallArea.toFixed(2)),
-      builtUp: formatNumber(builtUpArea.toFixed(2)),
-    });
-  }
+    return {
+      carpet,
+      wall: wallArea,
+      builtUp: builtUpArea
+    };
+
+  }, [carpetArea, wallPercentage]);
 
   return (
     <section
       className="rounded-xl p-6 space-y-10"
       style={{
         backgroundColor: "var(--surface)",
-        border: "1px solid var(--border)",
+        border: "1px solid var(--border)"
       }}
     >
-      {/* ================= HEADER ================= */}
+
+      {/* HEADER */}
+
       <header>
-        <h1 className="text-2xl font-bold mb-1">Built-Up Area Calculator</h1>
+        <h1 className="text-2xl font-bold mb-1">
+          Built-Up Area Calculator
+        </h1>
+
         <p className="text-sm leading-relaxed">
-          Use this Built-Up Area Calculator to calculate the built-up area of a
-          flat or house from the carpet area and wall thickness.
+          Calculate the built-up area of a house or apartment from
+          the carpet area and wall thickness percentage.
         </p>
       </header>
 
-      {/* ================= FORM ================= */}
-      <form onSubmit={calculateBuiltUpArea} className="space-y-4">
+      {/* INPUTS */}
+
+      <div className="grid md:grid-cols-2 gap-4">
+
         <AmountInput
           label="Carpet Area (sq.ft)"
           value={carpetArea}
           onChange={setCarpetArea}
-          placeholder="12,000"
           prefix=""
         />
 
@@ -90,53 +81,44 @@ export default function BuiltUpAreaCalculator() {
           label="Wall Area Percentage (%)"
           value={wallPercentage}
           onChange={setWallPercentage}
-          placeholder="15"
-          // prefix=""
         />
 
-        {error && <p className="text-sm text-red-500">{error}</p>}
+      </div>
 
-        <button
-          type="submit"
-          className="w-full py-2.5 rounded-md font-medium flex items-center justify-center gap-2"
-          style={{
-            backgroundColor: "var(--primary)",
-            color: "#fff",
-          }}
-        >
-          <Calculator size={18} />
-          Calculate Built-Up Area
-        </button>
-      </form>
+      {/* RESULTS */}
 
-      {/* ================= RESULT ================= */}
-      {result && (
-        <div className="grid md:grid-cols-3 gap-4" aria-live="polite">
-          <ResultCard
-            variant="neutral"
-            icon={<BarChart size={20} />}
-            label="Carpet Area"
-            value={`${result.carpet} sq.ft`}
-          />
+      <div
+        className="grid md:grid-cols-3 gap-4"
+        aria-live="polite"
+      >
 
-          <ResultCard
-            variant="neutral"
-            icon={<BarChart size={20} />}
-            label="Wall Area"
-            value={`${result.wall} sq.ft`}
-          />
+        <ResultCard
+          variant="neutral"
+          icon={<BarChart size={20} />}
+          label="Carpet Area"
+          value={`${formatNumber(result.carpet)} sq.ft`}
+        />
 
-          <ResultCard
-            variant="primary"
-            icon={<BarChart size={20} />}
-            label="Built-Up Area"
-            value={`${result.builtUp} sq.ft`}
-          />
-        </div>
-      )}
+        <ResultCard
+          variant="neutral"
+          icon={<BarChart size={20} />}
+          label="Wall Area"
+          value={`${formatNumber(result.wall)} sq.ft`}
+        />
 
-      {/* ================= SEO ARTICLE ================= */}
+        <ResultCard
+          variant="primary"
+          icon={<BarChart size={20} />}
+          label="Built-Up Area"
+          value={`${formatNumber(result.builtUp)} sq.ft`}
+        />
+
+      </div>
+
+      {/* ARTICLE */}
+
       <BuiltUpAreaCalculatorArticle />
+
     </section>
   );
 }

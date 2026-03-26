@@ -13,32 +13,39 @@ import { calculateBusinessLoan } from "../../../lib/formulas";
 import BusinessLoanCalculatorArticle from "../../content/finance/BusinessLoanCalculatorArticle";
 
 export default function BusinessLoanCalculator() {
+
   /* ---------------- STATE ---------------- */
 
   const [values, setValues] = useState({
-    amount: "",
-    rate: "",
-    years: "",
+    amount: "1000000",
+    rate: "12",
+    years: "5",
   });
 
-  /* ---------------- READY CHECK ---------------- */
+  /* ---------------- SAFE NUMBERS ---------------- */
 
-  const isComplete =
-    values.amount !== "" && values.rate !== "" && values.years !== "";
+  const principal = Number(values.amount) || 0;
+  const annualRate = Number(values.rate) || 0;
+  const years = Number(values.years) || 0;
 
-  /* ---------------- DERIVED RESULT ---------------- */
+  /* ---------------- RESULT ---------------- */
 
   const result = useMemo(() => {
-    if (!isComplete) return null;
+    return (
+      calculateBusinessLoan({
+        principal,
+        annualRate,
+        years,
+      }) || {
+        emi: 0,
+        interestPaid: 0,
+        totalPayable: 0,
+        months: 0,
+      }
+    );
+  }, [principal, annualRate, years]);
 
-    return calculateBusinessLoan({
-      principal: values.amount,
-      annualRate: values.rate,
-      years: values.years,
-    });
-  }, [values, isComplete]);
-
-  /* ---------------- INPUTS ---------------- */
+  /* ---------------- INPUT CONFIG ---------------- */
 
   const inputs = [
     {
@@ -77,44 +84,35 @@ export default function BusinessLoanCalculator() {
     >
       <InputsGrid inputs={inputs} values={values} setValues={setValues} />
 
-      {result && (
-        <>
-          <ResultHero label="Monthly EMI" value={result.emi} />
+      <ResultHero
+        label="Monthly EMI"
+        value={formatINR(result.emi || 0)}
+      />
 
-          <StatsGrid
-            items={[
-              {
-                label: "Total Interest Payable",
-                value: formatINR(result.interestPaid),
-                variant: "danger",
-              },
-              {
-                label: "Total Amount Payable",
-                value: formatINR(result.totalPayable),
-                variant: "warning",
-              },
-              {
-                label: "Total Months",
-                value: result.months,
-                variant: "info",
-              },
-            ]}
-          />
+      <StatsGrid
+        items={[
+          {
+            label: "Total Interest Payable",
+            value: formatINR(result.interestPaid || 0),
+            variant: "danger",
+          },
+          {
+            label: "Total Amount Payable",
+            value: formatINR(result.totalPayable || 0),
+            variant: "warning",
+          },
+          {
+            label: "Total Months",
+            value: result.months || 0,
+            variant: "info",
+          },
+        ]}
+      />
 
-          <ExplanationText
-            text={`For a loan of ${formatINR(
-              values.amount,
-            )} at ${values.rate}% for ${
-              values.years
-            } years, your monthly EMI will be ${formatINR(
-              result.emi,
-            )} and total interest paid will be ${formatINR(
-              result.interestPaid,
-            )}.`}
-          />
-        </>
-      )}
-      {/* ================= CALCULATOR NOTE ================= */}
+      <ExplanationText
+        text={`For a loan of ${formatINR(principal)} at ${annualRate}% for ${years} years, your monthly EMI will be ${formatINR(result.emi)} and total interest paid will be ${formatINR(result.interestPaid)}.`}
+      />
+
       <p className="text-xs text-[var(--text-muted)] mt-3">
         Note: Results are estimates for educational purposes. Actual loan terms,
         interest rates, and fees may vary depending on the lender and borrower
@@ -122,6 +120,7 @@ export default function BusinessLoanCalculator() {
       </p>
 
       <BusinessLoanCalculatorArticle />
+
     </CalculatorLayout>
   );
 }

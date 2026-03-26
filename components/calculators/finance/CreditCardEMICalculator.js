@@ -9,37 +9,31 @@ import ExplanationText from "@/components/core/ExplanationText";
 import CalculatorLayout from "@/components/core/CalculatorLayout";
 
 import { formatINR } from "@/lib/format";
-import { calculateCreditCardEMI } from "../../../lib/formulas";
+import { calculateCreditCardEMI } from "@/lib/formulas";
+
 import CreditCardEMIArticle from "../../content/finance/CreditCardEMIArticle";
 
+/* ================= DEFAULT VALUES ================= */
+
+const DEFAULT_VALUES = {
+  amount: 50000,
+  rate: 18,
+  months: 12,
+};
+
+/* ================= COMPONENT ================= */
 
 export default function CreditCardEMICalculator() {
-  const [values, setValues] = useState({
-    amount: "",
-    rate: "",
-    months: "",
-  });
 
-  /* ---------- show only when complete ---------- */
-
-  const isComplete =
-    values.amount !== "" &&
-    values.rate !== "" &&
-    values.months !== "";
-
-  /* ---------- derived result ---------- */
+  const [values, setValues] = useState(DEFAULT_VALUES);
 
   const result = useMemo(() => {
-    if (!isComplete) return null;
-
     return calculateCreditCardEMI({
       principal: values.amount,
       annualRate: values.rate,
       months: values.months,
     });
-  }, [values, isComplete]);
-
-  /* ---------- inputs ---------- */
+  }, [values]);
 
   const inputs = [
     {
@@ -63,8 +57,6 @@ export default function CreditCardEMICalculator() {
     },
   ];
 
-  /* ---------- UI ---------- */
-
   return (
     <CalculatorLayout
       title="Credit Card EMI Calculator"
@@ -76,46 +68,48 @@ export default function CreditCardEMICalculator() {
         "No Signup Required",
       ]}
     >
-      <InputsGrid inputs={inputs} values={values} setValues={setValues} />
 
-      {result && (
-        <>
-          <ResultHero
-            label="Monthly EMI"
-            value={result.emi}
-          />
+      <InputsGrid
+        inputs={inputs}
+        values={values}
+        setValues={setValues}
+      />
 
-          <StatsGrid
-            items={[
-              {
-                label: "Total Payable",
-                value: formatINR(result.totalPayable),
-                variant: "danger", // money out
-              },
-              {
-                label: "Interest Paid",
-                value: formatINR(result.interestPaid),
-                variant: "warning",
-              },
-              {
-                label: "Tenure",
-                value: `${values.months} months`,
-                variant: "info",
-              },
-            ]}
-          />
+      <ResultHero
+        label="Monthly EMI"
+        value={result?.emi}
+      />
 
-          <ExplanationText
-            text={`For a purchase of ${formatINR(values.amount)}, you will pay ${formatINR(
-              result.emi
-            )} per month and total interest of ${formatINR(
-              result.interestPaid
-            )}.`}
-          />
-        </>
-      )}
+      <StatsGrid
+        items={[
+          {
+            label: "Total Payable",
+            value: formatINR(result?.totalPayable),
+            variant: "danger",
+          },
+          {
+            label: "Interest Paid",
+            value: formatINR(result?.interestPaid),
+            variant: "warning",
+          },
+          {
+            label: "Tenure",
+            value: `${values.months} months`,
+            variant: "info",
+          },
+        ]}
+      />
 
-      <CreditCardEMIArticle/>
+      <ExplanationText
+        text={`For a purchase of ${formatINR(values?.amount)}, you will pay ${formatINR(
+          result?.emi
+        )} per month and total interest of ${formatINR(
+          result?.interestPaid
+        )}.`}
+      />
+
+      <CreditCardEMIArticle />
+
     </CalculatorLayout>
   );
 }

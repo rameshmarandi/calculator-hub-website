@@ -8,56 +8,84 @@ import SelectInput from "@/components/inputs/SelectInput";
 /*
   InputsGrid
   Pure layout renderer
-  Supports:
+
+  Supported input types
   - amount
   - percent
   - number
   - select
 */
 
-export default function InputsGrid({ inputs, values, setValues }) {
+export default function InputsGrid({
+  inputs = [],
+  values = {},
+  setValues,
+}) {
+  if (!Array.isArray(inputs) || inputs.length === 0) {
+    return null;
+  }
+
   return (
     <div className="grid sm:grid-cols-2 gap-6">
-      {inputs.map((i) => {
+      {inputs.map((i, index) => {
+        if (!i) return null;
+
+        const key = i?.key ?? `input-${index}`;
+
+        const value = values?.[key] ?? "";
+
+        const handleChange = (v) => {
+          if (typeof setValues !== "function") return;
+
+          setValues((prev) => ({
+            ...(prev || {}),
+            [key]: v ?? "",
+          }));
+        };
+
         const commonProps = {
-          label: i.label,
-          value: values[i.key],
-          onChange: (v) =>
-            setValues({
-              ...values,
-              [i.key]: v,
-            }),
+          label: i?.label ?? "",
+          value,
+          onChange: handleChange,
         };
 
         return (
-          <div key={i.key}>
+          <div key={key}>
             {/* TYPE SWITCH */}
 
-            {i.type === "amount" && (
-              <AmountInput {...commonProps} placeholder={i.placeholder}     prefix={i.prefix}/>
-            )}
-
-            {i.type === "percent" && (
-              <PercentageInput {...commonProps} placeholder={i.placeholder} />
-            )}
-
-            {i.type === "number" && (
-              <NumberInput
+            {i?.type === "amount" && (
+              <AmountInput
                 {...commonProps}
-                placeholder={i.placeholder}
-                min={i.min || 1}
+                placeholder={i?.placeholder ?? ""}
+                prefix={i?.prefix ?? ""}
               />
             )}
 
-            {i.type === "select" && (
+            {i?.type === "percent" && (
+              <PercentageInput
+                {...commonProps}
+                placeholder={i?.placeholder ?? ""}
+              />
+            )}
+
+            {i?.type === "number" && (
+              <NumberInput
+                {...commonProps}
+                placeholder={i?.placeholder ?? ""}
+                min={Number.isFinite(i?.min) ? i.min : 1}
+              />
+            )}
+
+            {i?.type === "select" && (
               <SelectInput
                 {...commonProps}
-                options={i.options || []}
+                options={Array.isArray(i?.options) ? i.options : []}
               />
             )}
 
             {/* HINT */}
-            {i.hint && (
+
+            {i?.hint && (
               <p className="text-xs text-gray-500 mt-1">{i.hint}</p>
             )}
           </div>

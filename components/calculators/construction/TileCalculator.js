@@ -12,21 +12,20 @@ import { calculateTiles, toNumber } from "../../../lib/formulas";
 import TileCalculatorArticle from "../../content/construction/TileCalculatorArticle";
 
 export default function TileCalculator() {
+
+  /* ---------- DEFAULT VALUES ---------- */
+
   const [values, setValues] = useState({
-    floorLength: "",
-    floorWidth: "",
-    tileLength: "",
-    tileWidth: "",
+    floorLength: "5",
+    floorWidth: "4",
+    tileLength: "600",
+    tileWidth: "600",
     wastage: "10",
   });
 
   const [warning, setWarning] = useState("");
 
-  const isComplete =
-    values.floorLength &&
-    values.floorWidth &&
-    values.tileLength &&
-    values.tileWidth;
+  /* ---------- WARNING CHECK ---------- */
 
   useEffect(() => {
     const tileL = toNumber(values.tileLength);
@@ -38,15 +37,15 @@ export default function TileCalculator() {
     } else if (tileW && tileW < 100) {
       setWarning("Tile width looks too small. Minimum recommended is 100 mm.");
     } else if (waste > 30) {
-      setWarning("Wastage above 30% is unrealistic. It has been limited.");
+      setWarning("Wastage above 30% is unrealistic.");
     } else {
       setWarning("");
     }
   }, [values]);
 
-  const result = useMemo(() => {
-    if (!isComplete) return null;
+  /* ---------- RESULT CALCULATION ---------- */
 
+  const result = useMemo(() => {
     return calculateTiles({
       floorLength: toNumber(values.floorLength),
       floorWidth: toNumber(values.floorWidth),
@@ -54,7 +53,9 @@ export default function TileCalculator() {
       tileWidth: toNumber(values.tileWidth),
       wastage: toNumber(values.wastage),
     });
-  }, [values, isComplete]);
+  }, [values]);
+
+  /* ---------- INPUT CONFIG ---------- */
 
   const inputs = [
     {
@@ -96,6 +97,14 @@ export default function TileCalculator() {
     },
   ];
 
+  /* ---------- SAFE VALUES ---------- */
+
+  const tiles = result?.tiles ?? 0;
+  const floorArea = result?.floorArea ?? 0;
+  const tileArea = result?.tileArea ?? 0;
+
+  /* ---------- UI ---------- */
+
   return (
     <CalculatorLayout
       title="Tile Calculator"
@@ -107,32 +116,35 @@ export default function TileCalculator() {
         "No Signup Required",
       ]}
     >
-      <InputsGrid inputs={inputs} values={values} setValues={setValues} />
+      <InputsGrid
+        inputs={inputs}
+        values={values}
+        setValues={setValues}
+      />
 
-      {warning && <p className="text-sm text-yellow-600">{warning}</p>}
-
-      {result && (
-        <>
-          <ResultHero
-            label="Tiles Required"
-            value={result?.tiles ? `${result.tiles} ` : "-"}
-          />
-          <StatsGrid
-            items={[
-              {
-                label: "Floor Area",
-                value: `${result.floorArea.toFixed(2)} m²`,
-                variant: "neutral",
-              },
-              {
-                label: "Tile Area",
-                value: `${result.tileArea.toFixed(3)} m²`,
-                variant: "neutral",
-              },
-            ]}
-          />
-        </>
+      {warning && (
+        <p className="text-sm text-yellow-600">{warning}</p>
       )}
+
+      <ResultHero
+        label="Tiles Required"
+        value={`${tiles} tiles`}
+      />
+
+      <StatsGrid
+        items={[
+          {
+            label: "Floor Area",
+            value: `${floorArea.toFixed(2)} m²`,
+            variant: "neutral",
+          },
+          {
+            label: "Tile Area",
+            value: `${tileArea.toFixed(3)} m²`,
+            variant: "neutral",
+          },
+        ]}
+      />
 
       <ExplanationText text="Floor area divided by tile area plus wastage gives total tiles required." />
 

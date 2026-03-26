@@ -1,87 +1,79 @@
 "use client";
 
-import { useState } from "react";
-import { Calculator, BarChart } from "lucide-react";
+import { useMemo, useState } from "react";
+import { BarChart } from "lucide-react";
 
 import { ResultCard } from "../../ResultCard";
 import BMICalculatorArticle from "../../content/health/BMICalculatorArticle";
 import { AmountInput } from "../../inputs/AmountInput";
 
+/* ---------- SAFE NUMBER PARSER ---------- */
+
+function parseNumber(value) {
+  const num = Number(String(value).replace(/,/g, ""));
+  return Number.isFinite(num) ? num : 0;
+}
+
 export default function BMICalculator() {
-  const [weight, setWeight] = useState("");
-  const [height, setHeight] = useState("");
 
-  const [result, setResult] = useState(null);
-  const [error, setError] = useState("");
+  const [weight, setWeight] = useState("70");
+  const [height, setHeight] = useState("170");
 
-  /* ---------------- VALIDATION ---------------- */
-  function validate() {
-    const w = Number(weight);
-    const h = Number(height);
+  /* ---------- LIVE CALCULATION ---------- */
 
-    if (!w || w < 20 || w > 300) {
-      setError("Please enter a valid weight between 20 kg and 300 kg.");
-      return false;
+  const result = useMemo(() => {
+
+    const w = parseNumber(weight);
+    const h = parseNumber(height) / 100;
+
+    const bmi = h > 0 ? w / (h * h) : 0;
+
+    let category = "—";
+
+    if (bmi > 0) {
+      if (bmi < 18.5) category = "Underweight";
+      else if (bmi < 25) category = "Normal weight";
+      else if (bmi < 30) category = "Overweight";
+      else category = "Obese";
     }
 
-    if (!h || h < 100 || h > 250) {
-      setError("Please enter a valid height between 100 cm and 250 cm.");
-      return false;
-    }
+    return {
+      bmi: bmi > 0 ? bmi.toFixed(1) : "0",
+      category
+    };
 
-    setError("");
-    return true;
-  }
-
-  /* ---------------- CALCULATION ---------------- */
-  function calculateBMI(e) {
-    e.preventDefault();
-
-    if (!validate()) return;
-
-    const w = Number(weight);
-    const hMeters = Number(height) / 100;
-
-    const bmi = w / (hMeters * hMeters);
-
-    let category = "";
-
-    if (bmi < 18.5) category = "Underweight";
-    else if (bmi < 25) category = "Normal weight";
-    else if (bmi < 30) category = "Overweight";
-    else category = "Obese";
-
-    setResult({
-      bmi: bmi.toFixed(1),
-      category,
-    });
-  }
+  }, [weight, height]);
 
   return (
     <section
       className="rounded-xl p-6 space-y-10"
       style={{
         backgroundColor: "var(--surface)",
-        border: "1px solid var(--border)",
+        border: "1px solid var(--border)"
       }}
     >
-      {/* ================= HEADER ================= */}
+
+      {/* HEADER */}
+
       <header>
-        <h1 className="text-2xl font-bold mb-1">BMI Calculator</h1>
+        <h1 className="text-2xl font-bold mb-1">
+          BMI Calculator
+        </h1>
+
         <p className="text-sm leading-relaxed">
-          Use this BMI Calculator to check your Body Mass Index and understand
-          whether your weight is healthy for your height.
+          Check your Body Mass Index (BMI) and understand whether
+          your weight is healthy for your height.
         </p>
       </header>
 
-      {/* ================= FORM ================= */}
-      <form onSubmit={calculateBMI} className="space-y-4">
+      {/* INPUTS */}
+
+      <div className="grid md:grid-cols-2 gap-4">
 
         <AmountInput
           label="Weight (kg)"
           value={weight}
           onChange={setWeight}
-          placeholder="70"
           prefix=""
         />
 
@@ -89,45 +81,36 @@ export default function BMICalculator() {
           label="Height (cm)"
           value={height}
           onChange={setHeight}
-          placeholder="170"
           prefix=""
         />
 
-        {error && <p className="text-sm text-red-500">{error}</p>}
+      </div>
 
-        <button
-          type="submit"
-          className="w-full py-2.5 rounded-md font-medium flex items-center justify-center gap-2"
-          style={{
-            backgroundColor: "var(--primary)",
-            color: "#fff",
-          }}
-        >
-          <Calculator size={18} />
-          Calculate BMI
-        </button>
-      </form>
+      {/* RESULTS */}
 
-      {/* ================= RESULT ================= */}
-      {result && (
-        <div className="grid md:grid-cols-2 gap-4" aria-live="polite">
-          <ResultCard
-            variant="primary"
-            icon={<BarChart size={20} />}
-            label="Your BMI"
-            value={result.bmi}
-          />
+      <div
+        className="grid md:grid-cols-2 gap-4"
+        aria-live="polite"
+      >
 
-          <ResultCard
-            variant="neutral"
-            icon={<BarChart size={20} />}
-            label="BMI Category"
-            value={result.category}
-          />
-        </div>
-      )}
+        <ResultCard
+          variant="primary"
+          icon={<BarChart size={20} />}
+          label="Your BMI"
+          value={result.bmi}
+        />
 
-      {/* ================= SEO ARTICLE ================= */}
+        <ResultCard
+          variant="neutral"
+          icon={<BarChart size={20} />}
+          label="BMI Category"
+          value={result.category}
+        />
+
+      </div>
+
+      {/* ARTICLE */}
+
       <BMICalculatorArticle />
 
     </section>

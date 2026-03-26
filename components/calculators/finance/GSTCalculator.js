@@ -9,37 +9,31 @@ import ExplanationText from "@/components/core/ExplanationText";
 import CalculatorLayout from "@/components/core/CalculatorLayout";
 
 import { formatINR } from "@/lib/format";
-import { calculateGST } from "../../../lib/formulas";
+import { calculateGST } from "@/lib/formulas";
+
 import GSTCalculatorArticle from "../../content/finance/GSTCalculatorArticle";
 
+/* ================= DEFAULT VALUES ================= */
+
+const DEFAULT_VALUES = {
+  amount: 10000,
+  rate: 18,
+};
+
+/* ================= COMPONENT ================= */
 
 export default function GSTCalculator() {
-  const [values, setValues] = useState({
-    amount: "",
-    rate: "18",
-  });
 
+  const [values, setValues] = useState(DEFAULT_VALUES);
   const [type, setType] = useState("add");
 
-  /* ---------- show only when filled ---------- */
-
-  const isComplete =
-    values.amount !== "" &&
-    values.rate !== "";
-
-  /* ---------- derived result ---------- */
-
   const result = useMemo(() => {
-    if (!isComplete) return null;
-
     return calculateGST({
       amount: values.amount,
       rate: values.rate,
       type,
     });
-  }, [values, type, isComplete]);
-
-  /* ---------- inputs ---------- */
+  }, [values, type]);
 
   const inputs = [
     {
@@ -59,8 +53,6 @@ export default function GSTCalculator() {
     },
   ];
 
-  /* ---------- UI ---------- */
-
   return (
     <CalculatorLayout
       title="GST Calculator"
@@ -72,9 +64,15 @@ export default function GSTCalculator() {
         "No Signup Required",
       ]}
     >
-      <InputsGrid inputs={inputs} values={values} setValues={setValues} />
 
-      {/* toggle buttons */}
+      <InputsGrid
+        inputs={inputs}
+        values={values}
+        setValues={setValues}
+      />
+
+      {/* Toggle */}
+
       <div className="flex gap-3">
         <button
           onClick={() => setType("add")}
@@ -99,37 +97,34 @@ export default function GSTCalculator() {
         </button>
       </div>
 
-      {result && (
-        <>
-          <ResultHero
-            label="GST Amount"
-            value={result.gstAmount}
-          />
+      <ResultHero
+        label="GST Amount"
+        value={result?.gstAmount}
+      />
 
-          <StatsGrid
-            items={[
-              {
-                label:
-                  type === "add"
-                    ? "Total Amount (Including GST)"
-                    : "Original Amount (Excluding GST)",
-                value: formatINR(result.finalAmount),
-                variant: type === "add" ? "warning" : "info",
-              },
-            ]}
-          />
+      <StatsGrid
+        items={[
+          {
+            label:
+              type === "add"
+                ? "Total Amount (Including GST)"
+                : "Original Amount (Excluding GST)",
+            value: formatINR(result?.finalAmount),
+            variant: type === "add" ? "warning" : "info",
+          },
+        ]}
+      />
 
-          <ExplanationText
-            text={`GST of ${formatINR(
-              result.gstAmount
-            )} is ${
-              type === "add" ? "added to" : "removed from"
-            } the base amount.`}
-          />
-        </>
-      )}
+      <ExplanationText
+        text={`GST of ${formatINR(
+          result?.gstAmount
+        )} is ${
+          type === "add" ? "added to" : "removed from"
+        } the base amount.`}
+      />
 
-      <GSTCalculatorArticle/>
+      <GSTCalculatorArticle />
+
     </CalculatorLayout>
   );
 }

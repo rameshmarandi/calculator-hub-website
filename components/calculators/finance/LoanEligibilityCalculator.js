@@ -9,43 +9,37 @@ import ExplanationText from "@/components/core/ExplanationText";
 import CalculatorLayout from "@/components/core/CalculatorLayout";
 
 import { formatINR } from "@/lib/format";
-import { calculateLoanEligibility } from "../../../lib/formulas";
+import { calculateLoanEligibility } from "@/lib/formulas";
+
 import LoanEligibilityArticle from "../../content/finance/LoanEligibilityArticle";
 
+/* ======================================================
+   DEFAULT VALUES
+====================================================== */
+
+const DEFAULT_VALUES = {
+  monthlyIncome: 50000,
+  existingEmi: 5000,
+  rate: 9,
+  years: 20,
+};
+
+/* ======================================================
+   COMPONENT
+====================================================== */
+
 export default function LoanEligibilityCalculator() {
-  const [values, setValues] = useState({
-    monthlyIncome: "",
-    existingEmi: "",
-    rate: "",
-    years: "",
-  });
 
-  const isValid =
-    Number(values.monthlyIncome) > 0 &&
-    Number(values.rate) > 0 &&
-    Number(values.years) > 0;
+  const [values, setValues] = useState(DEFAULT_VALUES);
 
-
-    const isComplete =
-  values.monthlyIncome !== "" &&
-  values.rate !== "" &&
-  values.years !== "" &&
-  Number(values.monthlyIncome) > 0 &&
-  Number(values.rate) > 0 &&
-  Number(values.years) > 0;
-
-
- const result = useMemo(() => {
-  if (!isComplete) return null;
-
-  return calculateLoanEligibility({
-    income: values.monthlyIncome,
-    existingEmi: values.existingEmi,
-    annualRate: values.rate,
-    years: values.years,
-  });
-}, [values, isComplete]);
-
+  const result = useMemo(() => {
+    return calculateLoanEligibility({
+      income: values?.monthlyIncome,
+      existingEmi: values?.existingEmi,
+      annualRate: values?.rate,
+      years: values?.years,
+    });
+  }, [values]);
 
   const inputs = [
     {
@@ -90,51 +84,53 @@ export default function LoanEligibilityCalculator() {
         "No Signup Required",
       ]}
     >
-      <InputsGrid inputs={inputs} values={values} setValues={setValues} />
 
-      {isComplete && result  && (
-        <>
-          <ResultHero
-            label="Eligible Loan Amount"
-            value={result?.eligibleAmount ?? 0}
-          />
+      <InputsGrid
+        inputs={inputs}
+        values={values}
+        setValues={setValues}
+      />
 
-          <StatsGrid
-            items={[
-              {
-                label: "Affordable EMI",
-                value: formatINR(result?.emi ?? 0),
-                variant: "neutral",
-              },
-              {
-                label: "Loan Tenure",
-                value: `${values.years || 0} Years`,
-                variant: "info",
-              },
-              {
-                label: "Total Months",
-                value: result?.months ?? 0,
-                variant: "warning",
-              },
-              {
-                label: "Max EMI Allowed (40%)",
-                value: formatINR((Number(values.monthlyIncome) || 0) * 0.4),
-                variant: "danger",
-              },
-            ]}
-          />
+      <ResultHero
+        label="Eligible Loan Amount"
+        value={result?.eligibleAmount}
+      />
 
-          <ExplanationText
-            text={`Based on 40% of your income, you can safely pay an EMI of ${formatINR(
-              result?.emi ?? 0,
-            )} per month. Your eligible loan amount is approximately ${formatINR(
-              result?.eligibleAmount ?? 0,
-            )}.`}
-          />
-        </>
-      )}
+      <StatsGrid
+        items={[
+          {
+            label: "Affordable EMI",
+            value: formatINR(result?.emi),
+            variant: "neutral",
+          },
+          {
+            label: "Loan Tenure",
+            value: `${values?.years} Years`,
+            variant: "info",
+          },
+          {
+            label: "Total Months",
+            value: result?.months,
+            variant: "warning",
+          },
+          {
+            label: "Max EMI Allowed (40%)",
+            value: formatINR(values?.monthlyIncome * 0.4),
+            variant: "danger",
+          },
+        ]}
+      />
 
-      <LoanEligibilityArticle/>
+      <ExplanationText
+        text={`Based on 40% of your income, you can safely pay an EMI of ${formatINR(
+          result?.emi
+        )} per month. Your eligible loan amount is approximately ${formatINR(
+          result?.eligibleAmount
+        )}.`}
+      />
+
+      <LoanEligibilityArticle />
+
     </CalculatorLayout>
   );
 }

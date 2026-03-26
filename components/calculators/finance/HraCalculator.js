@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 import CalculatorLayout from "@/components/core/CalculatorLayout";
 import ResultHero from "@/components/core/ResultHero";
@@ -8,69 +8,48 @@ import StatsGrid from "@/components/core/StatsGrid";
 import ExplanationText from "@/components/core/ExplanationText";
 
 import { AmountInput } from "@/components/inputs/AmountInput";
+
 import { formatINR } from "@/lib/format";
 import HRACalculatorArticle from "../../content/finance/HRACalculatorArticle";
 
-/*
-  HRA exemption = minimum of:
-  1. Actual HRA received
-  2. Rent paid – 10% of basic
-  3. 50% basic (metro) or 40% basic (non-metro)
-*/
-
 export default function HraCalculator() {
+
+  /* ================= STATE ================= */
+
   const [values, setValues] = useState({
-    basic: "",
-    hra: "",
-    rent: "",
+    basic: "600000",
+    hra: "240000",
+    rent: "300000",
     metro: true,
   });
 
-  const [result, setResult] = useState(null);
-  const [error, setError] = useState("");
+  /* ================= CALC ================= */
 
-  /* ================= VALIDATION ================= */
+  const result = useMemo(() => {
 
-  function validate() {
-    const { basic, hra, rent } = values;
-
-    if (!basic || basic <= 0) return "Enter valid basic salary";
-    if (hra < 0) return "Enter valid HRA received";
-    if (!rent || rent <= 0) return "Enter valid rent paid";
-
-    return "";
-  }
-
-  /* ================= CALCULATE ================= */
-
-  function handleCalculate() {
-    const err = validate();
-
-    if (err) {
-      setError(err);
-      setResult(null);
-      return;
-    }
-
-    setError("");
-
-    const basic = Number(values.basic);
-    const hra = Number(values.hra);
-    const rent = Number(values.rent);
+    const basic = Number(values.basic) || 0;
+    const hra = Number(values.hra) || 0;
+    const rent = Number(values.rent) || 0;
 
     const rule1 = hra;
+
     const rule2 = Math.max(rent - 0.1 * basic, 0);
+
     const rule3 = (values.metro ? 0.5 : 0.4) * basic;
 
     const exempt = Math.min(rule1, rule2, rule3);
+
     const taxable = hra - exempt;
 
-    setResult({
+    const percent = hra ? (exempt / hra) * 100 : 0;
+
+    return {
       exempt,
       taxable,
-      percent: (exempt / hra) * 100,
-    });
-  }
+      percent,
+    };
+
+  }, [values]);
 
   /* ================= UI ================= */
 
@@ -85,8 +64,11 @@ export default function HraCalculator() {
         "No Signup Required",
       ]}
     >
+
       {/* INPUTS */}
+
       <div className="space-y-4">
+
         <AmountInput
           label="Basic Salary (Annual)"
           value={values.basic}
@@ -115,53 +97,48 @@ export default function HraCalculator() {
           <option value="metro">Metro City (50%)</option>
           <option value="non">Non-Metro (40%)</option>
         </select>
+
       </div>
 
-      {error && <p className="text-sm text-red-500">{error}</p>}
+      {/* HERO */}
 
-      <button
-        onClick={handleCalculate}
-        className="w-full py-2.5 rounded-lg bg-[var(--primary)] text-white mt-4"
-      >
-        Calculate HRA
-      </button>
+      <ResultHero label="Tax Exempt HRA" value={result.exempt} />
 
-      {/* RESULTS */}
-      {result && (
-        <>
-          <ResultHero label="Tax Exempt HRA" value={result.exempt} />
+      {/* STATS */}
 
-          <StatsGrid
-            items={[
-              {
-                label: "Total HRA Received",
-                value: formatINR(values.hra),
-              },
-              {
-                label: "Taxable HRA",
-                value: formatINR(result.taxable),
-                variant: "warning",
-              },
-              {
-                label: "Exemption %",
-                value: result.percent.toFixed(2) + "%",
-                variant: "success",
-              },
-            ]}
-          />
+      <StatsGrid
+        items={[
+          {
+            label: "Total HRA Received",
+            value: formatINR(values.hra),
+          },
+          {
+            label: "Taxable HRA",
+            value: formatINR(result.taxable),
+            variant: "warning",
+          },
+          {
+            label: "Exemption %",
+            value: result.percent.toFixed(2) + "%",
+            variant: "success",
+          },
+        ]}
+      />
 
-          <ExplanationText
-            text={`Out of ${formatINR(
-              values.hra
-            )} HRA received, ${formatINR(
-              result.exempt
-            )} is tax-free and ${formatINR(
-              result.taxable
-            )} is taxable based on rent and city type.`}
-          />
-        </>
-      )}
+      {/* EXPLANATION */}
+
+      <ExplanationText
+        text={`Out of ${formatINR(
+          values.hra
+        )} HRA received, ${formatINR(
+          result.exempt
+        )} is tax-free and ${formatINR(
+          result.taxable
+        )} is taxable based on rent and city type.`}
+      />
+
       <HRACalculatorArticle/>
+
     </CalculatorLayout>
   );
 }

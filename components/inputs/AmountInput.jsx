@@ -7,16 +7,18 @@ export function AmountInput({
   placeholder,
   allowNegative = false,
   max = 999999999999,
-  prefix = "₹"   // default keeps existing calculators working
+  prefix = "₹"
 }) {
 
   function handleChange(e) {
     let raw = unformatNumber(e.target.value);
 
-    const regex = allowNegative ? /^-?\d*$/ : /^\d*$/;
+    // FIXED REGEX (supports decimals)
+    const regex = allowNegative ? /^-?\d*\.?\d*$/ : /^\d*\.?\d*$/;
+
     if (!regex.test(raw)) return;
 
-    if (raw === "" || raw === "-") {
+    if (raw === "" || raw === "-" || raw === ".") {
       onChange(raw);
       return;
     }
@@ -38,13 +40,15 @@ export function AmountInput({
       <div className="relative">
         <input
           type="text"
-          inputMode="numeric"
+          inputMode="decimal"
           value={
-            value === "" || value === "-" ? value : formatIndianNumber(value)
+            value === "" || value === "-" || value === "."
+              ? value
+              : formatIndianNumber(value)
           }
           placeholder={placeholder}
           onChange={handleChange}
-          className={` 
+          className={`
             w-full
             rounded-lg
             px-3 py-2

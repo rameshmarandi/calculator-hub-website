@@ -12,34 +12,38 @@ import { formatINR } from "@/lib/format";
 import { calculateStartupValuation } from "../../../lib/formulas";
 import StartupValuationArticle from "../../content/finance/StartupValuationArticle";
 
-
 export default function StartupValuationCalculator() {
+
   /* ---------------- STATE ---------------- */
 
   const [values, setValues] = useState({
-    revenue: "",
-    growth: "",
-    multiple: "",
+    revenue: "5000000",
+    growth: "20",
+    multiple: "5",
   });
 
-  /* ---------------- READY CHECK ---------------- */
+  /* ---------------- SAFE NUMBERS ---------------- */
 
-  const isComplete =
-    values.revenue !== "" &&
-    values.growth !== "" &&
-    values.multiple !== "";
+  const revenue = Number(values.revenue) || 0;
+  const growthRate = Number(values.growth) || 0;
+  const multiple = Number(values.multiple) || 0;
 
-  /* ---------------- DERIVED RESULT ---------------- */
+  /* ---------------- RESULT ---------------- */
 
   const result = useMemo(() => {
-    if (!isComplete) return null;
-
-    return calculateStartupValuation({
-      revenue: values.revenue,
-      growthRate: values.growth,
-      multiple: values.multiple,
+    const calculated = calculateStartupValuation({
+      revenue,
+      growthRate,
+      multiple,
     });
-  }, [values, isComplete]);
+
+    return (
+      calculated || {
+        valuation: 0,
+        adjustedRevenue: 0,
+      }
+    );
+  }, [revenue, growthRate, multiple]);
 
   /* ---------------- INPUT CONFIG ---------------- */
 
@@ -80,39 +84,35 @@ export default function StartupValuationCalculator() {
     >
       <InputsGrid inputs={inputs} values={values} setValues={setValues} />
 
-      {result && (
-        <>
-          <ResultHero
-            label="Estimated Startup Valuation"
-            value={result.valuation}
-          />
+      <ResultHero
+        label="Estimated Startup Valuation"
+        value={formatINR(result.valuation || 0)}
+      />
 
-          <StatsGrid
-            items={[
-              {
-                label: "Adjusted Annual Revenue",
-                value: formatINR(result.adjustedRevenue),
-                variant: "info",
-              },
-              {
-                label: "Revenue Multiple",
-                value: `${values.multiple}x`,
-                variant: "neutral",
-              },
-            ]}
-          />
+      <StatsGrid
+        items={[
+          {
+            label: "Adjusted Annual Revenue",
+            value: formatINR(result.adjustedRevenue || 0),
+            variant: "info",
+          },
+          {
+            label: "Revenue Multiple",
+            value: `${multiple || 0}x`,
+            variant: "neutral",
+          },
+        ]}
+      />
 
-          <ExplanationText
-            text={`With ${values.growth}% growth, your revenue becomes ${formatINR(
-              result.adjustedRevenue
-            )}. Applying a ${values.multiple}x multiple gives an estimated valuation of ${formatINR(
-              result.valuation
-            )}.`}
-          />
-        </>
-      )}
+      <ExplanationText
+        text={`With ${growthRate}% growth, your revenue becomes ${formatINR(
+          result.adjustedRevenue
+        )}. Applying a ${multiple}x revenue multiple gives an estimated startup valuation of ${formatINR(
+          result.valuation
+        )}.`}
+      />
 
-      <StartupValuationArticle/>
+      <StartupValuationArticle />
     </CalculatorLayout>
   );
 }

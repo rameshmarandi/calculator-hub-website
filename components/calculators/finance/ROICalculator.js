@@ -12,30 +12,35 @@ import { formatINR } from "@/lib/format";
 import { calculateROI } from "../../../lib/formulas";
 import ROICalculatorArticle from "../../content/finance/ROICalculatorArticle";
 
-
 export default function ROICalculator() {
+
   /* ---------------- STATE ---------------- */
 
   const [values, setValues] = useState({
-    investment: "",
-    returns: "",
+    investment: "100000",
+    returns: "150000",
   });
 
-  /* ---------------- READY CHECK ---------------- */
+  /* ---------------- SAFE NUMBERS ---------------- */
 
-  const isComplete =
-    values.investment !== "" &&
-    values.returns !== "";
+  const investment = Number(values.investment) || 0;
+  const returns = Number(values.returns) || 0;
 
-  /* ---------------- DERIVED RESULT ---------------- */
+  /* ---------------- RESULT ---------------- */
 
   const result = useMemo(() => {
-    if (!isComplete) return null;
+    return (
+      calculateROI({
+        investment,
+        returns,
+      }) || {
+        roi: 0,
+        profit: 0,
+      }
+    );
+  }, [investment, returns]);
 
-    return calculateROI(values);
-  }, [values, isComplete]);
-
-  /* ---------------- INPUTS ---------------- */
+  /* ---------------- INPUT CONFIG ---------------- */
 
   const inputs = [
     {
@@ -67,45 +72,36 @@ export default function ROICalculator() {
     >
       <InputsGrid inputs={inputs} values={values} setValues={setValues} />
 
-      {result && (
-        <>
-          {/* 🔥 FIXED: pass NUMBER only */}
-          <ResultHero
-            label="Return on Investment (%)"
-            value={result.roi}
-          />
+      <ResultHero
+        label="Return on Investment (%)"
+        value={result.roi || 0}
+      />
 
-          <StatsGrid
-            items={[
-              {
-                label: "Net Profit",
-                value: formatINR(result.profit),
-                variant:
-                  result.profit >= 0 ? "success" : "danger",
-              },
-              {
-                label: "Investment",
-                value: formatINR(values.investment),
-                variant: "neutral",
-              },
-            ]}
-          />
+      <StatsGrid
+        items={[
+          {
+            label: "Net Profit",
+            value: formatINR(result.profit || 0),
+            variant: result.profit >= 0 ? "success" : "danger",
+          },
+          {
+            label: "Investment",
+            value: formatINR(investment),
+            variant: "neutral",
+          },
+        ]}
+      />
 
-          <ExplanationText
-            variant={result.profit >= 0 ? "success" : "danger"}
-            text={
-              result.profit >= 0
-                ? `You earned ${formatINR(
-                    result.profit
-                  )} profit with an ROI of ${result.roi}%.`
-                : `You incurred a loss of ${formatINR(
-                    Math.abs(result.profit)
-                  )} with an ROI of ${result.roi}%.`
-            }
-          />
-        </>
-      )}
-      <ROICalculatorArticle/>
+      <ExplanationText
+        variant={result.profit >= 0 ? "success" : "danger"}
+        text={
+          result.profit >= 0
+            ? `You earned ${formatINR(result.profit)} profit with an ROI of ${result.roi}%.`
+            : `You incurred a loss of ${formatINR(Math.abs(result.profit))} with an ROI of ${result.roi}%.`
+        }
+      />
+
+      <ROICalculatorArticle />
     </CalculatorLayout>
   );
 }

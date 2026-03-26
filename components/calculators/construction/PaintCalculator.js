@@ -1,193 +1,128 @@
 "use client";
 
-import { useState } from "react";
-import { Calculator, BarChart } from "lucide-react";
+import { useMemo, useState } from "react";
 
-import { AmountInput } from "../../inputs/AmountInput";
-import { ResultCard } from "../../ResultCard";
+import CalculatorLayout from "@/components/core/CalculatorLayout";
+import InputsGrid from "@/components/core/InputsGrid";
+import ResultHero from "@/components/core/ResultHero";
+import StatsGrid from "@/components/core/StatsGrid";
+import ExplanationText from "@/components/core/ExplanationText";
+
+import { calculatePaint, toNumber } from "../../../lib/formulas";
 import PaintCalculatorArticle from "../../content/construction/PaintCalculatorArticle";
 
 export default function PaintCalculator() {
-  const [length, setLength] = useState("");
-  const [width, setWidth] = useState("");
-  const [height, setHeight] = useState("");
-  const [coats, setCoats] = useState("2");
-  const [coverage, setCoverage] = useState("10"); // sqm per liter
 
-  const [result, setResult] = useState(null);
-  const [error, setError] = useState("");
+  /* ---------- PREFILLED DEFAULT VALUES ---------- */
 
-  /* ---------------- VALIDATION ---------------- */
-  function validate() {
-    if (!length || Number(length) <= 0) {
-      setError("Please enter valid room length.");
-      return false;
-    }
+  const [values, setValues] = useState({
+    length: "5",
+    width: "4",
+    height: "3",
+    coats: "2",
+    coverage: "10",
+  });
 
-    if (!width || Number(width) <= 0) {
-      setError("Please enter valid room width.");
-      return false;
-    }
+  /* ---------- DERIVED RESULT ---------- */
 
-    if (!height || Number(height) <= 0) {
-      setError("Please enter valid wall height.");
-      return false;
-    }
-
-    if (!coats || Number(coats) <= 0) {
-      setError("Number of coats must be at least 1.");
-      return false;
-    }
-
-    if (!coverage || Number(coverage) <= 0) {
-      setError("Please enter valid paint coverage.");
-      return false;
-    }
-
-    setError("");
-    return true;
-  }
-
-  /* ---------------- CALCULATION ---------------- */
-  function calculatePaint(e) {
-    e.preventDefault();
-    if (!validate()) return;
-
-    const l = Number(length);
-    const w = Number(width);
-    const h = Number(height);
-    const c = Number(coats);
-    const cover = Number(coverage);
-
-    // Wall Area
-    const wallArea = 2 * (l + w) * h;
-
-    // Total paintable area (including coats)
-    const totalArea = wallArea * c;
-
-    // Add 10% wastage factor
-    const wastageFactor = 1.1;
-
-    const paintLiters = (totalArea / cover) * wastageFactor;
-
-    setResult({
-      wallArea: wallArea.toFixed(2),
-      totalArea: totalArea.toFixed(2),
-      paint: paintLiters.toFixed(2),
+  const result = useMemo(() => {
+    return calculatePaint({
+      length: toNumber(values.length),
+      width: toNumber(values.width),
+      height: toNumber(values.height),
+      coats: toNumber(values.coats),
+      coverage: toNumber(values.coverage),
     });
-  }
+  }, [values]);
+
+  /* ---------- INPUT CONFIG ---------- */
+
+  const inputs = [
+    {
+      key: "length",
+      label: "Room Length (meters)",
+      type: "amount",
+      placeholder: "5",
+      prefix: "",
+    },
+    {
+      key: "width",
+      label: "Room Width (meters)",
+      type: "amount",
+      placeholder: "4",
+      prefix: "",
+    },
+    {
+      key: "height",
+      label: "Wall Height (meters)",
+      type: "amount",
+      placeholder: "3",
+      prefix: "",
+    },
+    {
+      key: "coats",
+      label: "Number of Coats",
+      type: "amount",
+      placeholder: "2",
+      prefix: "",
+    },
+    {
+      key: "coverage",
+      label: "Paint Coverage (sqm per liter)",
+      type: "amount",
+      placeholder: "10",
+      prefix: "",
+    },
+  ];
+
+  /* ---------- SAFE FALLBACK VALUES ---------- */
+
+  const wallArea = result?.wallArea ?? 0;
+  const totalArea = result?.totalArea ?? 0;
+  const paint = result?.paint ?? 0;
+
+  /* ---------- UI ---------- */
 
   return (
-    <section
-      className="rounded-xl p-6 space-y-10"
-      style={{
-        backgroundColor: "var(--surface)",
-        border: "1px solid var(--border)",
-      }}
+    <CalculatorLayout
+      title="Paint Calculator – Estimate Paint Quantity"
+      subtitle="Estimate how much paint is required for walls based on room size and paint coverage."
+      badges={[
+        "Instant Results",
+        "Accurate",
+        "100% Free",
+        "No Signup Required",
+      ]}
     >
-      {/* ================= HEADER ================= */}
-      <header>
-        <h1 className="text-2xl font-bold mb-1">
-          Paint Calculator – Estimate Paint Quantity
-        </h1>
+      <InputsGrid
+        inputs={inputs}
+        values={values}
+        setValues={setValues}
+      />
 
-        <p className="text-sm leading-relaxed">
-          Use this Paint Calculator to estimate how much paint you need for
-          walls based on room size, number of coats, and paint coverage.
-        </p>
-      </header>
+      <ResultHero
+        label="Paint Required"
+        value={`${paint} liters`}
+      />
 
-      {/* ================= FORM ================= */}
-      <form onSubmit={calculatePaint} className="space-y-4">
-        <AmountInput
-          label="Room Length (meters)"
-          value={length}
-          onChange={setLength}
-          placeholder="5"
-          prefix=""
-        />
+      <StatsGrid
+        items={[
+          {
+            label: "Wall Area",
+            value: `${wallArea.toFixed(2)} m²`,
+            variant: "neutral",
+          },
+          {
+            label: "Total Paint Area",
+            value: `${totalArea.toFixed(2)} m²`,
+            variant: "neutral",
+          },
+        ]}
+      />
 
-        <AmountInput
-          label="Room Width (meters)"
-          value={width}
-          onChange={setWidth}
-          placeholder="4"
-          prefix=""
-        />
+      <ExplanationText text="Wall area multiplied by number of coats divided by paint coverage gives paint quantity required. A 10% buffer is included for wastage." />
 
-        <AmountInput
-          label="Wall Height (meters)"
-          value={height}
-          onChange={setHeight}
-          placeholder="3"
-          prefix=""
-        />
-
-        <AmountInput
-          label="Number of Coats"
-          value={coats}
-          onChange={setCoats}
-          placeholder="2"
-          prefix=""
-        />
-
-        <AmountInput
-          label="Paint Coverage (sqm per liter)"
-          value={coverage}
-          onChange={setCoverage}
-          placeholder="10"
-          prefix=""
-        />
-
-        {error && <p className="text-sm text-red-500">{error}</p>}
-
-        <button
-          type="submit"
-          className="w-full py-2.5 rounded-md font-medium flex items-center justify-center gap-2"
-          style={{
-            backgroundColor: "var(--primary)",
-            color: "#fff",
-          }}
-        >
-          <Calculator size={18} />
-          Calculate Paint Quantity
-        </button>
-      </form>
-
-      {/* ================= RESULT ================= */}
-      {result && (
-        <>
-          <div className="grid md:grid-cols-3 gap-4" aria-live="polite">
-            <ResultCard
-              variant="neutral"
-              icon={<BarChart size={20} />}
-              label="Wall Area"
-              value={`${result.wallArea} m²`}
-            />
-
-            <ResultCard
-              variant="neutral"
-              icon={<BarChart size={20} />}
-              label="Total Paint Area"
-              value={`${result.totalArea} m²`}
-            />
-
-            <ResultCard
-              variant="primary"
-              icon={<BarChart size={20} />}
-              label="Paint Required"
-              value={`${result.paint} liters`}
-            />
-          </div>
-
-          <p className="text-xs opacity-70">
-            Note: Paint estimate includes a 10% buffer for wastage and touch-ups.
-          </p>
-        </>
-      )}
-
-      {/* ================= ARTICLE CONTENT ================= */}
       <PaintCalculatorArticle />
-    </section>
+    </CalculatorLayout>
   );
 }

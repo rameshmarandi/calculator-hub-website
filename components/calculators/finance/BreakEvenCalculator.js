@@ -17,27 +17,33 @@ export default function BreakEvenCalculator() {
   /* ---------------- STATE ---------------- */
 
   const [values, setValues] = useState({
-    fixed: "",
-    price: "",
-    variable: "",
+    fixed: "100000",
+    price: "500",
+    variable: "300",
   });
 
-  /* ---------------- SHOW ONLY WHEN COMPLETE ---------------- */
+  /* ---------------- SAFE NUMBERS ---------------- */
 
-  const isComplete =
-    values.fixed !== "" && values.price !== "" && values.variable !== "";
+  const fixedCost = Number(values.fixed) || 0;
+  const sellingPrice = Number(values.price) || 0;
+  const variableCost = Number(values.variable) || 0;
 
-  /* ---------------- DERIVED RESULT ---------------- */
+  /* ---------------- RESULT ---------------- */
 
   const result = useMemo(() => {
-    if (!isComplete) return null;
-
-    return calculateBreakEven({
-      fixedCost: values.fixed,
-      sellingPrice: values.price,
-      variableCost: values.variable,
-    });
-  }, [values, isComplete]);
+    return (
+      calculateBreakEven({
+        fixedCost,
+        sellingPrice,
+        variableCost,
+      }) || {
+        units: 0,
+        revenue: 0,
+        contribution: 0,
+        impossible: false,
+      }
+    );
+  }, [fixedCost, sellingPrice, variableCost]);
 
   /* ---------------- INPUT CONFIG ---------------- */
 
@@ -84,26 +90,23 @@ export default function BreakEvenCalculator() {
         />
       )}
 
-      {result && !result.impossible && (
-        <>
-          <ResultHero label="Break Even Units" value={result.units} />
+      <ResultHero label="Break Even Units" value={result?.units || 0} />
 
-          <StatsGrid
-            items={[
-              {
-                label: "Break Even Revenue",
-                value: formatINR(result.revenue),
-                variant: "info",
-              },
-              {
-                label: "Contribution Margin",
-                value: formatINR(result.contribution),
-                variant: "neutral",
-              },
-            ]}
-          />
-        </>
-      )}
+      <StatsGrid
+        items={[
+          {
+            label: "Break Even Revenue",
+            value: formatINR(result?.revenue || 0),
+            variant: "info",
+          },
+          {
+            label: "Contribution Margin",
+            value: formatINR(result?.contribution || 0),
+            variant: "neutral",
+          },
+        ]}
+      />
+
       <BreakEvenCalculatorArticle />
     </CalculatorLayout>
   );

@@ -12,36 +12,44 @@ import { formatINR } from "@/lib/format";
 import { calculateEducationLoan } from "../../../lib/formulas";
 import EducationLoanRepaymentArticle from "../../content/finance/EducationLoanRepaymentArticle";
 
-
 export default function EducationLoanRepaymentCalculator() {
+
   /* ---------------- STATE ---------------- */
 
   const [values, setValues] = useState({
-    amount: "",
-    rate: "",
-    years: "",
+    amount: "1000000",
+    rate: "9",
+    years: "10",
   });
 
-  /* ---------------- READY CHECK ---------------- */
+  /* ---------------- SAFE NUMBERS ---------------- */
 
-  const isComplete =
-    Number(values.amount) > 0 &&
-    Number(values.rate) > 0 &&
-    Number(values.years) > 0;
+  const principal = Number(values.amount) || 0;
+  const annualRate = Number(values.rate) || 0;
+  const years = Number(values.years) || 0;
 
-  /* ---------------- DERIVED RESULT ---------------- */
+  /* ---------------- RESULT ---------------- */
 
   const result = useMemo(() => {
-    if (!isComplete) return null;
-
-    return calculateEducationLoan({
-      principal: values.amount,
-      annualRate: values.rate,
-      years: values.years,
+    const calculated = calculateEducationLoan({
+      principal,
+      annualRate,
+      years,
     });
-  }, [values, isComplete]);
 
-  /* ---------------- INPUTS ---------------- */
+    return (
+      calculated || {
+        emi: 0,
+        interestPaid: 0,
+        totalPayable: 0,
+        months: 0,
+      }
+    );
+  }, [principal, annualRate, years]);
+
+  console.log("edute_res_t" , result)
+
+  /* ---------------- INPUT CONFIG ---------------- */
 
   const inputs = [
     {
@@ -78,49 +86,58 @@ export default function EducationLoanRepaymentCalculator() {
         "No Signup Required",
       ]}
     >
-      <InputsGrid inputs={inputs} values={values} setValues={setValues} />
+      <InputsGrid
+        inputs={inputs}
+        values={values}
+        setValues={setValues}
+      />
 
-      {result && (
-        <>
-          <ResultHero
-            label="Monthly EMI"
-            value={result.emi}
-          />
+      <ResultHero
+        label="Monthly EMI"
+        value={formatINR(result.emi || 0)}
+      />
 
-          <StatsGrid
-            items={[
-              {
-                label: "Total Interest Payable",
-                value: formatINR(result.interestPaid),
-                variant: "danger",
-              },
-              {
-                label: "Total Repayment Amount",
-                value: formatINR(result.totalPayable),
-                variant: "warning",
-              },
-              {
-                label: "Total Months",
-                value: result.months,
-                variant: "info",
-              },
-            ]}
-          />
+      <StatsGrid
+        items={[
+          {
+            label: "Total Interest Payable",
+            value: formatINR(result.interestPaid || 0),
+            variant: "danger",
+          },
+          {
+            label: "Total Repayment Amount",
+            value: formatINR(result.totalPayable || 0),
+            variant: "warning",
+          },
+          {
+            label: "Total Months",
+            value: result.months || 0,
+            variant: "info",
+          },
+        ]}
+      />
 
-          <ExplanationText
-            text={`For a loan of ${formatINR(values.amount)} at ${values.rate}% for ${values.years} years, your EMI will be ${formatINR(result.emi)} and total repayment will be ${formatINR(result.totalPayable)}.`}
-          />
-        </>
-      )}
-{/* ================= RESULT DISCLAIMER ================= */}
+      <ExplanationText
+        text={`For a loan of ${formatINR(
+          principal
+        )} at ${annualRate}% for ${years} years, your EMI will be ${formatINR(
+          result.emi
+        )} and total repayment will be ${formatINR(
+          result.totalPayable
+        )}.`}
+      />
 
-<p className="text-xs text-[var(--text-muted)] mt-3">
-  Note: The results shown by this calculator are estimates based on the
-  values entered and the standard EMI formula used by banks. Actual
-  repayment amounts may vary depending on lender policies, processing
-  fees, interest rate changes, and moratorium conditions.
-</p>
-      <EducationLoanRepaymentArticle/>
+      {/* RESULT DISCLAIMER */}
+
+      <p className="text-xs text-[var(--text-muted)] mt-3">
+        Note: The results shown by this calculator are estimates based on the
+        values entered and the standard EMI formula used by banks. Actual
+        repayment amounts may vary depending on lender policies, processing
+        fees, interest rate changes, and moratorium conditions.
+      </p>
+
+      <EducationLoanRepaymentArticle />
+
     </CalculatorLayout>
   );
 }

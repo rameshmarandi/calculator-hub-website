@@ -12,30 +12,26 @@ import { calculateAggregate, toNumber } from "../../../lib/formulas";
 import AggregateQuantityArticle from "../../content/construction/AggregateQuantityArticle";
 
 export default function AggregateQuantityCalculator() {
+
+  /* ---------- PREFILLED DEFAULT VALUES ---------- */
+
   const [values, setValues] = useState({
-    length: "",
-    width: "",
-    thickness: "",
+    length: "5",
+    width: "4",
+    thickness: "100",
     ratio: "1:1.5:3",
   });
-
-  /* ---------- COMPLETE CHECK ---------- */
-
-  const isComplete =
-    values.length !== "" && values.width !== "" && values.thickness !== "";
 
   /* ---------- DERIVED RESULT ---------- */
 
   const result = useMemo(() => {
-    if (!isComplete) return null;
-
     return calculateAggregate({
       length: toNumber(values.length),
       width: toNumber(values.width),
       thickness: toNumber(values.thickness),
       mixRatio: values.ratio,
     });
-  }, [values, isComplete]);
+  }, [values]);
 
   /* ---------- INPUT CONFIG ---------- */
 
@@ -45,21 +41,21 @@ export default function AggregateQuantityCalculator() {
       label: "Length (meters)",
       type: "amount",
       placeholder: "5",
-      prefix:""
+      prefix: "",
     },
     {
       key: "width",
       label: "Width (meters)",
       type: "amount",
       placeholder: "4",
-       prefix:""
+      prefix: "",
     },
     {
       key: "thickness",
       label: "Thickness (mm)",
       type: "amount",
       placeholder: "100",
-       prefix:""
+      prefix: "",
     },
     {
       key: "ratio",
@@ -71,6 +67,11 @@ export default function AggregateQuantityCalculator() {
       ],
     },
   ];
+
+  /* ---------- SAFE FALLBACK VALUES ---------- */
+
+  const brass = result?.brass ?? 0;
+  const volume = result?.volume ?? 0;
 
   /* ---------- UI ---------- */
 
@@ -85,29 +86,30 @@ export default function AggregateQuantityCalculator() {
         "No Signup Required",
       ]}
     >
-      <InputsGrid inputs={inputs} values={values} setValues={setValues} />
+      <InputsGrid
+        inputs={inputs}
+        values={values}
+        setValues={setValues}
+      />
 
-      {result && (
-        <>
-          <ResultHero
-            label="Aggregate Required"
-            value={`${result.brass.toFixed(2)} brass`}
-          />
+      <ResultHero
+        label="Aggregate Required"
+        value={`${brass.toFixed(2)} brass`}
+      />
 
-          <StatsGrid
-            items={[
-              {
-                label: "Aggregate Volume",
-                value: `${result.volume.toFixed(3)} m³`,
-                variant: "neutral",
-              },
-            ]}
-          />
-        </>
-      )}
+      <StatsGrid
+        items={[
+          {
+            label: "Aggregate Volume",
+            value: `${volume.toFixed(3)} m³`,
+            variant: "neutral",
+          },
+        ]}
+      />
 
       <ExplanationText text="Uses wet volume → dry volume (1.54 factor) → concrete mix ratio distribution to compute aggregate requirement accurately." />
-    <AggregateQuantityArticle/>
+
+      <AggregateQuantityArticle />
     </CalculatorLayout>
   );
 }

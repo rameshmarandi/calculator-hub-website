@@ -5,23 +5,34 @@ export default function ResultHero({
   days = 30,
 }) {
 
+  const safeNumber = (v) => {
+    if (v === null || v === undefined) return 0;
+
+    const cleaned =
+      typeof v === "string"
+        ? v.replace(/[₹, ]/g, "")
+        : v;
+
+    const match = String(cleaned).match(/-?\d+(\.\d+)?/);
+
+    const n = match ? Number(match[0]) : 0;
+
+    return Number.isFinite(n) ? n : 0;
+  };
+
+  const numericValue = safeNumber(value);
+
   const formatNumber = (num) => {
-    if (num === null || num === undefined) return "-";
+    const n = safeNumber(num);
 
-    const n = Number(num);
-
-    if (!Number.isFinite(n)) return "-";
-
-    const rounded = Math.round(n * 100) / 100;
-
-    return rounded.toLocaleString("en-IN", {
+    return n.toLocaleString("en-IN", {
       maximumFractionDigits: 2,
     });
   };
 
   const perDay =
-    showPerDay && typeof value === "number"
-      ? Math.round(value / days)
+    showPerDay && days > 0
+      ? Math.round(numericValue / days)
       : null;
 
   return (
@@ -39,13 +50,10 @@ export default function ResultHero({
         shadow-sm
       "
     >
-
-      {/* LABEL */}
       <p className="text-xs uppercase tracking-wider text-gray-500">
         {label}
       </p>
 
-      {/* VALUE */}
       <p
         className="
           text-4xl md:text-5xl
@@ -55,10 +63,10 @@ export default function ResultHero({
           dark:text-indigo-400
         "
       >
-        {formatNumber(value)}
+        {formatNumber(numericValue)}
+        {typeof value === "string" && value.replace(/[0-9.,₹ ]/g, "")}
       </p>
 
-      {/* PER DAY */}
       {showPerDay && perDay !== null && (
         <p className="text-xs text-gray-500 mt-3">
           ≈ {formatNumber(perDay)} per day

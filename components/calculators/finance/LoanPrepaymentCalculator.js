@@ -9,70 +9,33 @@ import ExplanationText from "@/components/core/ExplanationText";
 import CalculatorLayout from "@/components/core/CalculatorLayout";
 
 import { formatINR } from "@/lib/format";
-import { calculatePrepayment } from "../../../lib/formulas";
+import { calculatePrepayment } from "@/lib/formulas";
+
 import LoanPrepaymentArticle from "../../content/finance/LoanPrepaymentArticle";
 
+/* ================= DEFAULT VALUES ================= */
+
+const DEFAULT_VALUES = {
+  loan: 3000000,
+  rate: 9,
+  years: 20,
+  prepayment: 500000,
+};
+
+/* ================= COMPONENT ================= */
+
 export default function LoanPrepaymentCalculator() {
-  /* ================= STATE ================= */
 
-  const [values, setValues] = useState({
-    loan: "",
-    rate: "",
-    years: "",
-    prepayment: "",
-  });
-
-  /* ================= VALIDATION ================= */
-
-  const isValid =
-    Number(values.loan) > 0 &&
-    Number(values.rate) > 0 &&
-    Number(values.years) > 0 &&
-    Number(values.prepayment) > 0 &&
-    Number(values.prepayment) < Number(values.loan);
-  const isComplete =
-    values.loan !== "" &&
-    values.rate !== "" &&
-    values.years !== "" &&
-    values.prepayment !== "" &&
-    Number(values.loan) > 0 &&
-    Number(values.rate) > 0 &&
-    Number(values.years) > 0 &&
-    Number(values.prepayment) > 0 &&
-    Number(values.prepayment) < Number(values.loan);
-
-  /* ================= CALC ================= */
-
-  // const result = useMemo(() => {
-  //   if (!isValid) {
-  //     return {
-  //       originalEMI: 0,
-  //       newEMI: 0,
-  //       interestSaved: 0,
-  //       months: 0,
-  //     };
-  //   }
-
-  //   return calculatePrepayment({
-  //     principal: values.loan,
-  //     annualRate: values.rate,
-  //     years: values.years,
-  //     prepayment: values.prepayment,
-  //   });
-  // }, [values, isValid]);
+  const [values, setValues] = useState(DEFAULT_VALUES);
 
   const result = useMemo(() => {
-    if (!isComplete) return null;
-
     return calculatePrepayment({
       principal: values.loan,
       annualRate: values.rate,
       years: values.years,
       prepayment: values.prepayment,
     });
-  }, [values, isComplete]);
-
-  /* ================= INPUT CONFIG ================= */
+  }, [values]);
 
   const inputs = [
     {
@@ -106,8 +69,6 @@ export default function LoanPrepaymentCalculator() {
     },
   ];
 
-  /* ================= UI ================= */
-
   return (
     <CalculatorLayout
       title="Loan Prepayment Calculator"
@@ -119,43 +80,48 @@ export default function LoanPrepaymentCalculator() {
         "No Signup Required",
       ]}
     >
-      <InputsGrid inputs={inputs} values={values} setValues={setValues} />
 
-      {isComplete && result && (
-        <>
-          <ResultHero label="Interest Saved" value={result.interestSaved} />
+      <InputsGrid
+        inputs={inputs}
+        values={values}
+        setValues={setValues}
+      />
 
-          <StatsGrid
-            items={[
-              {
-                label: "Original EMI",
-                value: formatINR(result.originalEMI),
-                variant: "neutral",
-              },
-              {
-                label: "New EMI",
-                value: formatINR(result.newEMI),
-                variant: "info",
-              },
-              {
-                label: "Total Months",
-                value: result.months,
-                variant: "warning",
-              },
-            ]}
-          />
+      <ResultHero
+        label="Interest Saved"
+        value={result.interestSaved}
+      />
 
-          <ExplanationText
-            text={`By prepaying ${formatINR(values.prepayment)}, your EMI reduces from ${formatINR(
-              result.originalEMI,
-            )} to ${formatINR(result.newEMI)} and you save approximately ${formatINR(
-              result.interestSaved,
-            )}.`}
-          />
-        </>
-      )}
+      <StatsGrid
+        items={[
+          {
+            label: "Original EMI",
+            value: formatINR(result.originalEMI),
+            variant: "neutral",
+          },
+          {
+            label: "New EMI",
+            value: formatINR(result.newEMI),
+            variant: "info",
+          },
+          {
+            label: "Total Months",
+            value: result.months,
+            variant: "warning",
+          },
+        ]}
+      />
 
-      <LoanPrepaymentArticle/>
+      <ExplanationText
+        text={`By prepaying ${formatINR(values.prepayment)}, your EMI reduces from ${formatINR(
+          result.originalEMI
+        )} to ${formatINR(result.newEMI)} and you save approximately ${formatINR(
+          result.interestSaved
+        )}.`}
+      />
+
+      <LoanPrepaymentArticle />
+
     </CalculatorLayout>
   );
 }
