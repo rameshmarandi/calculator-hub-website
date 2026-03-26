@@ -7,6 +7,8 @@ import { AmountInput } from "../../inputs/AmountInput";
 import { ResultCard } from "../../ResultCard";
 import ChildGrowthCalculatorArticle from "../../content/health/ChildGrowthCalculatorArticle";
 
+import { calculateChildGrowth } from "../../../lib/formulas";
+
 export default function ChildGrowthCalculator() {
   /* ---------------- DEFAULT PREFILLED DATA ---------------- */
   const [gender, setGender] = useState("male");
@@ -16,42 +18,13 @@ export default function ChildGrowthCalculator() {
 
   /* ---------------- LIVE CALCULATION ---------------- */
   const result = useMemo(() => {
-    const a = Number(age);
-    const h = Number(height);
-    const w = Number(weight);
-
-    if (!a || !h || !w) {
-      return {
-        bmi: "--",
-        status: "Enter valid values",
-        variant: "primary",
-      };
-    }
-
-    const hMeters = h / 100;
-    const bmi = w / (hMeters * hMeters);
-
-    let status = "Normal Growth";
-    let variant = "primary";
-
-    // Simplified BMI screening
-    if (bmi < 14) {
-      status = "Underweight for Age";
-      variant = "warning";
-    } else if (bmi > 20 && a < 10) {
-      status = "Overweight for Age";
-      variant = "warning";
-    } else if (bmi > 23 && a >= 10) {
-      status = "Overweight for Age";
-      variant = "warning";
-    }
-
-    return {
-      bmi: bmi.toFixed(1),
-      status,
-      variant,
-    };
-  }, [age, height, weight]);
+    return calculateChildGrowth({
+      gender,
+      age,
+      height,
+      weight,
+    });
+  }, [gender, age, height, weight]);
 
   return (
     <section
@@ -109,7 +82,6 @@ export default function ChildGrowthCalculator() {
           label="Age (years)"
           value={age}
           onChange={setAge}
-          placeholder="6"
           prefix=""
         />
 
@@ -117,20 +89,18 @@ export default function ChildGrowthCalculator() {
           label="Height (cm)"
           value={height}
           onChange={setHeight}
-          placeholder="120"
-           prefix=""
+          prefix=""
         />
 
         <AmountInput
           label="Weight (kg)"
           value={weight}
           onChange={setWeight}
-          placeholder="22"
-           prefix=""
+          prefix=""
         />
       </div>
 
-      {/* ================= RESULT (ALWAYS VISIBLE) ================= */}
+      {/* ================= RESULT ================= */}
       <div aria-live="polite">
         <ResultCard
           variant={result.variant}

@@ -1,83 +1,55 @@
 "use client";
 
-import { useState } from "react";
-import { Calculator, CalendarDays } from "lucide-react";
+import { useMemo, useState } from "react";
+import { CalendarDays } from "lucide-react";
 
-import { PercentageInput } from "../../inputs/PercentageInput";
 import { ResultCard } from "../../ResultCard";
 import OvulationCalculatorArticle from "../../content/health/OvulationCalculatorArticle";
 import { AmountInput } from "../../inputs/AmountInput";
 
+import { calculateOvulation } from "../../../lib/formulas";
+
 export default function OvulationCalculator() {
+
   const [lmp, setLmp] = useState("");
   const [cycleLength, setCycleLength] = useState("28");
 
-  const [result, setResult] = useState(null);
-  const [error, setError] = useState("");
+  const result = useMemo(() => {
 
-  /* ---------------- VALIDATION ---------------- */
-  function validate() {
-    if (!lmp) {
-      setError("Please select the first day of your last period.");
-      return false;
-    }
+    return calculateOvulation(
+      lmp,
+      cycleLength
+    );
 
-    if (!cycleLength || Number(cycleLength) < 21 || Number(cycleLength) > 35) {
-      setError("Cycle length should be between 21 and 35 days.");
-      return false;
-    }
-
-    setError("");
-    return true;
-  }
-
-  /* ---------------- CALCULATION ---------------- */
-  function calculateOvulation(e) {
-    e.preventDefault();
-    if (!validate()) return;
-
-    const lmpDate = new Date(lmp);
-    const cycleDays = Number(cycleLength);
-
-    // Ovulation occurs ~14 days before next period
-    const ovulationDate = new Date(lmpDate);
-    ovulationDate.setDate(ovulationDate.getDate() + (cycleDays - 14));
-
-    // Fertile window: 5 days before ovulation + ovulation day
-    const fertileStart = new Date(ovulationDate);
-    fertileStart.setDate(fertileStart.getDate() - 5);
-
-    const fertileEnd = new Date(ovulationDate);
-    fertileEnd.setDate(fertileEnd.getDate() + 1);
-
-    setResult({
-      ovulation: ovulationDate.toDateString(),
-      fertileWindow: `${fertileStart.toDateString()} – ${fertileEnd.toDateString()}`,
-    });
-  }
+  }, [lmp, cycleLength]);
 
   return (
     <section
       className="rounded-xl p-6 space-y-10"
       style={{
         backgroundColor: "var(--surface)",
-        border: "1px solid var(--border)",
-      }}>
-      {/* ================= HEADER ================= */}
+        border: "1px solid var(--border)"
+      }}
+    >
+
       <header>
-        <h1 className="text-2xl font-bold mb-1">Ovulation Calculator</h1>
+        <h1 className="text-2xl font-bold mb-1">
+          Ovulation Calculator
+        </h1>
+
         <p className="text-sm leading-relaxed">
-          Use this Ovulation Calculator to estimate your ovulation date and
-          fertile window based on your menstrual cycle.
+          Estimate your ovulation date and fertile window based on your
+          menstrual cycle.
         </p>
       </header>
 
-      {/* ================= FORM ================= */}
-      <form onSubmit={calculateOvulation} className="space-y-4">
+      <div className="space-y-4">
+
         <div className="space-y-1">
           <label className="text-sm font-medium">
             First Day of Last Menstrual Period
           </label>
+
           <input
             type="date"
             value={lmp}
@@ -86,7 +58,7 @@ export default function OvulationCalculator() {
             style={{
               backgroundColor: "var(--surface)",
               border: "1px solid var(--border)",
-              color: "var(--text)",
+              color: "var(--text)"
             }}
           />
         </div>
@@ -95,46 +67,31 @@ export default function OvulationCalculator() {
           label="Average Cycle Length (days)"
           value={cycleLength}
           onChange={setCycleLength}
-          placeholder="28"
           prefix=""
-
         />
 
-        {error && <p className="text-sm text-red-500">{error}</p>}
+      </div>
 
-        <button
-          type="submit"
-          className="w-full py-2.5 rounded-md font-medium flex items-center justify-center gap-2"
-          style={{
-            backgroundColor: "var(--primary)",
-            color: "#fff",
-          }}>
-          <Calculator size={18} />
-          Calculate Ovulation
-        </button>
-      </form>
+      <div className="grid md:grid-cols-2 gap-4" aria-live="polite">
 
-      {/* ================= RESULT ================= */}
-      {result && (
-        <div className="grid md:grid-cols-2 gap-4" aria-live="polite">
-          <ResultCard
-            variant="primary"
-            icon={<CalendarDays size={20} />}
-            label="Estimated Ovulation Date"
-            value={result.ovulation}
-          />
+        <ResultCard
+          variant="primary"
+          icon={<CalendarDays size={20} />}
+          label="Estimated Ovulation Date"
+          value={result.ovulation}
+        />
 
-          <ResultCard
-            variant="neutral"
-            icon={<CalendarDays size={20} />}
-            label="Fertile Window"
-            value={result.fertileWindow}
-          />
-        </div>
-      )}
+        <ResultCard
+          variant="neutral"
+          icon={<CalendarDays size={20} />}
+          label="Fertile Window"
+          value={`${result.fertileStart} – ${result.fertileEnd}`}
+        />
 
-      {/* ================= SEO BLOG CONTENT ================= */}
-      <OvulationCalculatorArticle/>
+      </div>
+
+      <OvulationCalculatorArticle />
+
     </section>
   );
 }

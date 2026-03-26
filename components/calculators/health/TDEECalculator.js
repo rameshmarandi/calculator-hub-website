@@ -1,56 +1,36 @@
 "use client";
 
-import { useState } from "react";
-import { Calculator, BarChart } from "lucide-react";
+import { useMemo, useState } from "react";
+import { BarChart } from "lucide-react";
 
 import { AmountInput } from "../../inputs/AmountInput";
 import { ResultCard } from "../../ResultCard";
 import TDEECalculatorArticle from "../../content/health/TDEECalculatorArticle";
 
+/* ---------- SAFE NUMBER PARSER ---------- */
+
+function parseNumber(value) {
+  const num = Number(String(value).replace(/,/g, ""));
+  return Number.isFinite(num) ? num : 0;
+}
+
 export default function TDEECalculator() {
+
   const [gender, setGender] = useState("male");
-  const [age, setAge] = useState("");
-  const [weight, setWeight] = useState("");
-  const [height, setHeight] = useState("");
+  const [age, setAge] = useState("30");
+  const [weight, setWeight] = useState("70");
+  const [height, setHeight] = useState("170");
   const [activity, setActivity] = useState("1.2");
 
-  const [result, setResult] = useState(null);
-  const [error, setError] = useState("");
+  const result = useMemo(() => {
 
-  /* ---------------- VALIDATION ---------------- */
-  function validate() {
-    if (!age || Number(age) <= 0) {
-      setError("Please enter valid age.");
-      return false;
-    }
-
-    if (!weight || Number(weight) <= 0) {
-      setError("Please enter valid weight.");
-      return false;
-    }
-
-    if (!height || Number(height) <= 0) {
-      setError("Please enter valid height.");
-      return false;
-    }
-
-    setError("");
-    return true;
-  }
-
-  /* ---------------- CALCULATION ---------------- */
-  function calculateTDEE(e) {
-    e.preventDefault();
-    if (!validate()) return;
-
-    const a = Number(age);
-    const w = Number(weight);
-    const h = Number(height);
-    const factor = Number(activity);
+    const a = parseNumber(age);
+    const w = parseNumber(weight);
+    const h = parseNumber(height);
+    const factor = parseNumber(activity);
 
     let bmr = 0;
 
-    /* Mifflin-St Jeor Formula */
     if (gender === "male") {
       bmr = 10 * w + 6.25 * h - 5 * a + 5;
     } else {
@@ -59,180 +39,179 @@ export default function TDEECalculator() {
 
     const tdee = bmr * factor;
 
-    setResult({
+    return {
       bmr: Math.round(bmr),
       tdee: Math.round(tdee),
       weightLoss: Math.round(tdee - 500),
-      weightGain: Math.round(tdee + 300),
-    });
-  }
+      weightGain: Math.round(tdee + 300)
+    };
+
+  }, [gender, age, weight, height, activity]);
 
   return (
     <section
       className="rounded-xl p-6 space-y-10"
       style={{
         backgroundColor: "var(--surface)",
-        border: "1px solid var(--border)",
+        border: "1px solid var(--border)"
       }}
     >
-      {/* ================= HEADER ================= */}
+
+      {/* HEADER */}
+
       <header>
-        <h1 className="text-2xl font-bold mb-1">TDEE Calculator</h1>
+        <h1 className="text-2xl font-bold mb-1">
+          TDEE Calculator
+        </h1>
+
         <p className="text-sm leading-relaxed">
-          Use this TDEE Calculator to estimate your Total Daily Energy
-          Expenditure — the total calories your body burns each day based on
-          age, body measurements, and activity level.
+          Estimate your Total Daily Energy Expenditure based on body
+          measurements and activity level.
         </p>
       </header>
 
-      {/* ================= FORM ================= */}
-      <form onSubmit={calculateTDEE} className="space-y-4">
-        {/* Gender Tabs */}
-        <div
-          className="flex rounded-md overflow-hidden"
-          style={{ border: "1px solid var(--border)" }}
+      {/* GENDER SWITCH */}
+
+      <div
+        className="flex rounded-md overflow-hidden"
+        style={{ border: "1px solid var(--border)" }}
+      >
+
+        <button
+          type="button"
+          onClick={() => setGender("male")}
+          className="flex-1 py-2 text-sm font-medium"
+          style={{
+            backgroundColor:
+              gender === "male" ? "var(--primary)" : "transparent",
+            color: gender === "male" ? "#fff" : "var(--text)"
+          }}
         >
-          <button
-            type="button"
-            onClick={() => setGender("male")}
-            className="flex-1 py-2 text-sm font-medium"
-            style={{
-              backgroundColor:
-                gender === "male" ? "var(--primary)" : "transparent",
-              color: gender === "male" ? "#fff" : "var(--text)",
-            }}
-          >
-            Male
-          </button>
+          Male
+        </button>
 
-          <button
-            type="button"
-            onClick={() => setGender("female")}
-            className="flex-1 py-2 text-sm font-medium"
-            style={{
-              backgroundColor:
-                gender === "female" ? "var(--primary)" : "transparent",
-              color: gender === "female" ? "#fff" : "var(--text)",
-              borderLeft: "1px solid var(--border)",
-            }}
-          >
-            Female
-          </button>
-        </div>
+        <button
+          type="button"
+          onClick={() => setGender("female")}
+          className="flex-1 py-2 text-sm font-medium"
+          style={{
+            backgroundColor:
+              gender === "female" ? "var(--primary)" : "transparent",
+            color: gender === "female" ? "#fff" : "var(--text)",
+            borderLeft: "1px solid var(--border)"
+          }}
+        >
+          Female
+        </button>
 
-        {/* Age */}
+      </div>
+
+      {/* INPUTS */}
+
+      <div className="grid md:grid-cols-3 gap-4">
+
         <AmountInput
           label="Age (years)"
           value={age}
           onChange={setAge}
-          placeholder="30"
           prefix=""
         />
 
-        {/* Weight */}
         <AmountInput
           label="Weight (kg)"
           value={weight}
           onChange={setWeight}
-          placeholder="70"
           prefix=""
         />
 
-        {/* Height */}
         <AmountInput
           label="Height (cm)"
           value={height}
           onChange={setHeight}
-          placeholder="170"
           prefix=""
         />
 
-        {/* Activity Level Dropdown */}
-        <div className="space-y-1">
-          <label className="text-sm font-medium">Activity Level</label>
+      </div>
 
-          <select
-            value={activity}
-            onChange={(e) => setActivity(e.target.value)}
-            className="w-full px-3 py-2 rounded-md text-sm"
-            style={{
-              border: "1px solid var(--border)",
-              backgroundColor: "var(--surface)",
-            }}
-          >
-            <option value="1.2">
-              Sedentary — Little or no exercise
-            </option>
+      {/* ACTIVITY LEVEL */}
 
-            <option value="1.375">
-              Lightly Active — Light physical activity during the week
-            </option>
+      <div className="space-y-1">
+        <label className="text-sm font-medium">
+          Activity Level
+        </label>
 
-            <option value="1.55">
-              Moderately Active — Regular exercise and active lifestyle
-            </option>
-
-            <option value="1.725">
-              Very Active — Intense workouts or demanding routine
-            </option>
-
-            <option value="1.9">
-              Extra Active — Physically demanding job or athlete
-            </option>
-          </select>
-        </div>
-
-        {error && <p className="text-sm text-red-500">{error}</p>}
-
-        {/* Submit Button */}
-        <button
-          type="submit"
-          className="w-full py-2.5 rounded-md font-medium flex items-center justify-center gap-2"
+        <select
+          value={activity}
+          onChange={(e) => setActivity(e.target.value)}
+          className="w-full px-3 py-2 rounded-md text-sm"
           style={{
-            backgroundColor: "var(--primary)",
-            color: "#fff",
+            border: "1px solid var(--border)",
+            backgroundColor: "var(--surface)"
           }}
         >
-          <Calculator size={18} />
-          Calculate TDEE
-        </button>
-      </form>
 
-      {/* ================= RESULTS ================= */}
-      {result && (
-        <div className="grid md:grid-cols-2 gap-4" aria-live="polite">
-          <ResultCard
-            variant="neutral"
-            icon={<BarChart size={20} />}
-            label="Basal Metabolic Rate (BMR)"
-            value={`${result.bmr} calories/day`}
-          />
+          <option value="1.2">
+            Sedentary — Little or no exercise
+          </option>
 
-          <ResultCard
-            variant="primary"
-            icon={<BarChart size={20} />}
-            label="Total Daily Energy Expenditure (TDEE)"
-            value={`${result.tdee} calories/day`}
-          />
+          <option value="1.375">
+            Lightly Active — Light exercise
+          </option>
 
-          <ResultCard
-            variant="neutral"
-            icon={<BarChart size={20} />}
-            label="Calories for Weight Loss"
-            value={`${result.weightLoss} calories/day`}
-          />
+          <option value="1.55">
+            Moderately Active — Regular exercise
+          </option>
 
-          <ResultCard
-            variant="neutral"
-            icon={<BarChart size={20} />}
-            label="Calories for Weight Gain"
-            value={`${result.weightGain} calories/day`}
-          />
-        </div>
-      )}
+          <option value="1.725">
+            Very Active — Hard exercise
+          </option>
 
-      {/* ================= SEO ARTICLE ================= */}
+          <option value="1.9">
+            Extra Active — Athlete / physical job
+          </option>
+
+        </select>
+      </div>
+
+      {/* RESULTS */}
+
+      <div
+        className="grid md:grid-cols-2 gap-4"
+        aria-live="polite"
+      >
+
+        <ResultCard
+          variant="neutral"
+          icon={<BarChart size={20} />}
+          label="Basal Metabolic Rate (BMR)"
+          value={`${result.bmr} calories/day`}
+        />
+
+        <ResultCard
+          variant="primary"
+          icon={<BarChart size={20} />}
+          label="Total Daily Energy Expenditure (TDEE)"
+          value={`${result.tdee} calories/day`}
+        />
+
+        <ResultCard
+          variant="neutral"
+          icon={<BarChart size={20} />}
+          label="Calories for Weight Loss"
+          value={`${result.weightLoss} calories/day`}
+        />
+
+        <ResultCard
+          variant="neutral"
+          icon={<BarChart size={20} />}
+          label="Calories for Weight Gain"
+          value={`${result.weightGain} calories/day`}
+        />
+
+      </div>
+
       <TDEECalculatorArticle />
+
     </section>
   );
 }

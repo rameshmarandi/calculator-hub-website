@@ -1,55 +1,25 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useMemo, useState } from "react";
 import { Activity } from "lucide-react";
 
 import { AmountInput } from "../../inputs/AmountInput";
 import { ResultCard } from "../../ResultCard";
 import BloodPressureCalculatorArticle from "./BloodPressureCalculatorArticle";
 
+import { calculateBloodPressure } from "../../../lib/formulas";
+
 export default function BloodPressureCalculator() {
 
-  /* ---------------- PREFILLED VALUES ---------------- */
   const [systolic, setSystolic] = useState("120");
   const [diastolic, setDiastolic] = useState("80");
 
-  const [result, setResult] = useState(null);
+  const result = useMemo(() => {
 
-  /* ---------------- AUTO CALCULATION ---------------- */
-  useEffect(() => {
-
-    if (!systolic || !diastolic) return;
-
-    const sys = Number(systolic);
-    const dia = Number(diastolic);
-
-    if (sys <= 0 || dia <= 0) return;
-
-    let category = "";
-    let variant = "neutral";
-
-    if (sys < 120 && dia < 80) {
-      category = "Normal Blood Pressure";
-      variant = "primary";
-    } else if (sys < 130 && dia < 80) {
-      category = "Elevated Blood Pressure";
-      variant = "warning";
-    } else if (sys < 140 || dia < 90) {
-      category = "High Blood Pressure (Stage 1)";
-      variant = "warning";
-    } else if (sys < 180 || dia < 120) {
-      category = "High Blood Pressure (Stage 2)";
-      variant = "danger";
-    } else {
-      category = "Hypertensive Crisis (Seek medical help)";
-      variant = "danger";
-    }
-
-    setResult({
-      reading: `${sys}/${dia} mmHg`,
-      category,
-      variant,
-    });
+    return calculateBloodPressure(
+      systolic,
+      diastolic
+    );
 
   }, [systolic, diastolic]);
 
@@ -58,11 +28,10 @@ export default function BloodPressureCalculator() {
       className="rounded-xl p-6 space-y-10"
       style={{
         backgroundColor: "var(--surface)",
-        border: "1px solid var(--border)",
+        border: "1px solid var(--border)"
       }}
     >
 
-      {/* ================= HEADER ================= */}
       <header>
         <h1 className="text-2xl font-bold mb-1">
           Blood Pressure Calculator
@@ -74,7 +43,6 @@ export default function BloodPressureCalculator() {
         </p>
       </header>
 
-      {/* ================= INPUTS ================= */}
       <div className="space-y-4">
 
         <AmountInput
@@ -93,17 +61,17 @@ export default function BloodPressureCalculator() {
 
       </div>
 
-      {/* ================= RESULT ================= */}
       <div aria-live="polite">
+
         <ResultCard
-          variant={result?.variant}
+          variant={result.variant}
           icon={<Activity size={20} />}
           label="Blood Pressure Result"
-          value={`${result?.reading} — ${result?.category}`}
+          value={`${result.reading} — ${result.category}`}
         />
+
       </div>
 
-      {/* ================= ARTICLE ================= */}
       <BloodPressureCalculatorArticle />
 
     </section>

@@ -1,64 +1,28 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { Flame } from "lucide-react";
 
 import { AmountInput } from "../../inputs/AmountInput";
 import { ResultCard } from "../../ResultCard";
 import CalorieBurnCalculatorArticle from "../../content/health/CalorieBurnCalculatorArticle";
 
+import { calculateCaloriesBurned } from "../../../lib/formulas";
+
 export default function CalorieBurnCalculator() {
 
-  /* ---------------- DEFAULT PREFILLED DATA ---------------- */
+  /* ---------------- PREFILLED DATA ---------------- */
   const [weight, setWeight] = useState("70");
   const [duration, setDuration] = useState("30");
   const [activity, setActivity] = useState("walking");
 
-  const [result, setResult] = useState({
-    calories: 0,
-  });
-
-  const [error, setError] = useState("");
-
-  /* ---------------- MET VALUES ---------------- */
-  const metValues = {
-    walking: 3.5,
-    jogging: 7.0,
-    running: 9.8,
-    cycling: 6.8,
-    swimming: 8.0,
-    yoga: 2.5,
-    strength: 6.0,
-  };
-
   /* ---------------- CALCULATION ---------------- */
-  function calculateCaloriesBurned() {
-    const w = Number(weight);
-    const minutes = Number(duration);
-
-    if (!w || w <= 0) {
-      setError("Please enter valid body weight.");
-      return;
-    }
-
-    if (!minutes || minutes <= 0) {
-      setError("Please enter valid activity duration.");
-      return;
-    }
-
-    setError("");
-
-    const met = metValues[activity];
-    const caloriesBurned = (met * w * minutes) / 60;
-
-    setResult({
-      calories: Math.round(caloriesBurned),
+  const result = useMemo(() => {
+    return calculateCaloriesBurned({
+      weight,
+      duration,
+      activity
     });
-  }
-
-  /* ---------------- AUTO RECALCULATE ---------------- */
-  useEffect(() => {
-    calculateCaloriesBurned();
   }, [weight, duration, activity]);
 
   return (
@@ -83,7 +47,6 @@ export default function CalorieBurnCalculator() {
         </p>
       </header>
 
-
       {/* ================= INPUTS ================= */}
       <div className="space-y-4">
 
@@ -91,7 +54,6 @@ export default function CalorieBurnCalculator() {
           label="Body Weight (kg)"
           value={weight}
           onChange={setWeight}
-          placeholder="70"
           prefix=""
         />
 
@@ -99,13 +61,12 @@ export default function CalorieBurnCalculator() {
           label="Duration (minutes)"
           value={duration}
           onChange={setDuration}
-          placeholder="30"
           prefix=""
         />
 
-
-        {/* ===== Activity Dropdown ===== */}
+        {/* Activity */}
         <div className="space-y-2">
+
           <label className="text-sm font-medium">
             Activity Type
           </label>
@@ -128,25 +89,22 @@ export default function CalorieBurnCalculator() {
             <option value="yoga">Yoga</option>
             <option value="strength">Strength Training</option>
           </select>
-        </div>
 
-        {error && (
-          <p className="text-sm text-red-500">{error}</p>
-        )}
+        </div>
 
       </div>
 
-
       {/* ================= RESULT ================= */}
       <div aria-live="polite">
+
         <ResultCard
           variant="primary"
           icon={<Flame size={20} />}
           label="Calories Burned"
           value={`${result.calories} kcal`}
         />
-      </div>
 
+      </div>
 
       {/* ================= SEO ARTICLE ================= */}
       <CalorieBurnCalculatorArticle />
