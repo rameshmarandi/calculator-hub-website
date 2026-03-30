@@ -1,43 +1,32 @@
 "use client";
 
-import { useState } from "react";
-import { Calculator, CalendarDays } from "lucide-react";
+import { useMemo, useState } from "react";
+import { CalendarDays } from "lucide-react";
 
 import { ResultCard } from "../../ResultCard";
 
 export default function DateDifferenceCalculator() {
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
+  /* ================= STATE ================= */
 
-  const [result, setResult] = useState(null);
-  const [error, setError] = useState("");
+  // ✅ Prefilled values (critical)
+  const [startDate, setStartDate] = useState("2020-01-01");
+  const [endDate, setEndDate] = useState("2025-01-01");
 
-  /* ---------------- VALIDATION ---------------- */
-  function validate() {
-    if (!startDate || !endDate) {
-      setError("Please select both start date and end date.");
-      return false;
-    }
+  /* ================= INTERNAL FORMULA ================= */
 
-    const start = new Date(startDate);
-    const end = new Date(endDate);
+  function calculateDateDifference({ startDate, endDate }) {
+    const start = startDate ? new Date(startDate) : new Date();
+    const end = endDate ? new Date(endDate) : new Date();
 
+    // Defensive: invalid range
     if (start > end) {
-      setError("Start date cannot be after end date.");
-      return false;
+      return {
+        primary: 0,
+        breakdown: { years: 0, months: 0, days: 0 },
+        stats: { totalDays: 0 },
+        meta: { error: "Invalid range" },
+      };
     }
-
-    setError("");
-    return true;
-  }
-
-  /* ---------------- DATE DIFFERENCE LOGIC ---------------- */
-  function calculateDifference(e) {
-    e.preventDefault();
-    if (!validate()) return;
-
-    const start = new Date(startDate);
-    const end = new Date(endDate);
 
     const diffTime = end.getTime() - start.getTime();
     const totalDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
@@ -51,7 +40,7 @@ export default function DateDifferenceCalculator() {
       const prevMonthDays = new Date(
         end.getFullYear(),
         end.getMonth(),
-        0
+        0,
       ).getDate();
       days += prevMonthDays;
     }
@@ -61,13 +50,21 @@ export default function DateDifferenceCalculator() {
       months += 12;
     }
 
-    setResult({
-      years,
-      months,
-      days,
-      totalDays,
-    });
+    return {
+      primary: totalDays,
+      breakdown: { years, months, days },
+      stats: { totalDays },
+      meta: { unit: "days" },
+    };
   }
+
+  /* ================= DERIVED RESULT ================= */
+
+  const result = useMemo(() => {
+    return calculateDateDifference({ startDate, endDate });
+  }, [startDate, endDate]);
+
+  /* ================= UI ================= */
 
   return (
     <section
@@ -75,26 +72,19 @@ export default function DateDifferenceCalculator() {
       style={{
         backgroundColor: "var(--surface)",
         border: "1px solid var(--border)",
-      }}
-    >
+      }}>
       {/* ================= HEADER ================= */}
       <header>
-        <h1 className="text-2xl font-bold mb-1">
-          Date Difference Calculator
-        </h1>
+        <h1 className="text-2xl font-bold mb-1">Date Difference Calculator</h1>
         <p className="text-sm leading-relaxed">
-          Calculate the difference between two dates in years, months,
-          days, and total days using this Date Difference Calculator.
+          Calculate the difference between two dates in years, months, and days.
         </p>
       </header>
 
-      {/* ================= FORM ================= */}
-      <form onSubmit={calculateDifference} className="space-y-4">
-        {/* Start Date */}
+      {/* ================= INPUTS ================= */}
+      <div className="space-y-4">
         <div className="space-y-1">
-          <label className="text-sm font-medium">
-            Start Date
-          </label>
+          <label className="text-sm font-medium">Start Date</label>
           <input
             type="date"
             value={startDate}
@@ -107,11 +97,8 @@ export default function DateDifferenceCalculator() {
           />
         </div>
 
-        {/* End Date */}
         <div className="space-y-1">
-          <label className="text-sm font-medium">
-            End Date
-          </label>
+          <label className="text-sm font-medium">End Date</label>
           <input
             type="date"
             value={endDate}
@@ -123,81 +110,56 @@ export default function DateDifferenceCalculator() {
             }}
           />
         </div>
+      </div>
 
-        {error && (
-          <p className="text-sm text-red-500">
-            {error}
-          </p>
-        )}
+      {/* ================= RESULT (ALWAYS VISIBLE) ================= */}
+      <div aria-live="polite">
+        <ResultCard
+          variant="primary"
+          icon={<CalendarDays size={20} />}
+          label="Date Difference"
+          value={`${result?.breakdown?.years || 0} Years, ${
+            result?.breakdown?.months || 0
+          } Months, ${result?.breakdown?.days || 0} Days (${result?.stats?.totalDays || 0} Days)`}
+        />
+      </div>
 
-        <button
-          type="submit"
-          className="w-full py-2.5 rounded-md font-medium flex items-center justify-center gap-2"
-          style={{
-            backgroundColor: "var(--primary)",
-            color: "#fff",
-          }}
-        >
-          <Calculator size={18} />
-          Calculate Difference
-        </button>
-      </form>
-
-      {/* ================= RESULT ================= */}
-      {result && (
-        <div aria-live="polite">
-          <ResultCard
-            variant="primary"
-            icon={<CalendarDays size={20} />}
-            label="Date Difference"
-            value={`${result.years} Years, ${result.months} Months, ${result.days} Days (${result.totalDays} Days Total)`}
-          />
+      {/* ================= STATS ================= */}
+      <div className="grid grid-cols-2 gap-4 text-sm">
+        <div className="p-3 rounded border">
+          <p className="text-muted">Total Days</p>
+          <p className="font-semibold">{result?.stats?.totalDays || 0}</p>
         </div>
-      )}
 
-      {/* ================= SEO BLOG CONTENT ================= */}
+        <div className="p-3 rounded border">
+          <p className="text-muted">Years</p>
+          <p className="font-semibold">{result?.breakdown?.years || 0}</p>
+        </div>
+      </div>
+
+      {/* ================= SEO ================= */}
       <article className="space-y-4 text-sm leading-relaxed">
         <h2 className="font-semibold text-base">
           What Is a Date Difference Calculator?
         </h2>
 
         <p>
-          A Date Difference Calculator helps you find the exact time gap
-          between two dates. It is commonly used for calculating age gaps,
-          project durations, work experience, and time intervals.
+          This tool calculates the exact difference between two dates, breaking
+          it into years, months, and days.
         </p>
 
-        <h3 className="font-semibold">
-          How Date Difference Is Calculated
-        </h3>
+        <h3 className="font-semibold">How It Works</h3>
 
         <ul className="list-disc pl-5">
-          <li>Counts total number of days between two dates</li>
-          <li>Breaks the difference into years, months, and days</li>
-          <li>Adjusts for varying month lengths and leap years</li>
+          <li>Computes total days between dates</li>
+          <li>Adjusts months and days accurately</li>
+          <li>Handles calendar variations</li>
         </ul>
-
-        <h3 className="font-semibold">
-          Why Use a Date Difference Calculator?
-        </h3>
-
-        <ul className="list-disc pl-5">
-          <li>Instant and accurate results</li>
-          <li>Useful for official and personal purposes</li>
-          <li>Eliminates manual calculation errors</li>
-          <li>Works for past and future dates</li>
-        </ul>
-
-        <p>
-          This calculator ensures precise date difference calculations
-          and is suitable for everyday use.
-        </p>
       </article>
 
       {/* ================= DISCLAIMER ================= */}
       <aside className="text-xs text-muted">
-        ⚠️ Date difference results are calculated using standard calendar
-        rules and are provided for informational purposes only.
+        Results are for informational purposes only.
       </aside>
     </section>
   );

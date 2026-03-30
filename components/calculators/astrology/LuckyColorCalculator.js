@@ -1,62 +1,52 @@
 "use client";
 
 import { useState } from "react";
-import { Calculator, Palette } from "lucide-react";
+import { Palette } from "lucide-react";
 
-import { ResultCard } from "../../ResultCard";
+import { calculateLuckyColor } from "../../../lib/formulas";
 
+/* ================= INPUT ================= */
+function InputField({ label, type = "text", value, onChange }) {
+  return (
+    <div className="space-y-1">
+      <label className="text-sm font-medium">{label}</label>
+      <input
+        type={type}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="w-full px-3 py-2 rounded"
+        style={{
+          border: "1px solid var(--border)",
+          backgroundColor: "var(--surface)",
+          color: "var(--text)",
+        }}
+      />
+    </div>
+  );
+}
+
+/* ================= MAIN ================= */
 export default function LuckyColorCalculator() {
-  const [name, setName] = useState("");
-  const [luckyNumber, setLuckyNumber] = useState("");
+  const [values, setValues] = useState({
+    name: "Ramesh Kumar",
+    luckyNumber: "5",
+  });
 
-  const [result, setResult] = useState(null);
-  const [error, setError] = useState("");
+  const updateValue = (key, val) => {
+    setValues((prev) => ({
+      ...prev,
+      [key]: val,
+    }));
+  };
 
-  /* ---------------- VALIDATION ---------------- */
-  function validate() {
-    if (!name.trim()) {
-      setError("Please enter your full name.");
-      return false;
-    }
+  // ✅ REAL-TIME CALCULATION
+  const result = calculateLuckyColor(values);
 
-    if (
-      !luckyNumber ||
-      isNaN(luckyNumber) ||
-      Number(luckyNumber) < 1 ||
-      Number(luckyNumber) > 9
-    ) {
-      setError("Please enter a valid lucky number (1–9).");
-      return false;
-    }
-
-    setError("");
-    return true;
-  }
-
-  /* ---------------- LUCKY COLOR LOGIC ---------------- */
-  function calculateLuckyColor(e) {
-    e.preventDefault();
-    if (!validate()) return;
-
-    const colorMap = {
-      1: "Red 🔴",
-      2: "White ⚪",
-      3: "Yellow 🟡",
-      4: "Blue 🔵",
-      5: "Green 🟢",
-      6: "Pink 🌸",
-      7: "Grey ⚫",
-      8: "Dark Blue / Black ⚫",
-      9: "Golden 🟠",
-    };
-
-    const luckyColor = colorMap[luckyNumber];
-
-    setResult({
-      name,
-      luckyColor,
-    });
-  }
+  const safeResult = {
+    color: result?.primary || "N/A",
+    info: result?.secondary || "",
+    name: result?.meta?.name || "User",
+  };
 
   return (
     <section
@@ -64,137 +54,74 @@ export default function LuckyColorCalculator() {
       style={{
         backgroundColor: "var(--surface)",
         border: "1px solid var(--border)",
-      }}
-    >
-      {/* ================= HEADER ================= */}
+      }}>
+      {/* HEADER */}
       <header>
-        <h1 className="text-2xl font-bold mb-1">
-          Lucky Color Calculator
-        </h1>
+        <h1 className="text-2xl font-bold mb-1">Lucky Color Calculator</h1>
         <p className="text-sm leading-relaxed">
-          Find your Lucky Color based on your lucky number using this
-          Lucky Color Calculator. Lucky colors are believed to enhance
-          positivity, confidence, and success in daily life.
+          Find your Lucky Color based on your lucky number.
         </p>
       </header>
 
-      {/* ================= FORM ================= */}
-      <form onSubmit={calculateLuckyColor} className="space-y-4">
-        {/* Name */}
-        <div className="space-y-1">
-          <label className="text-sm font-medium">Full Name</label>
-          <input
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="Your Full Name"
-            className="w-full px-3 py-2 rounded"
-            style={{
-              border: "1px solid var(--border)",
-              backgroundColor: "var(--surface)",
-              color: "var(--text)",
-            }}
-          />
+      {/* INPUTS */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <InputField
+          label="Full Name"
+          value={values.name}
+          onChange={(v) => updateValue("name", v)}
+        />
+
+        <InputField
+          label="Your Lucky Number (1–9)"
+          type="number"
+          value={values.luckyNumber}
+          onChange={(v) => updateValue("luckyNumber", v)}
+        />
+      </div>
+
+      {/* RESULT */}
+      <div
+        key={safeResult.color}
+        className="p-4 rounded-lg flex items-center gap-3 transition-all duration-300"
+        style={{
+          backgroundColor: "var(--primary)",
+          color: "#fff",
+        }}>
+        <Palette size={20} />
+        <div>
+          <p className="text-sm opacity-80">{safeResult.name}'s Lucky Color</p>
+          <p className="font-semibold">{safeResult.color}</p>
+          <p className="text-xs opacity-80">{safeResult.info}</p>
         </div>
+      </div>
 
-        {/* Lucky Number */}
-        <div className="space-y-1">
-          <label className="text-sm font-medium">Your Lucky Number</label>
-          <input
-            type="number"
-            value={luckyNumber}
-            onChange={(e) => setLuckyNumber(e.target.value)}
-            placeholder="Enter number (1–9)"
-            className="w-full px-3 py-2 rounded"
-            style={{
-              border: "1px solid var(--border)",
-              backgroundColor: "var(--surface)",
-            }}
-          />
-        </div>
-
-        {error && (
-          <p className="text-sm text-red-500">
-            {error}
-          </p>
-        )}
-
-        <button
-          type="submit"
-          className="w-full py-2.5 rounded-md font-medium flex items-center justify-center gap-2"
-          style={{
-            backgroundColor: "var(--primary)",
-            color: "#fff",
-          }}
-        >
-          <Calculator size={18} />
-          Find Lucky Color
-        </button>
-      </form>
-
-      {/* ================= RESULT ================= */}
-      {result && (
-        <div aria-live="polite">
-          <ResultCard
-            variant="success"
-            icon={<Palette size={20} />}
-            label={`${result.name}'s Lucky Color`}
-            value={result.luckyColor}
-          />
-        </div>
-      )}
-
-      {/* ================= SEO BLOG CONTENT ================= */}
+      {/* BLOG (UNCHANGED) */}
       <article className="space-y-4 text-sm leading-relaxed">
-        <h2 className="font-semibold text-base">
-          What Is a Lucky Color?
-        </h2>
+        <h2 className="font-semibold text-base">What Is a Lucky Color?</h2>
 
         <p>
-          A Lucky Color is derived from numerology and astrology principles.
-          Each number is associated with a planet, and each planet governs
-          specific colors that are believed to attract positive energy.
+          A Lucky Color is associated with numerology numbers and is believed to
+          attract positive energy.
         </p>
 
-        <h3 className="font-semibold">
-          Lucky Color by Numerology Number
-        </h3>
-
         <ul className="list-disc pl-5">
-          <li>1 → Red (Sun)</li>
-          <li>2 → White (Moon)</li>
-          <li>3 → Yellow (Jupiter)</li>
-          <li>4 → Blue (Rahu)</li>
-          <li>5 → Green (Mercury)</li>
-          <li>6 → Pink (Venus)</li>
-          <li>7 → Grey (Ketu)</li>
-          <li>8 → Dark Blue / Black (Saturn)</li>
-          <li>9 → Golden (Mars)</li>
+          <li>1 → Red</li>
+          <li>2 → White</li>
+          <li>3 → Yellow</li>
+          <li>4 → Blue</li>
+          <li>5 → Green</li>
+          <li>6 → Pink</li>
+          <li>7 → Grey</li>
+          <li>8 → Dark Blue / Black</li>
+          <li>9 → Golden</li>
         </ul>
 
-        <h3 className="font-semibold">
-          Why Use a Lucky Color Calculator?
-        </h3>
-
-        <ul className="list-disc pl-5">
-          <li>Choose favorable colors for important days</li>
-          <li>Helpful for clothing, interviews, and events</li>
-          <li>Widely used in astrology and numerology</li>
-          <li>Fun, positive, and motivating tool</li>
-        </ul>
-
-        <p>
-          Lucky colors are belief-based and symbolic. Their influence
-          depends on personal belief and confidence.
-        </p>
+        <p>Lucky colors are symbolic and belief-based.</p>
       </article>
 
-      {/* ================= DISCLAIMER ================= */}
+      {/* DISCLAIMER */}
       <aside className="text-xs text-muted">
-        ⚠️ Lucky Color calculations are based on traditional numerology
-        and astrology belief systems. Results are for guidance and
-        entertainment purposes only and should not be considered
-        scientific facts.
+        ⚠️ For guidance and entertainment only.
       </aside>
     </section>
   );

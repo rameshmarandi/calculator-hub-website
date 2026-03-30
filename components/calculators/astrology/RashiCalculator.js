@@ -1,73 +1,53 @@
 "use client";
 
 import { useState } from "react";
-import { Calculator, Sparkles } from "lucide-react";
+import { Sparkles } from "lucide-react";
+import { calculateRashi } from "../../../lib/formulas";
 
-import { ResultCard } from "../../ResultCard";
+/* ================= FORMULA ================= */
 
+/* ================= INPUT ================= */
+function InputField({ label, type = "text", value, onChange }) {
+  return (
+    <div className="space-y-1">
+      <label className="text-sm font-medium">{label}</label>
+      <input
+        type={type}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="w-full px-3 py-2 rounded"
+        style={{
+          border: "1px solid var(--border)",
+          backgroundColor: "var(--surface)",
+          color: "var(--text)",
+        }}
+      />
+    </div>
+  );
+}
+
+/* ================= MAIN ================= */
 export default function RashiCalculator() {
-  const [name, setName] = useState("");
-  const [date, setDate] = useState("");
-  const [time, setTime] = useState("");
+  const [values, setValues] = useState({
+    name: "Ramesh",
+    date: "1998-05-12",
+    time: "10:30",
+  });
 
-  const [result, setResult] = useState(null);
-  const [error, setError] = useState("");
+  const updateValue = (key, val) => {
+    setValues((prev) => ({
+      ...prev,
+      [key]: val,
+    }));
+  };
 
-  /* ---------------- VALIDATION ---------------- */
-  function validate() {
-    if (!name) {
-      setError("Please enter your name.");
-      return false;
-    }
-    if (!date) {
-      setError("Please select your date of birth.");
-      return false;
-    }
-    if (!time) {
-      setError("Please select your time of birth.");
-      return false;
-    }
-    setError("");
-    return true;
-  }
+  // ✅ REAL-TIME RESULT
+  const result = calculateRashi(values);
 
-  /* ---------------- RASHI LOGIC (SIMPLIFIED) ---------------- */
-  function calculateRashi(e) {
-    e.preventDefault();
-    if (!validate()) return;
-
-    /*
-      NOTE:
-      Rashi in Vedic astrology is the Moon Sign.
-      This simplified logic is used by many introductory astrology tools.
-      Accurate calculation requires Moon longitude via ephemeris data.
-    */
-
-    const rashis = [
-      "Aries (Mesh)",
-      "Taurus (Vrishabha)",
-      "Gemini (Mithun)",
-      "Cancer (Karka)",
-      "Leo (Simha)",
-      "Virgo (Kanya)",
-      "Libra (Tula)",
-      "Scorpio (Vrishchik)",
-      "Sagittarius (Dhanu)",
-      "Capricorn (Makara)",
-      "Aquarius (Kumbha)",
-      "Pisces (Meena)",
-    ];
-
-    const birthDate = new Date(`${date}T${time}`);
-    const day = birthDate.getDate();
-
-    const rashi = rashis[day % 12];
-
-    setResult({
-      name,
-      rashi,
-    });
-  }
+  const safeResult = {
+    rashi: result?.rashi || "N/A",
+    name: result?.name || "User",
+  };
 
   return (
     <section
@@ -75,146 +55,87 @@ export default function RashiCalculator() {
       style={{
         backgroundColor: "var(--surface)",
         border: "1px solid var(--border)",
-      }}
-    >
+      }}>
       {/* ================= HEADER ================= */}
       <header>
-        <h1 className="text-2xl font-bold mb-1">
-          Rashi Calculator
-        </h1>
+        <h1 className="text-2xl font-bold mb-1">Rashi Calculator</h1>
         <p className="text-sm leading-relaxed">
           Find your Rashi (Moon Sign) based on your date and time of birth.
-          Rashi represents your emotional nature, mindset, and inner behavior
-          in Vedic astrology.
         </p>
       </header>
 
-      {/* ================= FORM ================= */}
-      <form onSubmit={calculateRashi} className="space-y-4">
-        {/* Name */}
-        <div className="space-y-1">
-          <label className="text-sm font-medium">Full Name</label>
-          <input
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="Your Name"
-            className="w-full px-3 py-2 rounded"
-            style={{
-              border: "1px solid var(--border)",
-              backgroundColor: "var(--surface)",
-              color: "var(--text)",
-            }}
-          />
-        </div>
+      {/* ================= INPUTS ================= */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <InputField
+          label="Full Name"
+          value={values.name}
+          onChange={(val) => updateValue("name", val)}
+        />
 
-        {/* Date */}
-        <div className="space-y-1">
-          <label className="text-sm font-medium">Date of Birth</label>
-          <input
-            type="date"
-            value={date}
-            onChange={(e) => setDate(e.target.value)}
-            className="w-full px-3 py-2 rounded"
-            style={{
-              border: "1px solid var(--border)",
-              backgroundColor: "var(--surface)",
-            }}
-          />
-        </div>
+        <InputField
+          label="Date of Birth"
+          type="date"
+          value={values.date}
+          onChange={(val) => updateValue("date", val)}
+        />
 
-        {/* Time */}
-        <div className="space-y-1">
-          <label className="text-sm font-medium">Time of Birth</label>
-          <input
-            type="time"
-            value={time}
-            onChange={(e) => setTime(e.target.value)}
-            className="w-full px-3 py-2 rounded"
-            style={{
-              border: "1px solid var(--border)",
-              backgroundColor: "var(--surface)",
-            }}
-          />
-        </div>
-
-        {error && (
-          <p className="text-sm text-red-500">
-            {error}
-          </p>
-        )}
-
-        <button
-          type="submit"
-          className="w-full py-2.5 rounded-md font-medium flex items-center justify-center gap-2"
-          style={{
-            backgroundColor: "var(--primary)",
-            color: "#fff",
-          }}
-        >
-          <Calculator size={18} />
-          Calculate Rashi
-        </button>
-      </form>
+        <InputField
+          label="Time of Birth"
+          type="time"
+          value={values.time}
+          onChange={(val) => updateValue("time", val)}
+        />
+      </div>
 
       {/* ================= RESULT ================= */}
-      {result && (
-        <div aria-live="polite">
-          <ResultCard
-            variant="primary"
-            icon={<Sparkles size={20} />}
-            label={`${result.name}'s Rashi`}
-            value={result.rashi}
-          />
+      <div
+        key={safeResult.rashi}
+        className="p-4 rounded-lg flex items-center gap-3 transition-all duration-300"
+        style={{
+          backgroundColor: "var(--primary)",
+          color: "#fff",
+        }}>
+        <Sparkles size={20} />
+        <div>
+          <p className="text-sm opacity-80">{safeResult.name}'s Rashi</p>
+          <p className="font-semibold">{safeResult.rashi}</p>
         </div>
-      )}
+      </div>
 
       {/* ================= SEO BLOG CONTENT ================= */}
       <article className="space-y-4 text-sm leading-relaxed">
-        <h2 className="font-semibold text-base">
-          What Is Rashi in Astrology?
-        </h2>
+        <h2 className="font-semibold text-base">What Is Rashi in Astrology?</h2>
 
         <p>
-          Rashi refers to the zodiac sign in which the Moon was positioned
-          at the time of your birth. In Vedic astrology, Rashi plays a
-          crucial role in understanding emotions, mental tendencies, and
-          daily behavior.
+          Rashi refers to the zodiac sign in which the Moon was positioned at
+          the time of your birth.
         </p>
 
-        <h3 className="font-semibold">
-          Importance of Rashi
-        </h3>
+        <h3 className="font-semibold">Importance of Rashi</h3>
 
         <ul className="list-disc pl-5">
-          <li>Represents emotional and psychological nature</li>
-          <li>Used for Kundli matching and Dasha analysis</li>
-          <li>More impactful than Sun Sign in Vedic astrology</li>
+          <li>Represents emotional nature</li>
+          <li>Used in Kundli matching</li>
+          <li>Important in Vedic astrology</li>
         </ul>
 
-        <h3 className="font-semibold">
-          Why Use a Rashi Calculator?
-        </h3>
+        <h3 className="font-semibold">Why Use a Rashi Calculator?</h3>
 
         <ul className="list-disc pl-5">
-          <li>Instant Rashi calculation</li>
-          <li>No manual astrology knowledge required</li>
-          <li>Foundation for horoscope and predictions</li>
-          <li>Helpful for life and relationship insights</li>
+          <li>Instant calculation</li>
+          <li>No astrology knowledge needed</li>
+          <li>Useful for insights</li>
         </ul>
 
         <p>
-          This Rashi calculator provides a simplified result. Accurate
-          Rashi determination requires astronomical ephemeris and
-          geographical coordinates.
+          This is a simplified calculator. Accurate results require astronomical
+          data.
         </p>
       </article>
 
       {/* ================= DISCLAIMER ================= */}
       <aside className="text-xs text-muted">
-        ⚠️ Astrology is based on traditional belief systems. Rashi results
-        are for guidance and informational purposes only and should not
-        be considered scientific advice.
+        ⚠️ Astrology is based on traditional belief systems.
       </aside>
     </section>
   );

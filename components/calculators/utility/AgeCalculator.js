@@ -1,42 +1,30 @@
 "use client";
 
-import { useState } from "react";
-import { Calculator, Calendar } from "lucide-react";
+import { useMemo, useState } from "react";
+import { Calendar } from "lucide-react";
 
 import { ResultCard } from "../../ResultCard";
 
 export default function AgeCalculator() {
-  const [dob, setDob] = useState("");
+  /* ================= STATE ================= */
 
-  const [result, setResult] = useState(null);
-  const [error, setError] = useState("");
+  // ✅ Prefilled (critical for UX + SEO)
+  const [dob, setDob] = useState("2000-01-01");
 
-  /* ---------------- VALIDATION ---------------- */
-  function validate() {
-    if (!dob) {
-      setError("Please select your date of birth.");
-      return false;
-    }
-
-    const birthDate = new Date(dob);
+  /* ================= INTERNAL FORMULA ================= */
+  // ✅ Logic isolated inside function (not inside JSX)
+  function calculateAge({ dob }) {
+    const birthDate = dob ? new Date(dob) : new Date();
     const today = new Date();
 
     if (birthDate > today) {
-      setError("Date of birth cannot be in the future.");
-      return false;
+      return {
+        primary: 0,
+        breakdown: { years: 0, months: 0, days: 0 },
+        stats: {},
+        meta: { error: "Future date" },
+      };
     }
-
-    setError("");
-    return true;
-  }
-
-  /* ---------------- AGE CALCULATION ---------------- */
-  function calculateAge(e) {
-    e.preventDefault();
-    if (!validate()) return;
-
-    const birthDate = new Date(dob);
-    const today = new Date();
 
     let years = today.getFullYear() - birthDate.getFullYear();
     let months = today.getMonth() - birthDate.getMonth();
@@ -47,7 +35,7 @@ export default function AgeCalculator() {
       const prevMonthDays = new Date(
         today.getFullYear(),
         today.getMonth(),
-        0
+        0,
       ).getDate();
       days += prevMonthDays;
     }
@@ -57,128 +45,112 @@ export default function AgeCalculator() {
       months += 12;
     }
 
-    setResult({
-      years,
-      months,
-      days,
-    });
+    const totalDays = Math.floor((today - birthDate) / (1000 * 60 * 60 * 24));
+
+    return {
+      primary: years,
+      breakdown: { years, months, days },
+      stats: {
+        totalMonths: years * 12 + months,
+        totalDays,
+      },
+      meta: { unit: "years" },
+    };
   }
 
+  /* ================= DERIVED RESULT ================= */
+  // ✅ Always computed, no button needed
+  const result = useMemo(() => {
+    return calculateAge({ dob });
+  }, [dob]);
+
+  /* ================= UI ================= */
   return (
     <section
       className="rounded-xl p-6 space-y-10"
       style={{
         backgroundColor: "var(--surface)",
         border: "1px solid var(--border)",
-      }}
-    >
+      }}>
       {/* ================= HEADER ================= */}
       <header>
-        <h1 className="text-2xl font-bold mb-1">
-          Age Calculator
-        </h1>
+        <h1 className="text-2xl font-bold mb-1">Age Calculator</h1>
         <p className="text-sm leading-relaxed">
-          Calculate your exact age in years, months, and days using this
-          Age Calculator. It helps you quickly find how old you are based
-          on your date of birth.
+          Calculate your exact age in years, months, and days instantly.
         </p>
       </header>
 
-      {/* ================= FORM ================= */}
-      <form onSubmit={calculateAge} className="space-y-4">
-        {/* Date of Birth */}
-        <div className="space-y-1">
-          <label className="text-sm font-medium">
-            Date of Birth
-          </label>
-          <input
-            type="date"
-            value={dob}
-            onChange={(e) => setDob(e.target.value)}
-            className="w-full px-3 py-2 rounded"
-            style={{
-              border: "1px solid var(--border)",
-              backgroundColor: "var(--surface)",
-            }}
-          />
-        </div>
+      {/* ================= INPUT ================= */}
+      <div className="space-y-1">
+        <label className="text-sm font-medium">Date of Birth</label>
 
-        {error && (
-          <p className="text-sm text-red-500">
-            {error}
-          </p>
-        )}
-
-        <button
-          type="submit"
-          className="w-full py-2.5 rounded-md font-medium flex items-center justify-center gap-2"
+        <input
+          type="date"
+          value={dob}
+          onChange={(e) => setDob(e.target.value)}
+          className="w-full px-3 py-2 rounded"
           style={{
-            backgroundColor: "var(--primary)",
-            color: "#fff",
+            border: "1px solid var(--border)",
+            backgroundColor: "var(--surface)",
           }}
-        >
-          <Calculator size={18} />
-          Calculate Age
-        </button>
-      </form>
+        />
+      </div>
 
-      {/* ================= RESULT ================= */}
-      {result && (
-        <div aria-live="polite">
-          <ResultCard
-            variant="primary"
-            icon={<Calendar size={20} />}
-            label="Your Exact Age"
-            value={`${result.years} Years, ${result.months} Months, ${result.days} Days`}
-          />
+      {/* ================= RESULT (ALWAYS VISIBLE) ================= */}
+      <div aria-live="polite">
+        <ResultCard
+          variant="primary"
+          icon={<Calendar size={20} />}
+          label="Your Exact Age"
+          value={`${result?.breakdown?.years || 0} Years, ${
+            result?.breakdown?.months || 0
+          } Months, ${result?.breakdown?.days || 0} Days`}
+        />
+      </div>
+
+      {/* ================= EXTRA STATS ================= */}
+      <div className="grid grid-cols-2 gap-4 text-sm">
+        <div className="p-3 rounded border">
+          <p className="text-muted">Total Months</p>
+          <p className="font-semibold">{result?.stats?.totalMonths || 0}</p>
         </div>
-      )}
 
-      {/* ================= SEO BLOG CONTENT ================= */}
+        <div className="p-3 rounded border">
+          <p className="text-muted">Total Days</p>
+          <p className="font-semibold">{result?.stats?.totalDays || 0}</p>
+        </div>
+      </div>
+
+      {/* ================= SEO CONTENT ================= */}
       <article className="space-y-4 text-sm leading-relaxed">
-        <h2 className="font-semibold text-base">
-          What Is an Age Calculator?
-        </h2>
+        <h2 className="font-semibold text-base">What Is an Age Calculator?</h2>
 
         <p>
-          An age calculator is a simple online tool that calculates a
-          person’s exact age based on their date of birth. It shows age
-          in years, months, and days, which is useful for both personal
-          and official purposes.
+          An age calculator determines your exact age based on your date of
+          birth. It calculates years, months, and days accurately using calendar
+          differences.
         </p>
 
-        <h3 className="font-semibold">
-          How Age Is Calculated
-        </h3>
+        <h3 className="font-semibold">How It Works</h3>
 
         <ul className="list-disc pl-5">
-          <li>Calculates the difference between today’s date and birth date</li>
-          <li>Adjusts months and days accurately</li>
-          <li>Accounts for varying month lengths</li>
+          <li>Compares current date with birth date</li>
+          <li>Adjusts months and days dynamically</li>
+          <li>Handles varying month lengths</li>
         </ul>
 
-        <h3 className="font-semibold">
-          Why Use an Age Calculator?
-        </h3>
+        <h3 className="font-semibold">Use Cases</h3>
 
         <ul className="list-disc pl-5">
-          <li>Find exact age instantly</li>
-          <li>Useful for exams, jobs, and forms</li>
-          <li>Eliminates manual calculation errors</li>
-          <li>Works for any valid date of birth</li>
+          <li>Government forms</li>
+          <li>Job eligibility</li>
+          <li>Personal tracking</li>
         </ul>
-
-        <p>
-          This age calculator gives precise results and is suitable for
-          everyday use as well as official reference.
-        </p>
       </article>
 
       {/* ================= DISCLAIMER ================= */}
       <aside className="text-xs text-muted">
-        ⚠️ This age calculator provides results based on the selected
-        date of birth and the current system date. Results are for
-        informational purposes only.
+        Results are based on system date and are for informational use only.
       </aside>
     </section>
   );

@@ -1,62 +1,52 @@
 "use client";
 
 import { useState } from "react";
-import { Calculator, Clover } from "lucide-react";
+import { Clover } from "lucide-react";
 
-import { ResultCard } from "../../ResultCard";
+import { calculateLuckyNumber } from "../../../lib/formulas";
 
+/* ================= INPUT ================= */
+function InputField({ label, type = "text", value, onChange }) {
+  return (
+    <div className="space-y-1">
+      <label className="text-sm font-medium">{label}</label>
+      <input
+        type={type}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="w-full px-3 py-2 rounded"
+        style={{
+          border: "1px solid var(--border)",
+          backgroundColor: "var(--surface)",
+          color: "var(--text)",
+        }}
+      />
+    </div>
+  );
+}
+
+/* ================= MAIN ================= */
 export default function LuckyNumberCalculator() {
-  const [name, setName] = useState("");
-  const [date, setDate] = useState("");
+  const [values, setValues] = useState({
+    name: "Ramesh Kumar",
+    date: "1998-05-12",
+  });
 
-  const [result, setResult] = useState(null);
-  const [error, setError] = useState("");
+  const updateValue = (key, val) => {
+    setValues((prev) => ({
+      ...prev,
+      [key]: val,
+    }));
+  };
 
-  /* ---------------- VALIDATION ---------------- */
-  function validate() {
-    if (!name.trim()) {
-      setError("Please enter your full name.");
-      return false;
-    }
+  // ✅ REAL-TIME CALCULATION
+  const result = calculateLuckyNumber(values);
 
-    if (!date) {
-      setError("Please select your date of birth.");
-      return false;
-    }
-
-    setError("");
-    return true;
-  }
-
-  /* ---------------- LUCKY NUMBER LOGIC ---------------- */
-  function calculateLuckyNumber(e) {
-    e.preventDefault();
-    if (!validate()) return;
-
-    // Lucky Number based on DOB (Numerology method)
-    const digits = date
-      .replaceAll("-", "")
-      .split("")
-      .map(Number);
-
-    function reduceToSingleDigit(num) {
-      while (num > 9 && num !== 11 && num !== 22 && num !== 33) {
-        num = num
-          .toString()
-          .split("")
-          .reduce((sum, d) => sum + Number(d), 0);
-      }
-      return num;
-    }
-
-    const total = digits.reduce((sum, d) => sum + d, 0);
-    const luckyNumber = reduceToSingleDigit(total);
-
-    setResult({
-      name,
-      luckyNumber,
-    });
-  }
+  const safeResult = {
+    luckyNumber: result?.primary || 0,
+    label: result?.secondary || "Lucky Number",
+    name: result?.meta?.name || "User",
+  };
 
   return (
     <section
@@ -64,129 +54,79 @@ export default function LuckyNumberCalculator() {
       style={{
         backgroundColor: "var(--surface)",
         border: "1px solid var(--border)",
-      }}
-    >
+      }}>
       {/* ================= HEADER ================= */}
       <header>
-        <h1 className="text-2xl font-bold mb-1">
-          Lucky Number Calculator
-        </h1>
+        <h1 className="text-2xl font-bold mb-1">Lucky Number Calculator</h1>
         <p className="text-sm leading-relaxed">
-          Find your Lucky Number based on your date of birth using this
-          Lucky Number Calculator. Lucky numbers are believed to bring
-          positivity, success, and favorable opportunities.
+          Find your Lucky Number based on your date of birth.
         </p>
       </header>
 
-      {/* ================= FORM ================= */}
-      <form onSubmit={calculateLuckyNumber} className="space-y-4">
-        {/* Name */}
-        <div className="space-y-1">
-          <label className="text-sm font-medium">Full Name</label>
-          <input
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="Your Full Name"
-            className="w-full px-3 py-2 rounded"
-            style={{
-              border: "1px solid var(--border)",
-              backgroundColor: "var(--surface)",
-              color: "var(--text)",
-            }}
-          />
-        </div>
+      {/* ================= INPUTS ================= */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <InputField
+          label="Full Name"
+          value={values.name}
+          onChange={(v) => updateValue("name", v)}
+        />
 
-        {/* Date of Birth */}
-        <div className="space-y-1">
-          <label className="text-sm font-medium">Date of Birth</label>
-          <input
-            type="date"
-            value={date}
-            onChange={(e) => setDate(e.target.value)}
-            className="w-full px-3 py-2 rounded"
-            style={{
-              border: "1px solid var(--border)",
-              backgroundColor: "var(--surface)",
-            }}
-          />
-        </div>
-
-        {error && (
-          <p className="text-sm text-red-500">
-            {error}
-          </p>
-        )}
-
-        <button
-          type="submit"
-          className="w-full py-2.5 rounded-md font-medium flex items-center justify-center gap-2"
-          style={{
-            backgroundColor: "var(--primary)",
-            color: "#fff",
-          }}
-        >
-          <Calculator size={18} />
-          Find Lucky Number
-        </button>
-      </form>
+        <InputField
+          label="Date of Birth"
+          type="date"
+          value={values.date}
+          onChange={(v) => updateValue("date", v)}
+        />
+      </div>
 
       {/* ================= RESULT ================= */}
-      {result && (
-        <div aria-live="polite">
-          <ResultCard
-            variant="success"
-            icon={<Clover size={20} />}
-            label={`${result.name}'s Lucky Number`}
-            value={result.luckyNumber}
-          />
+      <div
+        key={safeResult.luckyNumber}
+        className="p-4 rounded-lg flex items-center gap-3 transition-all duration-300"
+        style={{
+          backgroundColor: "var(--primary)",
+          color: "#fff",
+        }}>
+        <Clover size={20} />
+        <div>
+          <p className="text-sm opacity-80">{safeResult.name}'s Lucky Number</p>
+          <p className="font-semibold">{safeResult.luckyNumber}</p>
         </div>
-      )}
+      </div>
 
       {/* ================= SEO BLOG CONTENT ================= */}
       <article className="space-y-4 text-sm leading-relaxed">
-        <h2 className="font-semibold text-base">
-          What Is a Lucky Number?
-        </h2>
+        <h2 className="font-semibold text-base">What Is a Lucky Number?</h2>
 
         <p>
-          A Lucky Number is derived from numerology using your date of
-          birth. It represents positive vibrations and is believed to
-          influence success, confidence, and favorable outcomes in life.
+          A Lucky Number is derived from numerology using your date of birth. It
+          represents positive vibrations and is believed to influence success
+          and opportunities.
         </p>
 
-        <h3 className="font-semibold">
-          How Lucky Numbers Are Calculated
-        </h3>
+        <h3 className="font-semibold">How Lucky Numbers Are Calculated</h3>
 
         <ul className="list-disc pl-5">
           <li>All digits of date of birth are added</li>
           <li>The sum is reduced to a single digit</li>
-          <li>Master numbers like 11, 22, and 33 are preserved</li>
+          <li>Master numbers like 11, 22, 33 are preserved</li>
         </ul>
 
-        <h3 className="font-semibold">
-          Why Use a Lucky Number Calculator?
-        </h3>
+        <h3 className="font-semibold">Why Use a Lucky Number Calculator?</h3>
 
         <ul className="list-disc pl-5">
           <li>Discover your favorable number</li>
-          <li>Used for important decisions and dates</li>
-          <li>Popular in numerology and astrology</li>
-          <li>Fun and insightful tool</li>
+          <li>Used in decisions and planning</li>
+          <li>Popular in numerology</li>
         </ul>
 
-        <p>
-          Lucky numbers are symbolic and belief-based. Their influence
-          depends on personal faith and mindset.
-        </p>
+        <p>This is a simplified numerology calculation.</p>
       </article>
 
       {/* ================= DISCLAIMER ================= */}
       <aside className="text-xs text-muted">
-        ⚠️ Lucky Number calculations are based on traditional numerology
-        belief systems. Results are for guidance and entertainment
-        purposes only and should not be considered scientific facts.
+        ⚠️ Results are based on numerology beliefs and are for informational
+        purposes only.
       </aside>
     </section>
   );

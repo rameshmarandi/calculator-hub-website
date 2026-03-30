@@ -1,64 +1,53 @@
 "use client";
 
 import { useState } from "react";
-import { Calculator, Moon } from "lucide-react";
+import { Moon } from "lucide-react";
+import { calculateMoonSign } from "../../../lib/formulas";
 
-import { ResultCard } from "../../ResultCard";
+/* ================= FORMULA ================= */
 
+/* ================= INPUT ================= */
+function InputField({ label, type = "text", value, onChange }) {
+  return (
+    <div className="space-y-1">
+      <label className="text-sm font-medium">{label}</label>
+      <input
+        type={type}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="w-full px-3 py-2 rounded"
+        style={{
+          border: "1px solid var(--border)",
+          backgroundColor: "var(--surface)",
+          color: "var(--text)",
+        }}
+      />
+    </div>
+  );
+}
+
+/* ================= MAIN ================= */
 export default function MoonSignCalculator() {
-  const [name, setName] = useState("");
-  const [date, setDate] = useState("");
-  const [time, setTime] = useState("");
+  const [values, setValues] = useState({
+    name: "Ramesh",
+    date: "1998-05-12",
+    time: "10:30",
+  });
 
-  const [result, setResult] = useState(null);
-  const [error, setError] = useState("");
+  const updateValue = (key, val) => {
+    setValues((prev) => ({
+      ...prev,
+      [key]: val,
+    }));
+  };
 
-  /* ---------------- VALIDATION ---------------- */
-  function validate() {
-    if (!name) {
-      setError("Please enter your name.");
-      return false;
-    }
-    if (!date) {
-      setError("Please select your date of birth.");
-      return false;
-    }
-    if (!time) {
-      setError("Please select your time of birth.");
-      return false;
-    }
-    setError("");
-    return true;
-  }
+  // REAL-TIME RESULT
+  const result = calculateMoonSign(values);
 
-  /* ---------------- MOON SIGN LOGIC (SIMPLIFIED) ---------------- */
-  function calculateMoonSign(e) {
-    e.preventDefault();
-    if (!validate()) return;
-
-    /*
-      NOTE:
-      This is a simplified Moon Sign (Rashi) logic used by many
-      introductory astrology tools. Accurate Moon longitude requires
-      astronomical ephemeris data.
-    */
-
-    const moonSigns = [
-      "Aries", "Taurus", "Gemini", "Cancer",
-      "Leo", "Virgo", "Libra", "Scorpio",
-      "Sagittarius", "Capricorn", "Aquarius", "Pisces",
-    ];
-
-    const birthDate = new Date(`${date}T${time}`);
-    const day = birthDate.getDate();
-
-    const moonSign = moonSigns[day % 12];
-
-    setResult({
-      name,
-      moonSign,
-    });
-  }
+  const safeResult = {
+    moonSign: result?.moonSign || "N/A",
+    name: result?.name || "User",
+  };
 
   return (
     <section
@@ -66,142 +55,92 @@ export default function MoonSignCalculator() {
       style={{
         backgroundColor: "var(--surface)",
         border: "1px solid var(--border)",
-      }}
-    >
+      }}>
       {/* ================= HEADER ================= */}
       <header>
-        <h1 className="text-2xl font-bold mb-1">
-          Moon Sign Calculator
-        </h1>
+        <h1 className="text-2xl font-bold mb-1">Moon Sign Calculator</h1>
         <p className="text-sm leading-relaxed">
-          Find your Moon Sign (Rashi) based on your date and time of birth.
-          The Moon Sign represents your emotions, mind, and inner personality
-          in Vedic astrology.
+          Find your Moon Sign (Rashi) based on your birth details.
         </p>
       </header>
 
-      {/* ================= FORM ================= */}
-      <form onSubmit={calculateMoonSign} className="space-y-4">
-        {/* Name */}
-        <div className="space-y-1">
-          <label className="text-sm font-medium">Full Name</label>
-          <input
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="Your Name"
-            className="w-full px-3 py-2 rounded"
-            style={{
-              border: "1px solid var(--border)",
-              backgroundColor: "var(--surface)",
-              color: "var(--text)",
-            }}
-          />
-        </div>
+      {/* ================= INPUTS ================= */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <InputField
+          label="Full Name"
+          value={values.name}
+          onChange={(val) => updateValue("name", val)}
+        />
 
-        {/* Date */}
-        <div className="space-y-1">
-          <label className="text-sm font-medium">Date of Birth</label>
-          <input
-            type="date"
-            value={date}
-            onChange={(e) => setDate(e.target.value)}
-            className="w-full px-3 py-2 rounded"
-            style={{
-              border: "1px solid var(--border)",
-              backgroundColor: "var(--surface)",
-            }}
-          />
-        </div>
+        <InputField
+          label="Date of Birth"
+          type="date"
+          value={values.date}
+          onChange={(val) => updateValue("date", val)}
+        />
 
-        {/* Time */}
-        <div className="space-y-1">
-          <label className="text-sm font-medium">Time of Birth</label>
-          <input
-            type="time"
-            value={time}
-            onChange={(e) => setTime(e.target.value)}
-            className="w-full px-3 py-2 rounded"
-            style={{
-              border: "1px solid var(--border)",
-              backgroundColor: "var(--surface)",
-            }}
-          />
-        </div>
-
-        {error && <p className="text-sm text-red-500">{error}</p>}
-
-        <button
-          type="submit"
-          className="w-full py-2.5 rounded-md font-medium flex items-center justify-center gap-2"
-          style={{
-            backgroundColor: "var(--primary)",
-            color: "#fff",
-          }}
-        >
-          <Calculator size={18} />
-          Calculate Moon Sign
-        </button>
-      </form>
+        <InputField
+          label="Time of Birth"
+          type="time"
+          value={values.time}
+          onChange={(val) => updateValue("time", val)}
+        />
+      </div>
 
       {/* ================= RESULT ================= */}
-      {result && (
-        <div aria-live="polite">
-          <ResultCard
-            variant="primary"
-            icon={<Moon size={20} />}
-            label={`${result.name}'s Moon Sign`}
-            value={result.moonSign}
-          />
+      <div
+        key={safeResult.moonSign}
+        className="p-4 rounded-lg flex items-center gap-3 transition-all duration-300"
+        style={{
+          backgroundColor: "var(--primary)",
+          color: "#fff",
+        }}>
+        <Moon size={20} />
+        <div>
+          <p className="text-sm opacity-80">{safeResult.name}'s Moon Sign</p>
+          <p className="font-semibold">{safeResult.moonSign}</p>
         </div>
-      )}
+      </div>
 
       {/* ================= SEO BLOG CONTENT ================= */}
       <article className="space-y-4 text-sm leading-relaxed">
-        <h2 className="font-semibold text-base">
-          What Is a Moon Sign?
-        </h2>
+        <h2 className="font-semibold text-base">What Is a Moon Sign?</h2>
 
         <p>
-          Your Moon Sign, also known as Rashi in Vedic astrology, is
-          determined by the position of the Moon at the time of your
-          birth. It governs emotions, mental reactions, instincts,
-          and inner feelings.
+          Your Moon Sign represents your emotional nature, instincts, and inner
+          personality in Vedic astrology.
         </p>
 
-        <h3 className="font-semibold">
-          Moon Sign vs Sun Sign
-        </h3>
+        <h3 className="font-semibold">Moon Sign vs Sun Sign</h3>
 
         <ul className="list-disc pl-5">
-          <li><strong>Moon Sign</strong> – Emotional nature and mind</li>
-          <li><strong>Sun Sign</strong> – Ego and outer personality</li>
-          <li>Moon Sign changes every ~2.5 days</li>
+          <li>
+            <strong>Moon Sign</strong> – Emotional nature
+          </li>
+          <li>
+            <strong>Sun Sign</strong> – Outer personality
+          </li>
+          <li>Moon changes every ~2.5 days</li>
         </ul>
 
-        <h3 className="font-semibold">
-          Why Use a Moon Sign Calculator?
-        </h3>
+        <h3 className="font-semibold">Why Use a Moon Sign Calculator?</h3>
 
         <ul className="list-disc pl-5">
           <li>Understand emotional behavior</li>
-          <li>Better relationship compatibility insights</li>
-          <li>Used for Kundli, Dasha, and horoscope analysis</li>
-          <li>More accurate than Sun Sign for daily predictions</li>
+          <li>Better relationship insights</li>
+          <li>Used in Kundli & horoscope analysis</li>
         </ul>
 
         <p>
-          This Moon Sign calculator provides a simplified result.
-          Accurate Moon Sign calculation requires astronomical ephemeris
-          and geographic coordinates.
+          This calculator provides a simplified result. Accurate calculations
+          require astronomical data.
         </p>
       </article>
 
       {/* ================= DISCLAIMER ================= */}
       <aside className="text-xs text-muted">
-        ⚠️ Astrology is based on traditional belief systems. Moon Sign
-        results are for guidance and informational purposes only and
-        should not be considered scientific advice.
+        ⚠️ Astrology is based on traditional belief systems. Results are for
+        informational purposes only.
       </aside>
     </section>
   );
