@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Stars } from "lucide-react";
+import CalculateKundliArticle from "../../content/astrology/CalculateKundliArticle";
 
 /* ================= FORMULA ================= */
 function calculateKundli({ name, date, time, place }) {
@@ -193,6 +194,7 @@ export default function KundliCalculator() {
       <p className="text-sm text-muted">
         Result updates instantly as you change values.
       </p>
+      <CalculateKundliArticle/>
     </section>
   );
 }

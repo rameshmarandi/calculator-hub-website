@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Orbit } from "lucide-react";
 import { calculateBirthChart } from "../../../lib/formulas";
+import BirthChartCalculatorArticle from "../../content/astrology/BirthChartCalculatorArticle";
 
 /* ================= FORMULA ================= */
 
@@ -114,49 +115,7 @@ export default function BirthChartCalculator() {
       </div>
 
       {/* ================= SEO BLOG CONTENT ================= */}
-      <article className="space-y-4 text-sm leading-relaxed">
-        <h2 className="font-semibold text-base">What Is a Birth Chart?</h2>
-
-        <p>
-          A Birth Chart, also known as a Natal Chart, is a snapshot of the sky
-          at the exact moment you were born. It shows the positions of the Sun,
-          Moon, and Ascendant, which together describe your personality and life
-          direction.
-        </p>
-
-        <h3 className="font-semibold">Key Elements in a Birth Chart</h3>
-
-        <ul className="list-disc pl-5">
-          <li>
-            <strong>Sun Sign</strong> – Core personality and ego
-          </li>
-          <li>
-            <strong>Ascendant (Lagna)</strong> – How the world sees you
-          </li>
-          <li>Foundation for planet & house analysis</li>
-        </ul>
-
-        <h3 className="font-semibold">Why Use a Birth Chart Calculator?</h3>
-
-        <ul className="list-disc pl-5">
-          <li>Instant chart generation</li>
-          <li>Understand personality traits</li>
-          <li>Basis for career, love, and life readings</li>
-          <li>No astrology expertise needed</li>
-        </ul>
-
-        <p>
-          This birth chart calculator provides a simplified overview. Detailed
-          birth charts require precise astronomical ephemeris data.
-        </p>
-      </article>
-
-      {/* ================= DISCLAIMER ================= */}
-      <aside className="text-xs text-muted">
-        ⚠️ Astrology is based on traditional belief systems. Birth chart results
-        are for guidance and informational purposes only and should not be
-        considered scientific advice.
-      </aside>
+     <BirthChartCalculatorArticle/>
     </section>
   );
 }

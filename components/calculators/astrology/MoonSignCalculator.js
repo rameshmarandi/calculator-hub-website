@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Moon } from "lucide-react";
 import { calculateMoonSign } from "../../../lib/formulas";
+import MoonSignCalculatorArticle from "../../content/astrology/MoonSignCalculatorArticle";
 
 /* ================= FORMULA ================= */
 
@@ -103,45 +104,7 @@ export default function MoonSignCalculator() {
       </div>
 
       {/* ================= SEO BLOG CONTENT ================= */}
-      <article className="space-y-4 text-sm leading-relaxed">
-        <h2 className="font-semibold text-base">What Is a Moon Sign?</h2>
-
-        <p>
-          Your Moon Sign represents your emotional nature, instincts, and inner
-          personality in Vedic astrology.
-        </p>
-
-        <h3 className="font-semibold">Moon Sign vs Sun Sign</h3>
-
-        <ul className="list-disc pl-5">
-          <li>
-            <strong>Moon Sign</strong> – Emotional nature
-          </li>
-          <li>
-            <strong>Sun Sign</strong> – Outer personality
-          </li>
-          <li>Moon changes every ~2.5 days</li>
-        </ul>
-
-        <h3 className="font-semibold">Why Use a Moon Sign Calculator?</h3>
-
-        <ul className="list-disc pl-5">
-          <li>Understand emotional behavior</li>
-          <li>Better relationship insights</li>
-          <li>Used in Kundli & horoscope analysis</li>
-        </ul>
-
-        <p>
-          This calculator provides a simplified result. Accurate calculations
-          require astronomical data.
-        </p>
-      </article>
-
-      {/* ================= DISCLAIMER ================= */}
-      <aside className="text-xs text-muted">
-        ⚠️ Astrology is based on traditional belief systems. Results are for
-        informational purposes only.
-      </aside>
+     <MoonSignCalculatorArticle/>
     </section>
   );
 }
