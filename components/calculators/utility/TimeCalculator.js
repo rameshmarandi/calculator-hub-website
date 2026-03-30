@@ -1,75 +1,94 @@
 "use client";
 
-import { useState } from "react";
-import { Calculator, Clock } from "lucide-react";
+import { useMemo, useState } from "react";
+import { Clock } from "lucide-react";
 
 import { ResultCard } from "../../ResultCard";
+import {AmountInput} from "@/components/inputs/AmountInput";
 
 export default function TimeCalculator() {
-  const [hours, setHours] = useState("");
-  const [minutes, setMinutes] = useState("");
-  const [addHours, setAddHours] = useState("");
-  const [addMinutes, setAddMinutes] = useState("");
+  /* ================= STATE ================= */
 
-  const [result, setResult] = useState(null);
-  const [error, setError] = useState("");
+  const [hours, setHours] = useState(2);
+  const [minutes, setMinutes] = useState(30);
+  const [addHours, setAddHours] = useState(1);
+  const [addMinutes, setAddMinutes] = useState(45);
 
-  /* ---------------- VALIDATION ---------------- */
-  function validate() {
-    if (
-      hours === "" ||
-      minutes === "" ||
-      isNaN(hours) ||
-      isNaN(minutes)
-    ) {
-      setError("Please enter a valid base time.");
-      return false;
-    }
+  /* ================= INPUT VALIDATION HANDLERS ================= */
 
-    if (
-      addHours === "" ||
-      addMinutes === "" ||
-      isNaN(addHours) ||
-      isNaN(addMinutes)
-    ) {
-      setError("Please enter a valid time to add or subtract.");
-      return false;
-    }
+  function handleHoursChange(setter) {
+    return (value) => {
+      let num = Number(value);
 
-    if (Number(minutes) < 0 || Number(minutes) > 59) {
-      setError("Minutes must be between 0 and 59.");
-      return false;
-    }
+      if (isNaN(num) || num < 0) num = 0;
 
-    if (Number(addMinutes) < 0 || Number(addMinutes) > 59) {
-      setError("Additional minutes must be between 0 and 59.");
-      return false;
-    }
+      // Limit max hours (prevent insane values)
+      if (num > 10000) num = 10000;
 
-    setError("");
-    return true;
+      setter(num);
+    };
   }
 
-  /* ---------------- TIME CALCULATION ---------------- */
-  function calculateTime(e) {
-    e.preventDefault();
-    if (!validate()) return;
+  function handleMinutesChange(setter) {
+    return (value) => {
+      let num = Number(value);
 
-    const baseTotalMinutes =
-      Number(hours) * 60 + Number(minutes);
-    const addTotalMinutes =
-      Number(addHours) * 60 + Number(addMinutes);
+      if (isNaN(num) || num < 0) num = 0;
 
-    const finalMinutes = baseTotalMinutes + addTotalMinutes;
+      // Strict minute validation
+      if (num > 59) num = 59;
+
+      setter(num);
+    };
+  }
+
+  /* ================= INTERNAL FORMULA ================= */
+
+  function calculateTime({ hours, minutes, addHours, addMinutes }) {
+    const h = Number(hours) || 0;
+    const m = Number(minutes) || 0;
+    const ah = Number(addHours) || 0;
+    const am = Number(addMinutes) || 0;
+
+    const baseTotal = h * 60 + m;
+    const addTotal = ah * 60 + am;
+
+    const finalMinutes = baseTotal + addTotal;
 
     const resultHours = Math.floor(finalMinutes / 60);
     const resultMinutes = finalMinutes % 60;
 
-    setResult({
-      hours: resultHours,
-      minutes: resultMinutes,
-    });
+    return {
+      primary: finalMinutes,
+
+      breakdown: {
+        hours: resultHours,
+        minutes: resultMinutes,
+      },
+
+      stats: {
+        totalMinutes: finalMinutes,
+        totalHours: resultHours,
+      },
+
+      meta: {
+        unit: "time",
+      },
+    };
   }
+
+  /* ================= DERIVED RESULT ================= */
+
+  const result = useMemo(() => {
+    return calculateTime({
+      hours,
+      minutes,
+      addHours,
+      addMinutes,
+    });
+  }, [hours, minutes, addHours, addMinutes]);
+
+  /* ================= UI ================= */
 
   return (
     <section
@@ -85,150 +104,107 @@ export default function TimeCalculator() {
           Time Calculator
         </h1>
         <p className="text-sm leading-relaxed">
-          Use this Time Calculator to add hours and minutes to a given
-          time. It is useful for calculating work hours, schedules,
-          durations, and time intervals.
+          Add hours and minutes instantly with strict input validation.
         </p>
       </header>
 
-      {/* ================= FORM ================= */}
-      <form onSubmit={calculateTime} className="space-y-4">
+      {/* ================= INPUTS ================= */}
+      <div className="space-y-6">
         {/* Base Time */}
-        <div className="space-y-2">
-          <p className="text-sm font-medium">Base Time</p>
+        <div>
+          <p className="text-sm font-medium mb-2">Base Time</p>
 
-          <div className="flex gap-3">
-            <input
-              type="number"
+          <div className="grid grid-cols-2 gap-4">
+            <AmountInput
+              label="Hours"
               value={hours}
-              onChange={(e) => setHours(e.target.value)}
-              placeholder="Hours"
-              className="w-full px-3 py-2 rounded"
-              style={{
-                border: "1px solid var(--border)",
-                backgroundColor: "var(--surface)",
-              }}
+              onChange={handleHoursChange(setHours)}
+              prefix=""
             />
 
-            <input
-              type="number"
+            <AmountInput
+              label="Minutes"
               value={minutes}
-              onChange={(e) => setMinutes(e.target.value)}
-              placeholder="Minutes"
-              className="w-full px-3 py-2 rounded"
-              style={{
-                border: "1px solid var(--border)",
-                backgroundColor: "var(--surface)",
-              }}
+              onChange={handleMinutesChange(setMinutes)}
+              prefix=""
             />
           </div>
         </div>
 
         {/* Add Time */}
-        <div className="space-y-2">
-          <p className="text-sm font-medium">Add Time</p>
+        <div>
+          <p className="text-sm font-medium mb-2">Add Time</p>
 
-          <div className="flex gap-3">
-            <input
-              type="number"
+          <div className="grid grid-cols-2 gap-4">
+            <AmountInput
+              label="Add Hours"
               value={addHours}
-              onChange={(e) => setAddHours(e.target.value)}
-              placeholder="Hours"
-              className="w-full px-3 py-2 rounded"
-              style={{
-                border: "1px solid var(--border)",
-                backgroundColor: "var(--surface)",
-              }}
+              onChange={handleHoursChange(setAddHours)}
+              prefix=""
             />
 
-            <input
-              type="number"
+            <AmountInput
+              label="Add Minutes"
               value={addMinutes}
-              onChange={(e) => setAddMinutes(e.target.value)}
-              placeholder="Minutes"
-              className="w-full px-3 py-2 rounded"
-              style={{
-                border: "1px solid var(--border)",
-                backgroundColor: "var(--surface)",
-              }}
+              onChange={handleMinutesChange(setAddMinutes)}
+              prefix=""
             />
           </div>
         </div>
-
-        {error && (
-          <p className="text-sm text-red-500">
-            {error}
-          </p>
-        )}
-
-        <button
-          type="submit"
-          className="w-full py-2.5 rounded-md font-medium flex items-center justify-center gap-2"
-          style={{
-            backgroundColor: "var(--primary)",
-            color: "#fff",
-          }}
-        >
-          <Calculator size={18} />
-          Calculate Time
-        </button>
-      </form>
+      </div>
 
       {/* ================= RESULT ================= */}
-      {result && (
-        <div aria-live="polite">
-          <ResultCard
-            variant="primary"
-            icon={<Clock size={20} />}
-            label="Final Time"
-            value={`${result.hours} Hours ${result.minutes} Minutes`}
-          />
-        </div>
-      )}
+      <div aria-live="polite">
+        <ResultCard
+          variant="primary"
+          icon={<Clock size={20} />}
+          label="Final Time"
+          value={`${result?.breakdown?.hours || 0} Hours ${
+            result?.breakdown?.minutes || 0
+          } Minutes`}
+        />
+      </div>
 
-      {/* ================= SEO BLOG CONTENT ================= */}
+      {/* ================= STATS ================= */}
+      <div className="grid grid-cols-2 gap-4 text-sm">
+        <div className="p-3 rounded border">
+          <p className="text-muted">Total Minutes</p>
+          <p className="font-semibold">
+            {result?.stats?.totalMinutes || 0}
+          </p>
+        </div>
+
+        <div className="p-3 rounded border">
+          <p className="text-muted">Total Hours</p>
+          <p className="font-semibold">
+            {result?.stats?.totalHours || 0}
+          </p>
+        </div>
+      </div>
+
+      {/* ================= SEO ================= */}
       <article className="space-y-4 text-sm leading-relaxed">
         <h2 className="font-semibold text-base">
           What Is a Time Calculator?
         </h2>
 
         <p>
-          A Time Calculator helps you add or calculate time in hours and
-          minutes. It is widely used for work schedules, travel planning,
-          shift timing, and project duration calculations.
+          A time calculator helps you add hours and minutes accurately for
+          schedules, work tracking, and planning.
         </p>
 
-        <h3 className="font-semibold">
-          How Time Calculation Works
-        </h3>
+        <h3 className="font-semibold">How It Works</h3>
 
         <ul className="list-disc pl-5">
-          <li>Converts hours into minutes</li>
-          <li>Adds total minutes accurately</li>
-          <li>Converts the result back into hours and minutes</li>
+          <li>Converts time into minutes</li>
+          <li>Adds values precisely</li>
+          <li>Returns normalized hours and minutes</li>
         </ul>
-
-        <h3 className="font-semibold">
-          Why Use a Time Calculator?
-        </h3>
-
-        <ul className="list-disc pl-5">
-          <li>Fast and accurate time addition</li>
-          <li>Eliminates manual errors</li>
-          <li>Useful for work and personal planning</li>
-          <li>Works with any valid time values</li>
-        </ul>
-
-        <p>
-          This time calculator is designed for everyday use and provides
-          reliable results instantly.
-        </p>
       </article>
 
       {/* ================= DISCLAIMER ================= */}
       <aside className="text-xs text-muted">
-        ⚠️ Time calculations are performed using standard arithmetic
-        rules. Results are for informational purposes only.
+        Inputs are validated and normalized for accurate results.
       </aside>
     </section>
   );

@@ -1,78 +1,115 @@
 "use client";
 
-import { useState } from "react";
-import { Calculator, FunctionSquare } from "lucide-react";
+import { useMemo, useState } from "react";
+import { FunctionSquare } from "lucide-react";
 
 import { ResultCard } from "../../ResultCard";
+import { AmountInput } from "@/components/inputs/AmountInput";
 
 export default function ScientificCalculator() {
-  const [value, setValue] = useState("");
+  /* ================= STATE ================= */
+
+  const [value, setValue] = useState(45);
   const [operation, setOperation] = useState("sin");
 
-  const [result, setResult] = useState(null);
-  const [error, setError] = useState("");
+  /* ================= INPUT VALIDATION ================= */
 
-  /* ---------------- VALIDATION ---------------- */
-  function validate() {
-    if (value === "" || isNaN(value)) {
-      setError("Please enter a valid number.");
-      return false;
-    }
-    setError("");
-    return true;
+  function handleValueChange(val) {
+    let num = Number(val);
+
+    if (isNaN(num) || !isFinite(num)) num = 0;
+
+    if (num > 1_000_000_000) num = 1_000_000_000;
+    if (num < -1_000_000_000) num = -1_000_000_000;
+
+    setValue(num);
   }
 
-  /* ---------------- SCIENTIFIC CALCULATION ---------------- */
-  function calculate(e) {
-    e.preventDefault();
-    if (!validate()) return;
+  /* ================= INTERNAL FORMULA ================= */
 
-    const num = Number(value);
-    let output;
+  function calculate({ value, operation }) {
+    const num = Number(value) || 0;
+
+    let output = 0;
+    let error = null;
 
     switch (operation) {
       case "sin":
-        output = Math.sin(num * (Math.PI / 180));
+        output = Math.sin((num * Math.PI) / 180);
         break;
+
       case "cos":
-        output = Math.cos(num * (Math.PI / 180));
+        output = Math.cos((num * Math.PI) / 180);
         break;
+
       case "tan":
-        output = Math.tan(num * (Math.PI / 180));
+        output = Math.tan((num * Math.PI) / 180);
         break;
+
       case "log":
         if (num <= 0) {
-          setError("Logarithm is only defined for positive numbers.");
-          return;
+          error = "Log undefined for ≤ 0";
+          output = 0;
+        } else {
+          output = Math.log10(num);
         }
-        output = Math.log10(num);
         break;
+
       case "ln":
         if (num <= 0) {
-          setError("Natural log is only defined for positive numbers.");
-          return;
+          error = "ln undefined for ≤ 0";
+          output = 0;
+        } else {
+          output = Math.log(num);
         }
-        output = Math.log(num);
         break;
+
       case "sqrt":
         if (num < 0) {
-          setError("Square root of negative number is not real.");
-          return;
+          error = "√ negative not real";
+          output = 0;
+        } else {
+          output = Math.sqrt(num);
         }
-        output = Math.sqrt(num);
         break;
+
       case "square":
         output = Math.pow(num, 2);
         break;
+
       case "cube":
         output = Math.pow(num, 3);
         break;
+
       default:
-        return;
+        output = 0;
     }
 
-    setResult(output.toFixed(6));
+    return {
+      primary: output,
+
+      breakdown: {
+        input: num,
+        operation,
+      },
+
+      stats: {
+        rounded: Number(output.toFixed(6)),
+      },
+
+      meta: {
+        error,
+      },
+    };
   }
+
+  /* ================= DERIVED RESULT ================= */
+
+  const result = useMemo(() => {
+    return calculate({ value, operation });
+  }, [value, operation]);
+
+  /* ================= UI ================= */
 
   return (
     <section
@@ -88,134 +125,73 @@ export default function ScientificCalculator() {
           Scientific Calculator
         </h1>
         <p className="text-sm leading-relaxed">
-          Use this Scientific Calculator to perform advanced mathematical
-          calculations such as trigonometric functions, logarithms,
-          square roots, and powers.
+          Perform trigonometric, logarithmic, and power calculations instantly.
         </p>
       </header>
 
-      {/* ================= FORM ================= */}
-      <form onSubmit={calculate} className="space-y-4">
-        {/* Input Value */}
-        <div className="space-y-1">
-          <label className="text-sm font-medium">
-            Enter Value
-          </label>
-          <input
-            type="number"
-            value={value}
-            onChange={(e) => setValue(e.target.value)}
-            placeholder="Enter number"
-            className="w-full px-3 py-2 rounded"
-            style={{
-              border: "1px solid var(--border)",
-              backgroundColor: "var(--surface)",
-            }}
-          />
-        </div>
+      {/* ================= INPUTS ================= */}
+      <div className="space-y-4">
+        <AmountInput
+          label="Enter Value"
+          value={value}
+          onChange={handleValueChange}
+          prefix=""
+        />
 
-        {/* Operation */}
-        <div className="space-y-1">
-          <label className="text-sm font-medium">
-            Select Operation
-          </label>
-          <select
-            value={operation}
-            onChange={(e) => setOperation(e.target.value)}
-            className="w-full px-3 py-2 rounded"
-            style={{
-              border: "1px solid var(--border)",
-              backgroundColor: "var(--surface)",
-            }}
-          >
-            <option value="sin">sin (degrees)</option>
-            <option value="cos">cos (degrees)</option>
-            <option value="tan">tan (degrees)</option>
-            <option value="log">log₁₀</option>
-            <option value="ln">ln (natural log)</option>
-            <option value="sqrt">√ Square Root</option>
-            <option value="square">x² (Square)</option>
-            <option value="cube">x³ (Cube)</option>
-          </select>
-        </div>
-
-        {error && (
-          <p className="text-sm text-red-500">
-            {error}
-          </p>
-        )}
-
-        <button
-          type="submit"
-          className="w-full py-2.5 rounded-md font-medium flex items-center justify-center gap-2"
-          style={{
-            backgroundColor: "var(--primary)",
-            color: "#fff",
-          }}
+        <select
+          value={operation}
+          onChange={(e) => setOperation(e.target.value)}
+          className="w-full px-3 py-2 rounded border"
         >
-          <Calculator size={18} />
-          Calculate
-        </button>
-      </form>
+          <option value="sin">sin (degrees)</option>
+          <option value="cos">cos (degrees)</option>
+          <option value="tan">tan (degrees)</option>
+          <option value="log">log₁₀</option>
+          <option value="ln">ln</option>
+          <option value="sqrt">√ Square Root</option>
+          <option value="square">x²</option>
+          <option value="cube">x³</option>
+        </select>
+      </div>
 
       {/* ================= RESULT ================= */}
-      {result !== null && (
-        <div aria-live="polite">
-          <ResultCard
-            variant="primary"
-            icon={<FunctionSquare size={20} />}
-            label="Result"
-            value={result}
-          />
-        </div>
-      )}
+      <div aria-live="polite">
+        <ResultCard
+          variant="primary"
+          icon={<FunctionSquare size={20} />}
+          label={
+            result?.meta?.error
+              ? "Invalid Input"
+              : "Result"
+          }
+          value={
+            result?.meta?.error
+              ? result.meta.error
+              : result?.stats?.rounded || 0
+          }
+        />
+      </div>
 
-      {/* ================= SEO BLOG CONTENT ================= */}
+      {/* ================= STATS ================= */}
+      <div className="p-3 rounded border text-sm">
+        <p className="text-muted">Operation</p>
+        <p className="font-semibold">{operation}</p>
+      </div>
+
+      {/* ================= SEO ================= */}
       <article className="space-y-4 text-sm leading-relaxed">
         <h2 className="font-semibold text-base">
           What Is a Scientific Calculator?
         </h2>
 
         <p>
-          A Scientific Calculator is an advanced mathematical tool used to
-          perform trigonometric, logarithmic, exponential, and power
-          calculations. It is commonly used by students, engineers,
-          scientists, and professionals.
-        </p>
-
-        <h3 className="font-semibold">
-          Functions Supported
-        </h3>
-
-        <ul className="list-disc pl-5">
-          <li>Trigonometric: sin, cos, tan</li>
-          <li>Logarithmic: log₁₀, ln</li>
-          <li>Roots and powers</li>
-          <li>Square and cube calculations</li>
-        </ul>
-
-        <h3 className="font-semibold">
-          Why Use a Scientific Calculator?
-        </h3>
-
-        <ul className="list-disc pl-5">
-          <li>Accurate advanced calculations</li>
-          <li>Useful for education and research</li>
-          <li>Eliminates manual computation errors</li>
-          <li>Supports complex math operations</li>
-        </ul>
-
-        <p>
-          This scientific calculator uses standard mathematical formulas
-          to deliver precise and reliable results instantly.
+          A scientific calculator performs advanced mathematical operations such as trigonometry, logarithms, and powers.
         </p>
       </article>
 
       {/* ================= DISCLAIMER ================= */}
       <aside className="text-xs text-muted">
-        ⚠️ Scientific calculations are based on standard mathematical
-        functions. Results are for informational and educational purposes
-        only.
+        Results are based on standard mathematical functions.
       </aside>
     </section>
   );

@@ -1,57 +1,51 @@
 "use client";
 
-import { useState } from "react";
-import { Calculator, Grid } from "lucide-react";
+import { useMemo, useState } from "react";
+import { Grid } from "lucide-react";
 
 import { ResultCard } from "../../ResultCard";
+import { AmountInput } from "@/components/inputs/AmountInput";
 
 export default function MatrixCalculator() {
+  /* ================= STATE ================= */
+
   const [size, setSize] = useState(2);
   const [operation, setOperation] = useState("add");
 
-  const [a, setA] = useState(
-    Array.from({ length: 2 }, () => Array(2).fill(""))
-  );
-  const [b, setB] = useState(
-    Array.from({ length: 2 }, () => Array(2).fill(""))
-  );
+  const createMatrix = (n, defaultVal = 0) =>
+    Array.from({ length: n }, () =>
+      Array.from({ length: n }, () => defaultVal)
+    );
 
-  const [result, setResult] = useState(null);
-  const [error, setError] = useState("");
+  const [a, setA] = useState(createMatrix(2));
+  const [b, setB] = useState(createMatrix(2));
 
-  /* ---------------- HELPERS ---------------- */
-  function createEmptyMatrix(n) {
-    return Array.from({ length: n }, () => Array(n).fill(""));
-  }
+  /* ================= HELPERS ================= */
 
   function updateMatrix(setter, i, j, value) {
     setter((prev) => {
       const copy = prev.map((row) => [...row]);
-      copy[i][j] = value;
+
+      let num = Number(value);
+      if (isNaN(num) || !isFinite(num)) num = 0;
+
+      if (num > 1_000_000) num = 1_000_000;
+      if (num < -1_000_000) num = -1_000_000;
+
+      copy[i][j] = num;
       return copy;
     });
   }
 
-  /* ---------------- VALIDATION ---------------- */
-  function validate() {
-    for (let i = 0; i < size; i++) {
-      for (let j = 0; j < size; j++) {
-        if (
-          a[i][j] === "" ||
-          b[i][j] === "" ||
-          isNaN(a[i][j]) ||
-          isNaN(b[i][j])
-        ) {
-          setError("Please enter valid numbers in all matrix fields.");
-          return false;
-        }
-      }
-    }
-    setError("");
-    return true;
+  function handleSizeChange(val) {
+    const s = Number(val);
+    setSize(s);
+    setA(createMatrix(s));
+    setB(createMatrix(s));
   }
 
-  /* ---------------- MATRIX OPERATIONS ---------------- */
+  /* ================= MATRIX OPERATIONS ================= */
+
   function addMatrices(A, B) {
     return A.map((row, i) =>
       row.map((val, j) => val + B[i][j])
@@ -65,9 +59,7 @@ export default function MatrixCalculator() {
   }
 
   function multiplyMatrices(A, B) {
-    const R = Array.from({ length: size }, () =>
-      Array(size).fill(0)
-    );
+    const R = createMatrix(size);
 
     for (let i = 0; i < size; i++) {
       for (let j = 0; j < size; j++) {
@@ -79,22 +71,38 @@ export default function MatrixCalculator() {
     return R;
   }
 
-  /* ---------------- CALCULATION ---------------- */
-  function calculate(e) {
-    e.preventDefault();
-    if (!validate()) return;
+  /* ================= INTERNAL FORMULA ================= */
 
-    const A = a.map((row) => row.map(Number));
-    const B = b.map((row) => row.map(Number));
+  function calculate({ a, b, operation }) {
+    let R = createMatrix(size);
 
-    let R;
+    if (operation === "add") R = addMatrices(a, b);
+    if (operation === "subtract") R = subtractMatrices(a, b);
+    if (operation === "multiply") R = multiplyMatrices(a, b);
 
-    if (operation === "add") R = addMatrices(A, B);
-    if (operation === "subtract") R = subtractMatrices(A, B);
-    if (operation === "multiply") R = multiplyMatrices(A, B);
+    return {
+      primary: R,
 
-    setResult(R);
+      breakdown: {
+        operation,
+        size,
+      },
+
+      stats: {
+        matrix: R,
+      },
+
+      meta: {},
+    };
   }
+
+  /* ================= DERIVED RESULT ================= */
+
+  const result = useMemo(() => {
+    return calculate({ a, b, operation });
+  }, [a, b, operation, size]);
+
+  /* ================= UI ================= */
 
   return (
     <section
@@ -110,56 +118,34 @@ export default function MatrixCalculator() {
           Matrix Calculator
         </h1>
         <p className="text-sm leading-relaxed">
-          Use this Matrix Calculator to perform addition, subtraction,
-          and multiplication of matrices. The calculator supports both
-          2×2 and 3×3 matrices, making it ideal for students, exams,
-          and learning linear algebra concepts.
+          Perform matrix addition, subtraction, and multiplication instantly.
         </p>
       </header>
 
-      {/* ================= FORM ================= */}
-      <form onSubmit={calculate} className="space-y-6">
-        {/* Matrix Size */}
-        <div className="space-y-1">
-          <label className="text-sm font-medium">Matrix Size</label>
-          <select
-            value={size}
-            onChange={(e) => {
-              const s = Number(e.target.value);
-              setSize(s);
-              setA(createEmptyMatrix(s));
-              setB(createEmptyMatrix(s));
-              setResult(null);
-            }}
-            className="w-full px-3 py-2 rounded"
-            style={{
-              border: "1px solid var(--border)",
-              backgroundColor: "var(--surface)",
-            }}
-          >
-            <option value={2}>2 × 2</option>
-            <option value={3}>3 × 3</option>
-          </select>
-        </div>
+      {/* ================= CONTROLS ================= */}
+      <div className="space-y-4">
+        <select
+          value={size}
+          onChange={(e) => handleSizeChange(e.target.value)}
+          className="w-full px-3 py-2 rounded border"
+        >
+          <option value={2}>2 × 2</option>
+          <option value={3}>3 × 3</option>
+        </select>
 
-        {/* Operation */}
-        <div className="space-y-1">
-          <label className="text-sm font-medium">Operation</label>
-          <select
-            value={operation}
-            onChange={(e) => setOperation(e.target.value)}
-            className="w-full px-3 py-2 rounded"
-            style={{
-              border: "1px solid var(--border)",
-              backgroundColor: "var(--surface)",
-            }}
-          >
-            <option value="add">Addition</option>
-            <option value="subtract">Subtraction</option>
-            <option value="multiply">Multiplication</option>
-          </select>
-        </div>
+        <select
+          value={operation}
+          onChange={(e) => setOperation(e.target.value)}
+          className="w-full px-3 py-2 rounded border"
+        >
+          <option value="add">Addition</option>
+          <option value="subtract">Subtraction</option>
+          <option value="multiply">Multiplication</option>
+        </select>
+      </div>
 
+      {/* ================= MATRICES ================= */}
+      <div className="grid md:grid-cols-2 gap-6">
         {/* Matrix A */}
         <div>
           <p className="font-medium mb-2">Matrix A</p>
@@ -169,18 +155,12 @@ export default function MatrixCalculator() {
           >
             {a.map((row, i) =>
               row.map((val, j) => (
-                <input
+                <AmountInput
                   key={`a-${i}-${j}`}
-                  type="number"
+                  label=""
                   value={val}
-                  onChange={(e) =>
-                    updateMatrix(setA, i, j, e.target.value)
-                  }
-                  className="px-3 py-2 rounded"
-                  style={{
-                    border: "1px solid var(--border)",
-                    backgroundColor: "var(--surface)",
-                  }}
+                  onChange={(v) => updateMatrix(setA, i, j, v)}
+                  prefix=""
                 />
               ))
             )}
@@ -196,95 +176,46 @@ export default function MatrixCalculator() {
           >
             {b.map((row, i) =>
               row.map((val, j) => (
-                <input
+                <AmountInput
                   key={`b-${i}-${j}`}
-                  type="number"
+                  label=""
                   value={val}
-                  onChange={(e) =>
-                    updateMatrix(setB, i, j, e.target.value)
-                  }
-                  className="px-3 py-2 rounded"
-                  style={{
-                    border: "1px solid var(--border)",
-                    backgroundColor: "var(--surface)",
-                  }}
+                  onChange={(v) => updateMatrix(setB, i, j, v)}
+                  prefix=""
                 />
               ))
             )}
           </div>
         </div>
-
-        {error && (
-          <p className="text-sm text-red-500">{error}</p>
-        )}
-
-        <button
-          type="submit"
-          className="w-full py-2.5 rounded-md font-medium flex items-center justify-center gap-2"
-          style={{
-            backgroundColor: "var(--primary)",
-            color: "#fff",
-          }}
-        >
-          <Calculator size={18} />
-          Calculate Matrix
-        </button>
-      </form>
+      </div>
 
       {/* ================= RESULT ================= */}
-      {result && (
-        <div aria-live="polite">
-          <ResultCard
-            variant="primary"
-            icon={<Grid size={20} />}
-            label="Result Matrix"
-            value={result
-              .map((row) => `[ ${row.join("  ")} ]`)
-              .join("\n")}
-          />
-        </div>
-      )}
+      <div aria-live="polite">
+        <ResultCard
+          variant="primary"
+          icon={<Grid size={20} />}
+          label="Result Matrix"
+          value={result?.stats?.matrix
+            ?.map((row) => `[ ${row.join("  ")} ]`)
+            .join("\n")}
+        />
+      </div>
 
-      {/* ================= SEO BLOG CONTENT ================= */}
+      {/* ================= SEO ================= */}
       <article className="space-y-4 text-sm leading-relaxed">
         <h2 className="font-semibold text-base">
           What Is a Matrix Calculator?
         </h2>
 
         <p>
-          A Matrix Calculator is a mathematical tool used to perform
-          operations such as addition, subtraction, and multiplication
-          on matrices. It is widely used in algebra, engineering,
-          computer science, and physics.
+          A matrix calculator performs operations like addition, subtraction,
+          and multiplication on matrices used in linear algebra.
         </p>
-
-        <h3 className="font-semibold">
-          Supported Matrix Operations
-        </h3>
-
-        <ul className="list-disc pl-5">
-          <li>Addition of matrices</li>
-          <li>Subtraction of matrices</li>
-          <li>Multiplication of 2×2 and 3×3 matrices</li>
-        </ul>
-
-        <h3 className="font-semibold">
-          Why Use a Matrix Calculator?
-        </h3>
-
-        <ul className="list-disc pl-5">
-          <li>Accurate and instant results</li>
-          <li>Ideal for students and exams</li>
-          <li>Eliminates manual calculation errors</li>
-          <li>Supports linear algebra learning</li>
-        </ul>
       </article>
 
       {/* ================= DISCLAIMER ================= */}
       <aside className="text-xs text-muted">
-        ⚠️ Matrix calculations are based on standard linear algebra
-        rules. Results are for educational and informational purposes
-        only.
+        Results follow standard matrix operation rules.
       </aside>
     </section>
   );

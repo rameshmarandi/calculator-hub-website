@@ -1,53 +1,81 @@
 "use client";
 
-import { useState } from "react";
-import { Calculator, Binary } from "lucide-react";
+import { useMemo, useState } from "react";
+import { Binary } from "lucide-react";
 
 import { ResultCard } from "../../ResultCard";
+import { AmountInput } from "@/components/inputs/AmountInput";
 
 export default function BinaryCalculator() {
-  const [binary, setBinary] = useState("");
-  const [decimal, setDecimal] = useState("");
+  /* ================= STATE ================= */
+
+  const [binary, setBinary] = useState("1010");
+  const [decimal, setDecimal] = useState(10);
   const [mode, setMode] = useState("binaryToDecimal");
 
-  const [result, setResult] = useState(null);
-  const [error, setError] = useState("");
+  /* ================= INPUT VALIDATION ================= */
 
-  /* ---------------- VALIDATION ---------------- */
-  function validate() {
-    if (mode === "binaryToDecimal") {
-      if (!binary || !/^[01]+$/.test(binary)) {
-        setError("Please enter a valid binary number (0s and 1s only).");
-        return false;
-      }
-    }
-
-    if (mode === "decimalToBinary") {
-      if (decimal === "" || isNaN(decimal) || Number(decimal) < 0) {
-        setError("Please enter a valid non-negative decimal number.");
-        return false;
-      }
-    }
-
-    setError("");
-    return true;
+  function handleBinaryChange(val) {
+    // allow only 0 and 1
+    const sanitized = val.replace(/[^01]/g, "");
+    setBinary(sanitized);
   }
 
-  /* ---------------- CALCULATION ---------------- */
-  function calculate(e) {
-    e.preventDefault();
-    if (!validate()) return;
+  function handleDecimalChange(val) {
+    let num = Number(val);
 
-    let output;
+    if (isNaN(num) || !isFinite(num)) num = 0;
+    if (num < 0) num = 0;
+    if (num > 1_000_000_000) num = 1_000_000_000;
+
+    setDecimal(num);
+  }
+
+  /* ================= INTERNAL FORMULA ================= */
+
+  function convert({ binary, decimal, mode }) {
+    let output = 0;
+    let error = null;
 
     if (mode === "binaryToDecimal") {
+      if (!binary) {
+        return {
+          primary: 0,
+          stats: { value: 0 },
+          meta: {},
+        };
+      }
+
       output = parseInt(binary, 2);
     } else {
-      output = Number(decimal).toString(2);
+      const num = Number(decimal) || 0;
+      output = num.toString(2);
     }
 
-    setResult(output);
+    return {
+      primary: output,
+
+      breakdown: {
+        mode,
+      },
+
+      stats: {
+        value: output,
+      },
+
+      meta: {
+        error,
+      },
+    };
   }
+
+  /* ================= DERIVED RESULT ================= */
+
+  const result = useMemo(() => {
+    return convert({ binary, decimal, mode });
+  }, [binary, decimal, mode]);
+
+  /* ================= UI ================= */
 
   return (
     <section
@@ -63,155 +91,80 @@ export default function BinaryCalculator() {
           Binary Calculator
         </h1>
         <p className="text-sm leading-relaxed">
-          Use this Binary Calculator to convert numbers between binary
-          and decimal formats. It is useful for computer science,
-          programming, and digital electronics.
+          Convert between binary and decimal instantly.
         </p>
       </header>
 
-      {/* ================= FORM ================= */}
-      <form onSubmit={calculate} className="space-y-4">
+      {/* ================= INPUTS ================= */}
+      <div className="space-y-4">
         {/* Mode */}
-        <div className="space-y-1">
-          <label className="text-sm font-medium">
-            Conversion Type
-          </label>
-          <select
-            value={mode}
-            onChange={(e) => {
-              setMode(e.target.value);
-              setBinary("");
-              setDecimal("");
-              setResult(null);
-              setError("");
-            }}
-            className="w-full px-3 py-2 rounded"
-            style={{
-              border: "1px solid var(--border)",
-              backgroundColor: "var(--surface)",
-            }}
-          >
-            <option value="binaryToDecimal">
-              Binary → Decimal
-            </option>
-            <option value="decimalToBinary">
-              Decimal → Binary
-            </option>
-          </select>
-        </div>
+        <select
+          value={mode}
+          onChange={(e) => setMode(e.target.value)}
+          className="w-full px-3 py-2 rounded border"
+        >
+          <option value="binaryToDecimal">
+            Binary → Decimal
+          </option>
+          <option value="decimalToBinary">
+            Decimal → Binary
+          </option>
+        </select>
 
-        {/* Input */}
+        {/* Dynamic Input */}
         {mode === "binaryToDecimal" ? (
-          <div className="space-y-1">
+          <div>
             <label className="text-sm font-medium">
               Binary Number
             </label>
             <input
               type="text"
               value={binary}
-              onChange={(e) => setBinary(e.target.value)}
-              placeholder="e.g. 101101"
-              className="w-full px-3 py-2 rounded"
-              style={{
-                border: "1px solid var(--border)",
-                backgroundColor: "var(--surface)",
-              }}
+              onChange={(e) => handleBinaryChange(e.target.value)}
+              className="w-full px-3 py-2 rounded border"
+              placeholder="e.g. 1010"
             />
           </div>
         ) : (
-          <div className="space-y-1">
-            <label className="text-sm font-medium">
-              Decimal Number
-            </label>
-            <input
-              type="number"
-              value={decimal}
-              onChange={(e) => setDecimal(e.target.value)}
-              placeholder="e.g. 45"
-              className="w-full px-3 py-2 rounded"
-              style={{
-                border: "1px solid var(--border)",
-                backgroundColor: "var(--surface)",
-              }}
-            />
-          </div>
+          <AmountInput
+            label="Decimal Number"
+            value={decimal}
+            onChange={handleDecimalChange}
+            prefix=""
+          />
         )}
-
-        {error && (
-          <p className="text-sm text-red-500">
-            {error}
-          </p>
-        )}
-
-        <button
-          type="submit"
-          className="w-full py-2.5 rounded-md font-medium flex items-center justify-center gap-2"
-          style={{
-            backgroundColor: "var(--primary)",
-            color: "#fff",
-          }}
-        >
-          <Calculator size={18} />
-          Convert
-        </button>
-      </form>
+      </div>
 
       {/* ================= RESULT ================= */}
-      {result !== null && (
-        <div aria-live="polite">
-          <ResultCard
-            variant="primary"
-            icon={<Binary size={20} />}
-            label="Conversion Result"
-            value={result}
-          />
-        </div>
-      )}
+      <div aria-live="polite">
+        <ResultCard
+          variant="primary"
+          icon={<Binary size={20} />}
+          label="Conversion Result"
+          value={result?.stats?.value || 0}
+        />
+      </div>
 
-      {/* ================= SEO BLOG CONTENT ================= */}
+      {/* ================= STATS ================= */}
+      <div className="p-3 rounded border text-sm">
+        <p className="text-muted">Mode</p>
+        <p className="font-semibold">{mode}</p>
+      </div>
+
+      {/* ================= SEO ================= */}
       <article className="space-y-4 text-sm leading-relaxed">
         <h2 className="font-semibold text-base">
           What Is a Binary Calculator?
         </h2>
 
         <p>
-          A Binary Calculator is a tool that converts numbers between
-          binary (base-2) and decimal (base-10) systems. Binary numbers
-          are fundamental to computer systems and digital electronics.
-        </p>
-
-        <h3 className="font-semibold">
-          Binary and Decimal Number Systems
-        </h3>
-
-        <ul className="list-disc pl-5">
-          <li>Binary uses only 0 and 1</li>
-          <li>Decimal uses digits from 0 to 9</li>
-          <li>Computers operate internally using binary</li>
-        </ul>
-
-        <h3 className="font-semibold">
-          Why Use a Binary Calculator?
-        </h3>
-
-        <ul className="list-disc pl-5">
-          <li>Quick number conversions</li>
-          <li>Helpful for computer science students</li>
-          <li>Used in programming and networking</li>
-          <li>Eliminates manual conversion errors</li>
-        </ul>
-
-        <p>
-          This binary calculator provides fast and accurate conversions
-          suitable for learning and professional use.
+          A binary calculator converts numbers between base-2 and base-10 systems used in computing.
         </p>
       </article>
 
       {/* ================= DISCLAIMER ================= */}
       <aside className="text-xs text-muted">
-        ⚠️ Binary conversions are calculated using standard base-2 and
-        base-10 number system rules. Results are for informational
-        purposes only.
+        Results follow standard binary conversion rules.
       </aside>
     </section>
   );

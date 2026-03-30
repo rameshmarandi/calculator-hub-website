@@ -1,55 +1,76 @@
 "use client";
 
-import { useState } from "react";
-import { Calculator, Sigma } from "lucide-react";
+import { useMemo, useState } from "react";
+import { Sigma } from "lucide-react";
 
 import { ResultCard } from "../../ResultCard";
+import { AmountInput } from "@/components/inputs/AmountInput";
 
 export default function EquationSolver() {
-  const [a, setA] = useState("");
-  const [b, setB] = useState("");
-  const [c, setC] = useState("");
+  /* ================= STATE ================= */
 
-  const [result, setResult] = useState(null);
-  const [error, setError] = useState("");
+  const [a, setA] = useState(2);
+  const [b, setB] = useState(4);
+  const [c, setC] = useState(10);
 
-  /* ---------------- VALIDATION ---------------- */
-  function validate() {
-    if (
-      a === "" ||
-      b === "" ||
-      c === "" ||
-      isNaN(a) ||
-      isNaN(b) ||
-      isNaN(c)
-    ) {
-      setError("Please enter valid numeric values.");
-      return false;
-    }
+  /* ================= INPUT VALIDATION ================= */
 
-    if (Number(a) === 0) {
-      setError("Coefficient 'a' cannot be zero.");
-      return false;
-    }
+  function handleValueChange(setter) {
+    return (value) => {
+      let num = Number(value);
 
-    setError("");
-    return true;
+      if (isNaN(num) || !isFinite(num)) num = 0;
+
+      if (num > 1_000_000_000) num = 1_000_000_000;
+      if (num < -1_000_000_000) num = -1_000_000_000;
+
+      setter(num);
+    };
   }
 
-  /* ---------------- EQUATION SOLVER ---------------- */
-  function solveEquation(e) {
-    e.preventDefault();
-    if (!validate()) return;
+  /* ================= INTERNAL FORMULA ================= */
 
-    const A = Number(a);
-    const B = Number(b);
-    const C = Number(c);
+  function solve({ a, b, c }) {
+    const A = Number(a) || 0;
+    const B = Number(b) || 0;
+    const C = Number(c) || 0;
 
-    // ax + b = c  →  x = (c - b) / a
-    const x = (C - B) / A;
+    let x = 0;
+    let error = null;
 
-    setResult(x.toFixed(4));
+    if (A === 0) {
+      error = "Invalid: a cannot be 0";
+      x = 0;
+    } else {
+      x = (C - B) / A;
+    }
+
+    return {
+      primary: x,
+
+      breakdown: {
+        a: A,
+        b: B,
+        c: C,
+      },
+
+      stats: {
+        rounded: Number(x.toFixed(4)),
+      },
+
+      meta: {
+        error,
+      },
+    };
   }
+
+  /* ================= DERIVED RESULT ================= */
+
+  const result = useMemo(() => {
+    return solve({ a, b, c });
+  }, [a, b, c]);
+
+  /* ================= UI ================= */
 
   return (
     <section
@@ -65,152 +86,80 @@ export default function EquationSolver() {
           Equation Solver
         </h1>
         <p className="text-sm leading-relaxed">
-          Use this Equation Solver to solve linear equations of the form
-          <strong> ax + b = c</strong>. It is ideal for students,
-          exams, and learning algebra fundamentals.
+          Solve linear equations of the form ax + b = c instantly.
         </p>
       </header>
 
-      {/* ================= FORM ================= */}
-      <form onSubmit={solveEquation} className="space-y-4">
-        {/* a */}
-        <div className="space-y-1">
-          <label className="text-sm font-medium">
-            Coefficient a
-          </label>
-          <input
-            type="number"
-            value={a}
-            onChange={(e) => setA(e.target.value)}
-            placeholder="Enter a"
-            className="w-full px-3 py-2 rounded"
-            style={{
-              border: "1px solid var(--border)",
-              backgroundColor: "var(--surface)",
-            }}
-          />
-        </div>
+      {/* ================= INPUTS ================= */}
+      <div className="space-y-4">
+        <AmountInput
+          label="Coefficient a"
+          value={a}
+          onChange={handleValueChange(setA)}
+          prefix=""
+        />
 
-        {/* b */}
-        <div className="space-y-1">
-          <label className="text-sm font-medium">
-            Constant b
-          </label>
-          <input
-            type="number"
-            value={b}
-            onChange={(e) => setB(e.target.value)}
-            placeholder="Enter b"
-            className="w-full px-3 py-2 rounded"
-            style={{
-              border: "1px solid var(--border)",
-              backgroundColor: "var(--surface)",
-            }}
-          />
-        </div>
+        <AmountInput
+          label="Constant b"
+          value={b}
+          onChange={handleValueChange(setB)}
+          prefix=""
+        />
 
-        {/* c */}
-        <div className="space-y-1">
-          <label className="text-sm font-medium">
-            Constant c
-          </label>
-          <input
-            type="number"
-            value={c}
-            onChange={(e) => setC(e.target.value)}
-            placeholder="Enter c"
-            className="w-full px-3 py-2 rounded"
-            style={{
-              border: "1px solid var(--border)",
-              backgroundColor: "var(--surface)",
-            }}
-          />
-        </div>
-
-        {error && (
-          <p className="text-sm text-red-500">
-            {error}
-          </p>
-        )}
-
-        <button
-          type="submit"
-          className="w-full py-2.5 rounded-md font-medium flex items-center justify-center gap-2"
-          style={{
-            backgroundColor: "var(--primary)",
-            color: "#fff",
-          }}
-        >
-          <Calculator size={18} />
-          Solve Equation
-        </button>
-      </form>
+        <AmountInput
+          label="Constant c"
+          value={c}
+          onChange={handleValueChange(setC)}
+          prefix=""
+        />
+      </div>
 
       {/* ================= RESULT ================= */}
-      {result !== null && (
-        <div aria-live="polite">
-          <ResultCard
-            variant="primary"
-            icon={<Sigma size={20} />}
-            label="Solution"
-            value={`x = ${result}`}
-          />
-        </div>
-      )}
+      <div aria-live="polite">
+        <ResultCard
+          variant="primary"
+          icon={<Sigma size={20} />}
+          label={
+            result?.meta?.error
+              ? "Invalid Equation"
+              : "Solution"
+          }
+          value={
+            result?.meta?.error
+              ? result.meta.error
+              : `x = ${result?.stats?.rounded || 0}`
+          }
+        />
+      </div>
 
-      {/* ================= SEO BLOG CONTENT ================= */}
+      {/* ================= STATS ================= */}
+      <div className="p-3 rounded border text-sm">
+        <p className="text-muted">Equation</p>
+        <p className="font-semibold">
+          {a}x + {b} = {c}
+        </p>
+      </div>
+
+      {/* ================= SEO ================= */}
       <article className="space-y-4 text-sm leading-relaxed">
         <h2 className="font-semibold text-base">
           What Is an Equation Solver?
         </h2>
 
         <p>
-          An Equation Solver is a mathematical tool that finds the value
-          of an unknown variable that satisfies a given equation.
-          This calculator solves simple linear equations involving one
-          variable.
+          An equation solver finds the value of x that satisfies the equation ax + b = c.
         </p>
 
-        <h3 className="font-semibold">
-          Linear Equation Formula
-        </h3>
+        <h3 className="font-semibold">Formula</h3>
 
-        <p
-          className="font-mono text-xs p-3 rounded"
-          style={{ backgroundColor: "var(--surface-2)" }}
-        >
-          ax + b = c  
-          <br />
+        <p className="font-mono text-xs p-3 rounded ">
           x = (c − b) ÷ a
-        </p>
-
-        <ul className="list-disc pl-5">
-          <li>a must not be zero</li>
-          <li>b and c are constants</li>
-          <li>Solution gives the value of x</li>
-        </ul>
-
-        <h3 className="font-semibold">
-          Why Use an Equation Solver?
-        </h3>
-
-        <ul className="list-disc pl-5">
-          <li>Instant and accurate solutions</li>
-          <li>Ideal for students and exams</li>
-          <li>Eliminates manual algebra errors</li>
-          <li>Useful for learning fundamentals</li>
-        </ul>
-
-        <p>
-          This equation solver is designed for simplicity and accuracy,
-          making it perfect for everyday algebra problems.
         </p>
       </article>
 
       {/* ================= DISCLAIMER ================= */}
       <aside className="text-xs text-muted">
-        ⚠️ This calculator solves basic linear equations only.
-        Results are for educational and informational purposes.
+        Results are based on standard algebraic rules.
       </aside>
     </section>
   );

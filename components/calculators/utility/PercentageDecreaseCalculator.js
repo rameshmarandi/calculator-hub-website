@@ -1,59 +1,89 @@
 "use client";
 
-import { useState } from "react";
-import { Calculator, TrendingDown } from "lucide-react";
+import { useMemo, useState } from "react";
+import { TrendingDown } from "lucide-react";
 
 import { ResultCard } from "../../ResultCard";
+import { AmountInput } from "@/components/inputs/AmountInput";
 
 export default function PercentageDecreaseCalculator() {
-  const [originalValue, setOriginalValue] = useState("");
-  const [newValue, setNewValue] = useState("");
+  /* ================= STATE ================= */
 
-  const [result, setResult] = useState(null);
-  const [error, setError] = useState("");
+  const [originalValue, setOriginalValue] = useState(200);
+  const [newValue, setNewValue] = useState(150);
 
-  /* ---------------- VALIDATION ---------------- */
-  function validate() {
-    if (
-      originalValue === "" ||
-      newValue === "" ||
-      isNaN(originalValue) ||
-      isNaN(newValue)
-    ) {
-      setError("Please enter valid numeric values.");
-      return false;
-    }
+  /* ================= INPUT VALIDATION ================= */
 
-    if (Number(originalValue) <= 0) {
-      setError("Original value must be greater than zero.");
-      return false;
-    }
+  function handleValueChange(setter) {
+    return (value) => {
+      let num = Number(value);
 
-    if (Number(newValue) > Number(originalValue)) {
-      setError("New value must be less than or equal to original value.");
-      return false;
-    }
+      if (isNaN(num) || !isFinite(num)) num = 0;
 
-    setError("");
-    return true;
+      // prevent extreme values
+      if (num > 1_000_000_000) num = 1_000_000_000;
+      if (num < 0) num = 0;
+
+      setter(num);
+    };
   }
 
-  /* ---------------- CALCULATION ---------------- */
-  function calculatePercentageDecrease(e) {
-    e.preventDefault();
-    if (!validate()) return;
+  /* ================= INTERNAL FORMULA ================= */
 
-    const original = Number(originalValue);
-    const current = Number(newValue);
+  function calculatePercentageDecrease({ originalValue, newValue }) {
+    const original = Number(originalValue) || 0;
+    const current = Number(newValue) || 0;
 
-    const decrease = original - current;
+    // prevent division issues
+    if (original <= 0) {
+      return {
+        primary: 0,
+        breakdown: {
+          decrease: 0,
+          percentage: 0,
+        },
+        stats: {},
+        meta: {
+          error: "invalid_original",
+        },
+      };
+    }
+
+    // ensure logical decrease (not increase)
+    const safeCurrent = current > original ? original : current;
+
+    const decrease = original - safeCurrent;
     const percentageDecrease = (decrease / original) * 100;
 
-    setResult({
-      decrease: decrease.toFixed(2),
-      percentage: percentageDecrease.toFixed(2),
-    });
+    return {
+      primary: percentageDecrease,
+
+      breakdown: {
+        decrease,
+        percentage: percentageDecrease,
+      },
+
+      stats: {
+        roundedPercentage: Number(percentageDecrease.toFixed(2)),
+        roundedDecrease: Number(decrease.toFixed(2)),
+      },
+
+      meta: {
+        unit: "%",
+      },
+    };
   }
+
+  /* ================= DERIVED RESULT ================= */
+
+  const result = useMemo(() => {
+    return calculatePercentageDecrease({
+      originalValue,
+      newValue,
+    });
+  }, [originalValue, newValue]);
+
+  /* ================= UI ================= */
 
   return (
     <section
@@ -69,131 +99,76 @@ export default function PercentageDecreaseCalculator() {
           Percentage Decrease Calculator
         </h1>
         <p className="text-sm leading-relaxed">
-          Use this Percentage Decrease Calculator to find how much a value
-          has decreased in percentage terms from its original value.
+          Calculate percentage decrease instantly between two values.
         </p>
       </header>
 
-      {/* ================= FORM ================= */}
-      <form onSubmit={calculatePercentageDecrease} className="space-y-4">
-        {/* Original Value */}
-        <div className="space-y-1">
-          <label className="text-sm font-medium">
-            Original Value
-          </label>
-          <input
-            type="number"
-            value={originalValue}
-            onChange={(e) => setOriginalValue(e.target.value)}
-            placeholder="Enter original value"
-            className="w-full px-3 py-2 rounded"
-            style={{
-              border: "1px solid var(--border)",
-              backgroundColor: "var(--surface)",
-            }}
-          />
-        </div>
+      {/* ================= INPUTS ================= */}
+      <div className="space-y-4">
+        <AmountInput
+          label="Original Value"
+          value={originalValue}
+          onChange={handleValueChange(setOriginalValue)}
+          prefix=""
+        />
 
-        {/* New Value */}
-        <div className="space-y-1">
-          <label className="text-sm font-medium">
-            New Value
-          </label>
-          <input
-            type="number"
-            value={newValue}
-            onChange={(e) => setNewValue(e.target.value)}
-            placeholder="Enter new value"
-            className="w-full px-3 py-2 rounded"
-            style={{
-              border: "1px solid var(--border)",
-              backgroundColor: "var(--surface)",
-            }}
-          />
-        </div>
+        <AmountInput
+          label="New Value"
+          value={newValue}
+          onChange={handleValueChange(setNewValue)}
+          prefix=""
+        />
+      </div>
 
-        {error && (
-          <p className="text-sm text-red-500">
-            {error}
+      {/* ================= RESULT (ALWAYS VISIBLE) ================= */}
+      <div aria-live="polite">
+        <ResultCard
+          variant="danger"
+          icon={<TrendingDown size={20} />}
+          label="Percentage Decrease"
+          value={`${result?.stats?.roundedPercentage || 0}% (Decrease: ${
+            result?.stats?.roundedDecrease || 0
+          })`}
+        />
+      </div>
+
+      {/* ================= STATS ================= */}
+      <div className="grid grid-cols-2 gap-4 text-sm">
+        <div className="p-3 rounded border">
+          <p className="text-muted">Decrease</p>
+          <p className="font-semibold">
+            {result?.stats?.roundedDecrease || 0}
           </p>
-        )}
-
-        <button
-          type="submit"
-          className="w-full py-2.5 rounded-md font-medium flex items-center justify-center gap-2"
-          style={{
-            backgroundColor: "var(--primary)",
-            color: "#fff",
-          }}
-        >
-          <Calculator size={18} />
-          Calculate Percentage Decrease
-        </button>
-      </form>
-
-      {/* ================= RESULT ================= */}
-      {result && (
-        <div aria-live="polite">
-          <ResultCard
-            variant="danger"
-            icon={<TrendingDown size={20} />}
-            label="Percentage Decrease"
-            value={`${result.percentage}% (Decrease: ${result.decrease})`}
-          />
         </div>
-      )}
 
-      {/* ================= SEO BLOG CONTENT ================= */}
+        <div className="p-3 rounded border">
+          <p className="text-muted">Percentage</p>
+          <p className="font-semibold">
+            {result?.stats?.roundedPercentage || 0}%
+          </p>
+        </div>
+      </div>
+
+      {/* ================= SEO ================= */}
       <article className="space-y-4 text-sm leading-relaxed">
         <h2 className="font-semibold text-base">
           What Is Percentage Decrease?
         </h2>
 
         <p>
-          Percentage decrease measures how much a value has reduced
-          compared to its original value. It is commonly used in price
-          drops, discounts, depreciation, and performance analysis.
+          Percentage decrease measures how much a value has reduced compared to its original value.
         </p>
 
-        <h3 className="font-semibold">
-          Percentage Decrease Formula
-        </h3>
+        <h3 className="font-semibold">Formula</h3>
 
-        <p
-          className="font-mono text-xs p-3 rounded"
-          style={{ backgroundColor: "var(--surface-2)" }}
-        >
-          Percentage Decrease = (Original Value − New Value) ÷ Original
-          Value × 100
-        </p>
-
-        <ul className="list-disc pl-5">
-          <li>Original value must be greater than zero</li>
-          <li>Result is always a positive percentage</li>
-          <li>Higher percentage means larger reduction</li>
-        </ul>
-
-        <h3 className="font-semibold">
-          Why Use a Percentage Decrease Calculator?
-        </h3>
-
-        <ul className="list-disc pl-5">
-          <li>Quick and accurate reduction calculations</li>
-          <li>Useful for discounts and loss analysis</li>
-          <li>Eliminates manual calculation errors</li>
-          <li>Works for any numeric values</li>
-        </ul>
-
-        <p>
-          This calculator helps you instantly determine the percentage
-          decrease between two values with precision.
+        <p className="font-mono text-xs p-3 rounded bg-gray-100">
+          (Original Value − New Value) ÷ Original Value × 100
         </p>
       </article>
 
       {/* ================= DISCLAIMER ================= */}
       <aside className="text-xs text-muted">
-        ⚠️ Percentage decrease results are calculated using standard
-        mathematical formulas and are for informational purposes only.
+        Results are calculated using standard mathematical formulas.
       </aside>
     </section>
   );

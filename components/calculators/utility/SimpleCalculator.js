@@ -1,67 +1,94 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Calculator } from "lucide-react";
 
 import { ResultCard } from "../../ResultCard";
+import { AmountInput } from "@/components/inputs/AmountInput";
 
 export default function SimpleCalculator() {
-  const [num1, setNum1] = useState("");
-  const [num2, setNum2] = useState("");
+  /* ================= STATE ================= */
+
+  const [num1, setNum1] = useState(10);
+  const [num2, setNum2] = useState(5);
   const [operation, setOperation] = useState("add");
 
-  const [result, setResult] = useState(null);
-  const [error, setError] = useState("");
+  /* ================= INPUT VALIDATION ================= */
 
-  /* ---------------- VALIDATION ---------------- */
-  function validate() {
-    if (
-      num1 === "" ||
-      num2 === "" ||
-      isNaN(num1) ||
-      isNaN(num2)
-    ) {
-      setError("Please enter valid numbers.");
-      return false;
-    }
+  function handleValueChange(setter) {
+    return (value) => {
+      let num = Number(value);
 
-    if (operation === "divide" && Number(num2) === 0) {
-      setError("Division by zero is not allowed.");
-      return false;
-    }
+      if (isNaN(num) || !isFinite(num)) num = 0;
 
-    setError("");
-    return true;
+      if (num > 1_000_000_000) num = 1_000_000_000;
+      if (num < -1_000_000_000) num = -1_000_000_000;
+
+      setter(num);
+    };
   }
 
-  /* ---------------- CALCULATION ---------------- */
-  function calculate(e) {
-    e.preventDefault();
-    if (!validate()) return;
+  /* ================= INTERNAL FORMULA ================= */
 
-    const a = Number(num1);
-    const b = Number(num2);
+  function calculate({ num1, num2, operation }) {
+    const a = Number(num1) || 0;
+    const b = Number(num2) || 0;
+
     let output = 0;
+    let error = null;
 
     switch (operation) {
       case "add":
         output = a + b;
         break;
+
       case "subtract":
         output = a - b;
         break;
+
       case "multiply":
         output = a * b;
         break;
+
       case "divide":
-        output = a / b;
+        if (b === 0) {
+          error = "Division by zero";
+          output = 0;
+        } else {
+          output = a / b;
+        }
         break;
+
       default:
-        break;
+        output = 0;
     }
 
-    setResult(output);
+    return {
+      primary: output,
+
+      breakdown: {
+        a,
+        b,
+        operation,
+      },
+
+      stats: {
+        rounded: Number(output.toFixed(4)),
+      },
+
+      meta: {
+        error,
+      },
+    };
   }
+
+  /* ================= DERIVED RESULT ================= */
+
+  const result = useMemo(() => {
+    return calculate({ num1, num2, operation });
+  }, [num1, num2, operation]);
+
+  /* ================= UI ================= */
 
   return (
     <section
@@ -77,141 +104,80 @@ export default function SimpleCalculator() {
           Simple Calculator
         </h1>
         <p className="text-sm leading-relaxed">
-          Use this Simple Calculator to perform basic arithmetic
-          operations like addition, subtraction, multiplication, and
-          division quickly and accurately.
+          Perform addition, subtraction, multiplication, and division instantly.
         </p>
       </header>
 
-      {/* ================= FORM ================= */}
-      <form onSubmit={calculate} className="space-y-4">
-        {/* Number 1 */}
-        <div className="space-y-1">
-          <label className="text-sm font-medium">First Number</label>
-          <input
-            type="number"
-            value={num1}
-            onChange={(e) => setNum1(e.target.value)}
-            placeholder="Enter first number"
-            className="w-full px-3 py-2 rounded"
-            style={{
-              border: "1px solid var(--border)",
-              backgroundColor: "var(--surface)",
-            }}
-          />
-        </div>
+      {/* ================= INPUTS ================= */}
+      <div className="space-y-4">
+        <AmountInput
+          label="First Number"
+          value={num1}
+          onChange={handleValueChange(setNum1)}
+          prefix=""
+        />
 
-        {/* Number 2 */}
-        <div className="space-y-1">
-          <label className="text-sm font-medium">Second Number</label>
-          <input
-            type="number"
-            value={num2}
-            onChange={(e) => setNum2(e.target.value)}
-            placeholder="Enter second number"
-            className="w-full px-3 py-2 rounded"
-            style={{
-              border: "1px solid var(--border)",
-              backgroundColor: "var(--surface)",
-            }}
-          />
-        </div>
+        <AmountInput
+          label="Second Number"
+          value={num2}
+          onChange={handleValueChange(setNum2)}
+          prefix=""
+        />
 
         {/* Operation */}
-        <div className="space-y-1">
-          <label className="text-sm font-medium">Operation</label>
-          <select
-            value={operation}
-            onChange={(e) => setOperation(e.target.value)}
-            className="w-full px-3 py-2 rounded"
-            style={{
-              border: "1px solid var(--border)",
-              backgroundColor: "var(--surface)",
-            }}
-          >
-            <option value="add">Addition (+)</option>
-            <option value="subtract">Subtraction (−)</option>
-            <option value="multiply">Multiplication (×)</option>
-            <option value="divide">Division (÷)</option>
-          </select>
-        </div>
-
-        {error && (
-          <p className="text-sm text-red-500">
-            {error}
-          </p>
-        )}
-
-        <button
-          type="submit"
-          className="w-full py-2.5 rounded-md font-medium flex items-center justify-center gap-2"
-          style={{
-            backgroundColor: "var(--primary)",
-            color: "#fff",
-          }}
+        <select
+          value={operation}
+          onChange={(e) => setOperation(e.target.value)}
+          className="w-full px-3 py-2 rounded border"
         >
-          <Calculator size={18} />
-          Calculate
-        </button>
-      </form>
+          <option value="add">Addition (+)</option>
+          <option value="subtract">Subtraction (−)</option>
+          <option value="multiply">Multiplication (×)</option>
+          <option value="divide">Division (÷)</option>
+        </select>
+      </div>
 
       {/* ================= RESULT ================= */}
-      {result !== null && (
-        <div aria-live="polite">
-          <ResultCard
-            variant="primary"
-            icon={<Calculator size={20} />}
-            label="Result"
-            value={result}
-          />
-        </div>
-      )}
+      <div aria-live="polite">
+        <ResultCard
+          variant="primary"
+          icon={<Calculator size={20} />}
+          label={
+            result?.meta?.error
+              ? "Invalid Operation"
+              : "Result"
+          }
+          value={
+            result?.meta?.error
+              ? result.meta.error
+              : result?.stats?.rounded || 0
+          }
+        />
+      </div>
 
-      {/* ================= SEO BLOG CONTENT ================= */}
+      {/* ================= STATS ================= */}
+      <div className="p-3 rounded border text-sm">
+        <p className="text-muted">Operation</p>
+        <p className="font-semibold">
+          {operation}
+        </p>
+      </div>
+
+      {/* ================= SEO ================= */}
       <article className="space-y-4 text-sm leading-relaxed">
         <h2 className="font-semibold text-base">
           What Is a Simple Calculator?
         </h2>
 
         <p>
-          A Simple Calculator is a basic mathematical tool used to
-          perform everyday arithmetic operations such as addition,
+          A simple calculator performs basic arithmetic operations such as addition,
           subtraction, multiplication, and division.
-        </p>
-
-        <h3 className="font-semibold">
-          Operations Supported
-        </h3>
-
-        <ul className="list-disc pl-5">
-          <li>Addition (+)</li>
-          <li>Subtraction (−)</li>
-          <li>Multiplication (×)</li>
-          <li>Division (÷)</li>
-        </ul>
-
-        <h3 className="font-semibold">
-          Why Use a Simple Calculator?
-        </h3>
-
-        <ul className="list-disc pl-5">
-          <li>Quick and accurate calculations</li>
-          <li>Useful for daily tasks</li>
-          <li>Eliminates manual errors</li>
-          <li>Works for students and professionals</li>
-        </ul>
-
-        <p>
-          This simple calculator is designed for fast, reliable
-          arithmetic calculations with a clean and easy-to-use interface.
         </p>
       </article>
 
       {/* ================= DISCLAIMER ================= */}
       <aside className="text-xs text-muted">
-        ⚠️ This calculator performs basic arithmetic calculations using
-        standard mathematical rules. Results are for informational
-        purposes only.
+        Results are calculated using standard arithmetic rules.
       </aside>
     </section>
   );

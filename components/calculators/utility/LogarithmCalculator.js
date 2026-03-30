@@ -1,56 +1,78 @@
 "use client";
 
-import { useState } from "react";
-import { Calculator, LogOut } from "lucide-react";
+import { useMemo, useState } from "react";
+import { LogOut } from "lucide-react";
 
 import { ResultCard } from "../../ResultCard";
+import { AmountInput } from "@/components/inputs/AmountInput";
 
 export default function LogarithmCalculator() {
-  const [number, setNumber] = useState("");
-  const [base, setBase] = useState("10");
+  /* ================= STATE ================= */
 
-  const [result, setResult] = useState(null);
-  const [error, setError] = useState("");
+  const [number, setNumber] = useState(10);
+  const [base, setBase] = useState(10);
 
-  /* ---------------- VALIDATION ---------------- */
-  function validate() {
-    if (
-      number === "" ||
-      base === "" ||
-      isNaN(number) ||
-      isNaN(base)
-    ) {
-      setError("Please enter valid numeric values.");
-      return false;
-    }
+  /* ================= INPUT VALIDATION ================= */
 
-    if (Number(number) <= 0) {
-      setError("Logarithm is only defined for positive numbers.");
-      return false;
-    }
+  function handleValueChange(setter) {
+    return (value) => {
+      let num = Number(value);
 
-    if (Number(base) <= 0 || Number(base) === 1) {
-      setError("Base must be greater than 0 and not equal to 1.");
-      return false;
-    }
+      if (isNaN(num) || !isFinite(num)) num = 0;
 
-    setError("");
-    return true;
+      if (num > 1_000_000_000) num = 1_000_000_000;
+      if (num < -1_000_000_000) num = -1_000_000_000;
+
+      setter(num);
+    };
   }
 
-  /* ---------------- CALCULATION ---------------- */
-  function calculateLog(e) {
-    e.preventDefault();
-    if (!validate()) return;
+  /* ================= INTERNAL FORMULA ================= */
 
-    const n = Number(number);
-    const b = Number(base);
+  function calculate({ number, base }) {
+    const n = Number(number) || 0;
+    const b = Number(base) || 0;
 
-    // Change of base formula
-    const value = Math.log(n) / Math.log(b);
+    let output = 0;
+    let error = null;
 
-    setResult(value.toFixed(6));
+    // domain checks
+    if (n <= 0) {
+      error = "Number must be > 0";
+      output = 0;
+    } else if (b <= 0 || b === 1) {
+      error = "Base must be > 0 and ≠ 1";
+      output = 0;
+    } else {
+      // change of base formula
+      output = Math.log(n) / Math.log(b);
+    }
+
+    return {
+      primary: output,
+
+      breakdown: {
+        number: n,
+        base: b,
+      },
+
+      stats: {
+        rounded: Number(output.toFixed(6)),
+      },
+
+      meta: {
+        error,
+      },
+    };
   }
+
+  /* ================= DERIVED RESULT ================= */
+
+  const result = useMemo(() => {
+    return calculate({ number, base });
+  }, [number, base]);
+
+  /* ================= UI ================= */
 
   return (
     <section
@@ -66,133 +88,73 @@ export default function LogarithmCalculator() {
           Logarithm Calculator
         </h1>
         <p className="text-sm leading-relaxed">
-          Use this Logarithm Calculator to find the logarithm of a number
-          for any valid base. It supports common logarithms, natural
-          logarithms, and custom bases.
+          Calculate logarithms for any base using standard mathematical formulas.
         </p>
       </header>
 
-      {/* ================= FORM ================= */}
-      <form onSubmit={calculateLog} className="space-y-4">
-        {/* Number */}
-        <div className="space-y-1">
-          <label className="text-sm font-medium">
-            Number
-          </label>
-          <input
-            type="number"
-            value={number}
-            onChange={(e) => setNumber(e.target.value)}
-            placeholder="Enter number"
-            className="w-full px-3 py-2 rounded"
-            style={{
-              border: "1px solid var(--border)",
-              backgroundColor: "var(--surface)",
-            }}
-          />
-        </div>
+      {/* ================= INPUTS ================= */}
+      <div className="space-y-4">
+        <AmountInput
+          label="Number (x)"
+          value={number}
+          onChange={handleValueChange(setNumber)}
+          prefix=""
+        />
 
-        {/* Base */}
-        <div className="space-y-1">
-          <label className="text-sm font-medium">
-            Logarithm Base
-          </label>
-          <input
-            type="number"
-            value={base}
-            onChange={(e) => setBase(e.target.value)}
-            placeholder="10 for log, e for ln"
-            className="w-full px-3 py-2 rounded"
-            style={{
-              border: "1px solid var(--border)",
-              backgroundColor: "var(--surface)",
-            }}
-          />
-        </div>
-
-        {error && (
-          <p className="text-sm text-red-500">
-            {error}
-          </p>
-        )}
-
-        <button
-          type="submit"
-          className="w-full py-2.5 rounded-md font-medium flex items-center justify-center gap-2"
-          style={{
-            backgroundColor: "var(--primary)",
-            color: "#fff",
-          }}
-        >
-          <Calculator size={18} />
-          Calculate Logarithm
-        </button>
-      </form>
+        <AmountInput
+          label="Base (b)"
+          value={base}
+          onChange={handleValueChange(setBase)}
+          prefix=""
+        />
+      </div>
 
       {/* ================= RESULT ================= */}
-      {result !== null && (
-        <div aria-live="polite">
-          <ResultCard
-            variant="primary"
-            icon={<LogOut size={20} />}
-            label="Logarithm Result"
-            value={result}
-          />
-        </div>
-      )}
+      <div aria-live="polite">
+        <ResultCard
+          variant="primary"
+          icon={<LogOut size={20} />}
+          label={
+            result?.meta?.error
+              ? "Invalid Input"
+              : "Logarithm Result"
+          }
+          value={
+            result?.meta?.error
+              ? result.meta.error
+              : result?.stats?.rounded || 0
+          }
+        />
+      </div>
 
-      {/* ================= SEO BLOG CONTENT ================= */}
+      {/* ================= STATS ================= */}
+      <div className="p-3 rounded border text-sm">
+        <p className="text-muted">Expression</p>
+        <p className="font-semibold">
+          log<sub>{base}</sub>({number})
+        </p>
+      </div>
+
+      {/* ================= SEO ================= */}
       <article className="space-y-4 text-sm leading-relaxed">
         <h2 className="font-semibold text-base">
           What Is a Logarithm?
         </h2>
 
         <p>
-          A logarithm answers the question: <em>to what power must a base
-          be raised to obtain a given number?</em> Logarithms are widely
-          used in mathematics, science, engineering, and computing.
+          A logarithm determines the exponent required to raise a base to a given number.
         </p>
 
-        <h3 className="font-semibold">
-          Logarithm Formula
-        </h3>
+        <h3 className="font-semibold">Formula</h3>
 
-        <p
-          className="font-mono text-xs p-3 rounded"
-          style={{ backgroundColor: "var(--surface-2)" }}
-        >
+        <p className="font-mono text-xs p-3 rounded ">
           log<sub>b</sub>(x) = ln(x) ÷ ln(b)
-        </p>
-
-        <ul className="list-disc pl-5">
-          <li>Base must be positive and not equal to 1</li>
-          <li>Number must be greater than 0</li>
-          <li>Common log uses base 10</li>
-          <li>Natural log uses base e (≈ 2.718)</li>
-        </ul>
-
-        <h3 className="font-semibold">
-          Why Use a Logarithm Calculator?
-        </h3>
-
-        <ul className="list-disc pl-5">
-          <li>Instant and accurate results</li>
-          <li>Supports custom bases</li>
-          <li>Ideal for students and professionals</li>
-          <li>Eliminates manual calculation errors</li>
-        </ul>
-
-        <p>
-          This logarithm calculator provides precise results using
-          standard mathematical formulas.
         </p>
       </article>
 
       {/* ================= DISCLAIMER ================= */}
       <aside className="text-xs text-muted">
-        ⚠️ Logarithmic calculations are based on standard mathematical
-        rules. Results are for educational and informational purposes
-        only.
+        Results follow standard logarithmic rules.
       </aside>
     </section>
   );

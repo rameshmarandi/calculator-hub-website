@@ -1,45 +1,74 @@
 "use client";
 
-import { useState } from "react";
-import { Calculator, Zap } from "lucide-react";
+import { useMemo, useState } from "react";
+import { Zap } from "lucide-react";
 
 import { ResultCard } from "../../ResultCard";
+import { AmountInput } from "@/components/inputs/AmountInput";
 
 export default function PowerCalculator() {
-  const [base, setBase] = useState("");
-  const [exponent, setExponent] = useState("");
+  /* ================= STATE ================= */
 
-  const [result, setResult] = useState(null);
-  const [error, setError] = useState("");
+  const [base, setBase] = useState(2);
+  const [exponent, setExponent] = useState(3);
 
-  /* ---------------- VALIDATION ---------------- */
-  function validate() {
-    if (
-      base === "" ||
-      exponent === "" ||
-      isNaN(base) ||
-      isNaN(exponent)
-    ) {
-      setError("Please enter valid numeric values.");
-      return false;
+  /* ================= INPUT VALIDATION ================= */
+
+  function handleValueChange(setter) {
+    return (value) => {
+      let num = Number(value);
+
+      if (isNaN(num) || !isFinite(num)) num = 0;
+
+      if (num > 1_000_000_000) num = 1_000_000_000;
+      if (num < -1_000_000_000) num = -1_000_000_000;
+
+      setter(num);
+    };
+  }
+
+  /* ================= INTERNAL FORMULA ================= */
+
+  function calculate({ base, exponent }) {
+    const b = Number(base) || 0;
+    const e = Number(exponent) || 0;
+
+    let output = 0;
+    let error = null;
+
+    // edge case
+    if (b === 0 && e === 0) {
+      error = "0^0 is undefined";
+      output = 0;
+    } else {
+      output = Math.pow(b, e);
     }
 
-    setError("");
-    return true;
+    return {
+      primary: output,
+
+      breakdown: {
+        base: b,
+        exponent: e,
+      },
+
+      stats: {
+        rounded: Number(output.toFixed(6)),
+      },
+
+      meta: {
+        error,
+      },
+    };
   }
 
-  /* ---------------- CALCULATION ---------------- */
-  function calculatePower(e) {
-    e.preventDefault();
-    if (!validate()) return;
+  /* ================= DERIVED RESULT ================= */
 
-    const b = Number(base);
-    const eValue = Number(exponent);
+  const result = useMemo(() => {
+    return calculate({ base, exponent });
+  }, [base, exponent]);
 
-    const value = Math.pow(b, eValue);
-
-    setResult(value);
-  }
+  /* ================= UI ================= */
 
   return (
     <section
@@ -55,133 +84,74 @@ export default function PowerCalculator() {
           Power Calculator
         </h1>
         <p className="text-sm leading-relaxed">
-          Use this Power Calculator to calculate the value of a number
-          raised to the power of another number. It helps you solve
-          exponential expressions quickly and accurately.
+          Calculate exponential values instantly using base and exponent.
         </p>
       </header>
 
-      {/* ================= FORM ================= */}
-      <form onSubmit={calculatePower} className="space-y-4">
-        {/* Base */}
-        <div className="space-y-1">
-          <label className="text-sm font-medium">
-            Base Value
-          </label>
-          <input
-            type="number"
-            value={base}
-            onChange={(e) => setBase(e.target.value)}
-            placeholder="Enter base"
-            className="w-full px-3 py-2 rounded"
-            style={{
-              border: "1px solid var(--border)",
-              backgroundColor: "var(--surface)",
-            }}
-          />
-        </div>
+      {/* ================= INPUTS ================= */}
+      <div className="space-y-4">
+        <AmountInput
+          label="Base"
+          value={base}
+          onChange={handleValueChange(setBase)}
+          prefix=""
+        />
 
-        {/* Exponent */}
-        <div className="space-y-1">
-          <label className="text-sm font-medium">
-            Exponent (Power)
-          </label>
-          <input
-            type="number"
-            value={exponent}
-            onChange={(e) => setExponent(e.target.value)}
-            placeholder="Enter exponent"
-            className="w-full px-3 py-2 rounded"
-            style={{
-              border: "1px solid var(--border)",
-              backgroundColor: "var(--surface)",
-            }}
-          />
-        </div>
-
-        {error && (
-          <p className="text-sm text-red-500">
-            {error}
-          </p>
-        )}
-
-        <button
-          type="submit"
-          className="w-full py-2.5 rounded-md font-medium flex items-center justify-center gap-2"
-          style={{
-            backgroundColor: "var(--primary)",
-            color: "#fff",
-          }}
-        >
-          <Calculator size={18} />
-          Calculate Power
-        </button>
-      </form>
+        <AmountInput
+          label="Exponent"
+          value={exponent}
+          onChange={handleValueChange(setExponent)}
+          prefix=""
+        />
+      </div>
 
       {/* ================= RESULT ================= */}
-      {result !== null && (
-        <div aria-live="polite">
-          <ResultCard
-            variant="primary"
-            icon={<Zap size={20} />}
-            label="Result"
-            value={result}
-          />
-        </div>
-      )}
+      <div aria-live="polite">
+        <ResultCard
+          variant="primary"
+          icon={<Zap size={20} />}
+          label={
+            result?.meta?.error
+              ? "Invalid Input"
+              : "Result"
+          }
+          value={
+            result?.meta?.error
+              ? result.meta.error
+              : result?.stats?.rounded || 0
+          }
+        />
+      </div>
 
-      {/* ================= SEO BLOG CONTENT ================= */}
+      {/* ================= STATS ================= */}
+      <div className="p-3 rounded border text-sm">
+        <p className="text-muted">Expression</p>
+        <p className="font-semibold">
+          {base}
+          <sup>{exponent}</sup>
+        </p>
+      </div>
+
+      {/* ================= SEO ================= */}
       <article className="space-y-4 text-sm leading-relaxed">
         <h2 className="font-semibold text-base">
           What Is a Power Calculator?
         </h2>
 
         <p>
-          A Power Calculator is a mathematical tool used to calculate
-          exponential expressions where a base number is raised to the
-          power of an exponent. It is commonly used in mathematics,
-          science, engineering, and finance.
+          A power calculator computes a number raised to the power of another number.
         </p>
 
-        <h3 className="font-semibold">
-          Power Formula
-        </h3>
+        <h3 className="font-semibold">Formula</h3>
 
-        <p
-          className="font-mono text-xs p-3 rounded"
-          style={{ backgroundColor: "var(--surface-2)" }}
-        >
+        <p className="font-mono text-xs p-3 rounded">
           Result = Base<sup>Exponent</sup>
-        </p>
-
-        <ul className="list-disc pl-5">
-          <li>Positive exponent → repeated multiplication</li>
-          <li>Zero exponent → result is 1</li>
-          <li>Negative exponent → reciprocal value</li>
-        </ul>
-
-        <h3 className="font-semibold">
-          Why Use a Power Calculator?
-        </h3>
-
-        <ul className="list-disc pl-5">
-          <li>Instant exponential calculations</li>
-          <li>Accurate and reliable results</li>
-          <li>Useful for students and professionals</li>
-          <li>Eliminates manual calculation errors</li>
-        </ul>
-
-        <p>
-          This power calculator uses standard mathematical rules to
-          deliver fast and precise results.
         </p>
       </article>
 
       {/* ================= DISCLAIMER ================= */}
       <aside className="text-xs text-muted">
-        ⚠️ Power calculations are based on standard mathematical
-        formulas. Results are for educational and informational purposes
-        only.
+        Results follow standard exponential rules.
       </aside>
     </section>
   );

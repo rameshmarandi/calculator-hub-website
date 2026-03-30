@@ -1,62 +1,98 @@
 "use client";
 
-import { useState } from "react";
-import { Calculator, Tag } from "lucide-react";
+import { useMemo, useState } from "react";
+import { Tag } from "lucide-react";
 
 import { ResultCard } from "../../ResultCard";
+import { AmountInput } from "@/components/inputs/AmountInput";
 
 export default function DiscountCalculator() {
-  const [originalPrice, setOriginalPrice] = useState("");
-  const [discountPercent, setDiscountPercent] = useState("");
+  /* ================= STATE ================= */
 
-  const [result, setResult] = useState(null);
-  const [error, setError] = useState("");
+  const [originalPrice, setOriginalPrice] = useState(1000);
+  const [discountPercent, setDiscountPercent] = useState(20);
 
-  /* ---------------- VALIDATION ---------------- */
-  function validate() {
-    if (
-      originalPrice === "" ||
-      discountPercent === "" ||
-      isNaN(originalPrice) ||
-      isNaN(discountPercent)
-    ) {
-      setError("Please enter valid numeric values.");
-      return false;
-    }
+  /* ================= INPUT VALIDATION ================= */
 
-    if (Number(originalPrice) <= 0) {
-      setError("Original price must be greater than zero.");
-      return false;
-    }
+  function handlePriceChange(setter) {
+    return (value) => {
+      let num = Number(value);
 
-    if (
-      Number(discountPercent) < 0 ||
-      Number(discountPercent) > 100
-    ) {
-      setError("Discount percentage must be between 0 and 100.");
-      return false;
-    }
+      if (isNaN(num) || !isFinite(num)) num = 0;
 
-    setError("");
-    return true;
+      if (num < 0) num = 0;
+      if (num > 1_000_000_000) num = 1_000_000_000;
+
+      setter(num);
+    };
   }
 
-  /* ---------------- DISCOUNT CALCULATION ---------------- */
-  function calculateDiscount(e) {
-    e.preventDefault();
-    if (!validate()) return;
+  function handleDiscountChange(setter) {
+    return (value) => {
+      let num = Number(value);
 
-    const price = Number(originalPrice);
-    const discount = Number(discountPercent);
+      if (isNaN(num) || !isFinite(num)) num = 0;
+
+      // strict 0–100 validation
+      if (num < 0) num = 0;
+      if (num > 100) num = 100;
+
+      setter(num);
+    };
+  }
+
+  /* ================= INTERNAL FORMULA ================= */
+
+  function calculateDiscount({ originalPrice, discountPercent }) {
+    const price = Number(originalPrice) || 0;
+    const discount = Number(discountPercent) || 0;
+
+    if (price <= 0) {
+      return {
+        primary: 0,
+        breakdown: {
+          discountAmount: 0,
+          finalPrice: 0,
+        },
+        stats: {},
+        meta: {
+          error: "invalid_price",
+        },
+      };
+    }
 
     const discountAmount = (price * discount) / 100;
     const finalPrice = price - discountAmount;
 
-    setResult({
-      discountAmount: discountAmount.toFixed(2),
-      finalPrice: finalPrice.toFixed(2),
-    });
+    return {
+      primary: finalPrice,
+
+      breakdown: {
+        discountAmount,
+        finalPrice,
+      },
+
+      stats: {
+        roundedDiscount: Number(discountAmount.toFixed(2)),
+        roundedFinal: Number(finalPrice.toFixed(2)),
+      },
+
+      meta: {
+        unit: "currency",
+      },
+    };
   }
+
+  /* ================= DERIVED RESULT ================= */
+
+  const result = useMemo(() => {
+    return calculateDiscount({
+      originalPrice,
+      discountPercent,
+    });
+  }, [originalPrice, discountPercent]);
+
+  /* ================= UI ================= */
 
   return (
     <section
@@ -72,133 +108,78 @@ export default function DiscountCalculator() {
           Discount Calculator
         </h1>
         <p className="text-sm leading-relaxed">
-          Use this Discount Calculator to quickly calculate the final
-          price after applying a discount percentage to the original
-          price.
+          Calculate final price after applying a discount instantly.
         </p>
       </header>
 
-      {/* ================= FORM ================= */}
-      <form onSubmit={calculateDiscount} className="space-y-4">
-        {/* Original Price */}
-        <div className="space-y-1">
-          <label className="text-sm font-medium">
-            Original Price
-          </label>
-          <input
-            type="number"
-            value={originalPrice}
-            onChange={(e) => setOriginalPrice(e.target.value)}
-            placeholder="Enter original price"
-            className="w-full px-3 py-2 rounded"
-            style={{
-              border: "1px solid var(--border)",
-              backgroundColor: "var(--surface)",
-            }}
-          />
-        </div>
+      {/* ================= INPUTS ================= */}
+      <div className="space-y-4">
+        <AmountInput
+          label="Original Price"
+          value={originalPrice}
+          onChange={handlePriceChange(setOriginalPrice)}
+          prefix=""
+        />
 
-        {/* Discount Percentage */}
-        <div className="space-y-1">
-          <label className="text-sm font-medium">
-            Discount Percentage (%)
-          </label>
-          <input
-            type="number"
-            value={discountPercent}
-            onChange={(e) => setDiscountPercent(e.target.value)}
-            placeholder="Enter discount percentage"
-            className="w-full px-3 py-2 rounded"
-            style={{
-              border: "1px solid var(--border)",
-              backgroundColor: "var(--surface)",
-            }}
-          />
-        </div>
+        <AmountInput
+          label="Discount Percentage"
+          value={discountPercent}
+          onChange={handleDiscountChange(setDiscountPercent)}
+          prefix=""
+        />
+      </div>
 
-        {error && (
-          <p className="text-sm text-red-500">
-            {error}
+      {/* ================= RESULT (ALWAYS VISIBLE) ================= */}
+      <div aria-live="polite">
+        <ResultCard
+          variant="success"
+          icon={<Tag size={20} />}
+          label="Discount Result"
+          value={`You Save: ${result?.stats?.roundedDiscount || 0} | Final Price: ${
+            result?.stats?.roundedFinal || 0
+          }`}
+        />
+      </div>
+
+      {/* ================= STATS ================= */}
+      <div className="grid grid-cols-2 gap-4 text-sm">
+        <div className="p-3 rounded border">
+          <p className="text-muted">Discount Amount</p>
+          <p className="font-semibold">
+            {result?.stats?.roundedDiscount || 0}
           </p>
-        )}
-
-        <button
-          type="submit"
-          className="w-full py-2.5 rounded-md font-medium flex items-center justify-center gap-2"
-          style={{
-            backgroundColor: "var(--primary)",
-            color: "#fff",
-          }}
-        >
-          <Calculator size={18} />
-          Calculate Discount
-        </button>
-      </form>
-
-      {/* ================= RESULT ================= */}
-      {result && (
-        <div aria-live="polite">
-          <ResultCard
-            variant="success"
-            icon={<Tag size={20} />}
-            label="Discount Result"
-            value={`You Save: ${result.discountAmount} | Final Price: ${result.finalPrice}`}
-          />
         </div>
-      )}
 
-      {/* ================= SEO BLOG CONTENT ================= */}
+        <div className="p-3 rounded border">
+          <p className="text-muted">Final Price</p>
+          <p className="font-semibold">
+            {result?.stats?.roundedFinal || 0}
+          </p>
+        </div>
+      </div>
+
+      {/* ================= SEO ================= */}
       <article className="space-y-4 text-sm leading-relaxed">
         <h2 className="font-semibold text-base">
           What Is a Discount Calculator?
         </h2>
 
         <p>
-          A Discount Calculator helps you determine the final price of a
-          product after applying a percentage discount. It is commonly
-          used during shopping, sales, offers, and budgeting.
+          A discount calculator helps you determine the final price after applying a percentage discount.
         </p>
 
-        <h3 className="font-semibold">
-          Discount Calculation Formula
-        </h3>
+        <h3 className="font-semibold">Formula</h3>
 
-        <p
-          className="font-mono text-xs p-3 rounded"
-          style={{ backgroundColor: "var(--surface-2)" }}
-        >
-          Discount Amount = Original Price × Discount % ÷ 100  
+        <p className="font-mono text-xs p-3 rounded ">
+          Discount = Price × % ÷ 100
           <br />
-          Final Price = Original Price − Discount Amount
-        </p>
-
-        <ul className="list-disc pl-5">
-          <li>Helps calculate savings instantly</li>
-          <li>Ensures accurate price comparison</li>
-          <li>Works for any discount percentage</li>
-        </ul>
-
-        <h3 className="font-semibold">
-          Why Use a Discount Calculator?
-        </h3>
-
-        <ul className="list-disc pl-5">
-          <li>Quick shopping decisions</li>
-          <li>Accurate discount calculations</li>
-          <li>Useful for sales and offers</li>
-          <li>Eliminates manual errors</li>
-        </ul>
-
-        <p>
-          This discount calculator provides precise results and is
-          suitable for everyday use.
+          Final Price = Price − Discount
         </p>
       </article>
 
       {/* ================= DISCLAIMER ================= */}
       <aside className="text-xs text-muted">
-        ⚠️ Discount results are calculated using standard mathematical
-        formulas and are for informational purposes only.
+        Results are calculated using standard formulas.
       </aside>
     </section>
   );

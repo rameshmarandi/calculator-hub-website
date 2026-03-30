@@ -1,72 +1,111 @@
 "use client";
 
-import { useState } from "react";
-import { Calculator, BarChart2 } from "lucide-react";
+import { useMemo, useState } from "react";
+import { BarChart2 } from "lucide-react";
 
 import { ResultCard } from "../../ResultCard";
+import { AmountInput } from "@/components/inputs/AmountInput";
 
 export default function ProfitLossCalculator() {
-  const [costPrice, setCostPrice] = useState("");
-  const [sellingPrice, setSellingPrice] = useState("");
+  /* ================= STATE ================= */
 
-  const [result, setResult] = useState(null);
-  const [error, setError] = useState("");
+  const [costPrice, setCostPrice] = useState(100);
+  const [sellingPrice, setSellingPrice] = useState(120);
 
-  /* ---------------- VALIDATION ---------------- */
-  function validate() {
-    if (
-      costPrice === "" ||
-      sellingPrice === "" ||
-      isNaN(costPrice) ||
-      isNaN(sellingPrice)
-    ) {
-      setError("Please enter valid numeric values.");
-      return false;
-    }
+  /* ================= INPUT VALIDATION ================= */
 
-    if (Number(costPrice) <= 0) {
-      setError("Cost price must be greater than zero.");
-      return false;
-    }
+  function handleValueChange(setter) {
+    return (value) => {
+      let num = Number(value);
 
-    setError("");
-    return true;
+      if (isNaN(num) || !isFinite(num)) num = 0;
+
+      if (num < 0) num = 0;
+      if (num > 1_000_000_000) num = 1_000_000_000;
+
+      setter(num);
+    };
   }
 
-  /* ---------------- PROFIT / LOSS CALCULATION ---------------- */
-  function calculateProfitLoss(e) {
-    e.preventDefault();
-    if (!validate()) return;
+  /* ================= INTERNAL FORMULA ================= */
 
-    const cp = Number(costPrice);
-    const sp = Number(sellingPrice);
+  function calculateProfitLoss({ costPrice, sellingPrice }) {
+    const cp = Number(costPrice) || 0;
+    const sp = Number(sellingPrice) || 0;
+
+    if (cp <= 0) {
+      return {
+        primary: 0,
+        breakdown: {
+          amount: 0,
+          percentage: 0,
+          type: "invalid",
+        },
+        stats: {},
+        meta: {},
+      };
+    }
+
+    let type = "neutral";
+    let amount = 0;
+    let percentage = 0;
 
     if (sp > cp) {
-      const profit = sp - cp;
-      const profitPercent = (profit / cp) * 100;
-
-      setResult({
-        type: "profit",
-        amount: profit.toFixed(2),
-        percentage: profitPercent.toFixed(2),
-      });
+      type = "profit";
+      amount = sp - cp;
+      percentage = (amount / cp) * 100;
     } else if (cp > sp) {
-      const loss = cp - sp;
-      const lossPercent = (loss / cp) * 100;
-
-      setResult({
-        type: "loss",
-        amount: loss.toFixed(2),
-        percentage: lossPercent.toFixed(2),
-      });
-    } else {
-      setResult({
-        type: "neutral",
-        amount: "0.00",
-        percentage: "0.00",
-      });
+      type = "loss";
+      amount = cp - sp;
+      percentage = (amount / cp) * 100;
     }
+
+    return {
+      primary: amount,
+
+      breakdown: {
+        type,
+        amount,
+        percentage,
+      },
+
+      stats: {
+        roundedAmount: Number(amount.toFixed(2)),
+        roundedPercentage: Number(percentage.toFixed(2)),
+      },
+
+      meta: {
+        unit: "%",
+      },
+    };
   }
+
+  /* ================= DERIVED RESULT ================= */
+
+  const result = useMemo(() => {
+    return calculateProfitLoss({
+      costPrice,
+      sellingPrice,
+    });
+  }, [costPrice, sellingPrice]);
+
+  /* ================= UI HELPERS ================= */
+
+  const variant =
+    result?.breakdown?.type === "profit"
+      ? "success"
+      : result?.breakdown?.type === "loss"
+      ? "danger"
+      : "primary";
+
+  const label =
+    result?.breakdown?.type === "profit"
+      ? "Profit"
+      : result?.breakdown?.type === "loss"
+      ? "Loss"
+      : "No Profit No Loss";
+
+  /* ================= UI ================= */
 
   return (
     <section
@@ -82,150 +121,78 @@ export default function ProfitLossCalculator() {
           Profit and Loss Calculator
         </h1>
         <p className="text-sm leading-relaxed">
-          Use this Profit and Loss Calculator to determine whether you
-          made a profit or loss based on cost price and selling price.
-          It also calculates profit or loss percentage.
+          Instantly calculate profit or loss and percentage based on cost and selling price.
         </p>
       </header>
 
-      {/* ================= FORM ================= */}
-      <form onSubmit={calculateProfitLoss} className="space-y-4">
-        {/* Cost Price */}
-        <div className="space-y-1">
-          <label className="text-sm font-medium">
-            Cost Price
-          </label>
-          <input
-            type="number"
-            value={costPrice}
-            onChange={(e) => setCostPrice(e.target.value)}
-            placeholder="Enter cost price"
-            className="w-full px-3 py-2 rounded"
-            style={{
-              border: "1px solid var(--border)",
-              backgroundColor: "var(--surface)",
-            }}
-          />
-        </div>
+      {/* ================= INPUTS ================= */}
+      <div className="space-y-4">
+        <AmountInput
+          label="Cost Price"
+          value={costPrice}
+          onChange={handleValueChange(setCostPrice)}
+          prefix=""
+        />
 
-        {/* Selling Price */}
-        <div className="space-y-1">
-          <label className="text-sm font-medium">
-            Selling Price
-          </label>
-          <input
-            type="number"
-            value={sellingPrice}
-            onChange={(e) => setSellingPrice(e.target.value)}
-            placeholder="Enter selling price"
-            className="w-full px-3 py-2 rounded"
-            style={{
-              border: "1px solid var(--border)",
-              backgroundColor: "var(--surface)",
-            }}
-          />
-        </div>
-
-        {error && (
-          <p className="text-sm text-red-500">
-            {error}
-          </p>
-        )}
-
-        <button
-          type="submit"
-          className="w-full py-2.5 rounded-md font-medium flex items-center justify-center gap-2"
-          style={{
-            backgroundColor: "var(--primary)",
-            color: "#fff",
-          }}
-        >
-          <Calculator size={18} />
-          Calculate Profit / Loss
-        </button>
-      </form>
+        <AmountInput
+          label="Selling Price"
+          value={sellingPrice}
+          onChange={handleValueChange(setSellingPrice)}
+          prefix=""
+        />
+      </div>
 
       {/* ================= RESULT ================= */}
-      {result && (
-        <div aria-live="polite">
-          <ResultCard
-            variant={
-              result.type === "profit"
-                ? "success"
-                : result.type === "loss"
-                ? "danger"
-                : "primary"
-            }
-            icon={<BarChart2 size={20} />}
-            label={
-              result.type === "profit"
-                ? "Profit"
-                : result.type === "loss"
-                ? "Loss"
-                : "No Profit No Loss"
-            }
-            value={`${result.amount} (${result.percentage}%)`}
-          />
-        </div>
-      )}
+      <div aria-live="polite">
+        <ResultCard
+          variant={variant}
+          icon={<BarChart2 size={20} />}
+          label={label}
+          value={`${result?.stats?.roundedAmount || 0} (${
+            result?.stats?.roundedPercentage || 0
+          }%)`}
+        />
+      </div>
 
-      {/* ================= SEO BLOG CONTENT ================= */}
+      {/* ================= STATS ================= */}
+      <div className="grid grid-cols-2 gap-4 text-sm">
+        <div className="p-3 rounded border">
+          <p className="text-muted">Amount</p>
+          <p className="font-semibold">
+            {result?.stats?.roundedAmount || 0}
+          </p>
+        </div>
+
+        <div className="p-3 rounded border">
+          <p className="text-muted">Percentage</p>
+          <p className="font-semibold">
+            {result?.stats?.roundedPercentage || 0}%
+          </p>
+        </div>
+      </div>
+
+      {/* ================= SEO ================= */}
       <article className="space-y-4 text-sm leading-relaxed">
         <h2 className="font-semibold text-base">
-          What Is a Profit and Loss Calculator?
+          What Is Profit and Loss?
         </h2>
 
         <p>
-          A Profit and Loss Calculator helps you determine whether a
-          transaction resulted in profit or loss. It compares the cost
-          price and selling price to calculate the exact amount and
-          percentage.
+          Profit occurs when selling price is higher than cost price, while loss occurs when selling price is lower.
         </p>
 
-        <h3 className="font-semibold">
-          Profit and Loss Formulas
-        </h3>
+        <h3 className="font-semibold">Formula</h3>
 
-        <p
-          className="font-mono text-xs p-3 rounded"
-          style={{ backgroundColor: "var(--surface-2)" }}
-        >
-          Profit = Selling Price − Cost Price  
+        <p className="font-mono text-xs p-3 rounded bg-gray-100">
+          Profit = SP − CP
           <br />
-          Profit % = (Profit ÷ Cost Price) × 100  
-          <br /><br />
-          Loss = Cost Price − Selling Price  
-          <br />
-          Loss % = (Loss ÷ Cost Price) × 100
-        </p>
-
-        <ul className="list-disc pl-5">
-          <li>Used in business and finance</li>
-          <li>Helps analyze transactions accurately</li>
-          <li>Works for any valid price values</li>
-        </ul>
-
-        <h3 className="font-semibold">
-          Why Use a Profit and Loss Calculator?
-        </h3>
-
-        <ul className="list-disc pl-5">
-          <li>Instant profit or loss calculation</li>
-          <li>Eliminates manual errors</li>
-          <li>Useful for traders, students, and businesses</li>
-          <li>Supports financial decision-making</li>
-        </ul>
-
-        <p>
-          This calculator provides fast and accurate profit and loss
-          results for everyday and professional use.
+          Loss = CP − SP
         </p>
       </article>
 
       {/* ================= DISCLAIMER ================= */}
       <aside className="text-xs text-muted">
-        ⚠️ Profit and loss calculations are based on standard
-        mathematical formulas and are for informational purposes only.
+        Results are calculated using standard financial formulas.
       </aside>
     </section>
   );

@@ -1,20 +1,21 @@
 "use client";
 
-import { useState } from "react";
-import { Calculator, Ruler } from "lucide-react";
+import { useMemo, useState } from "react";
+import { Ruler } from "lucide-react";
 
 import { ResultCard } from "../../ResultCard";
+import {AmountInput} from "@/components/inputs/AmountInput";
 
 export default function UnitConverter() {
-  const [value, setValue] = useState("");
+  /* ================= STATE ================= */
+
+  const [value, setValue] = useState(10);
   const [category, setCategory] = useState("length");
-  const [fromUnit, setFromUnit] = useState("");
-  const [toUnit, setToUnit] = useState("");
+  const [fromUnit, setFromUnit] = useState("meter");
+  const [toUnit, setToUnit] = useState("kilometer");
 
-  const [result, setResult] = useState(null);
-  const [error, setError] = useState("");
+  /* ================= UNIT DEFINITIONS ================= */
 
-  /* ---------------- UNIT DEFINITIONS ---------------- */
   const units = {
     length: {
       meter: 1,
@@ -39,32 +40,38 @@ export default function UnitConverter() {
     },
   };
 
-  /* ---------------- VALIDATION ---------------- */
-  function validate() {
-    if (value === "" || isNaN(value)) {
-      setError("Please enter a valid numeric value.");
-      return false;
-    }
+  /* ================= INPUT VALIDATION ================= */
 
-    if (!fromUnit || !toUnit) {
-      setError("Please select both units.");
-      return false;
-    }
+  function handleValueChange(val) {
+    let num = Number(val);
 
-    setError("");
-    return true;
+    if (isNaN(num) || !isFinite(num)) num = 0;
+
+    // Prevent insane numbers
+    if (num > 1_000_000_000) num = 1_000_000_000;
+    if (num < -1_000_000_000) num = -1_000_000_000;
+
+    setValue(num);
   }
 
-  /* ---------------- CONVERSION LOGIC ---------------- */
-  function convertUnits(e) {
-    e.preventDefault();
-    if (!validate()) return;
+  /* ================= INTERNAL FORMULA ================= */
+
+  function convertUnits({ value, category, fromUnit, toUnit }) {
+    const v = Number(value) || 0;
+
+    // Safe fallback
+    if (!fromUnit || !toUnit) {
+      return {
+        primary: 0,
+        breakdown: {},
+        stats: {},
+        meta: {},
+      };
+    }
 
     let convertedValue = 0;
 
     if (category === "temperature") {
-      const v = Number(value);
-
       if (fromUnit === toUnit) {
         convertedValue = v;
       } else if (fromUnit === "celsius") {
@@ -84,21 +91,50 @@ export default function UnitConverter() {
             : (v - 273.15) * (9 / 5) + 32;
       }
     } else {
-      const baseValue = Number(value) * units[category][fromUnit];
-      convertedValue = baseValue / units[category][toUnit];
+      const baseValue =
+        v * (units?.[category]?.[fromUnit] || 1);
+
+      convertedValue =
+        baseValue / (units?.[category]?.[toUnit] || 1);
     }
 
-    setResult({
-      convertedValue: convertedValue.toFixed(4),
+    return {
+      primary: convertedValue,
+
+      breakdown: {
+        from: fromUnit,
+        to: toUnit,
+      },
+
+      stats: {
+        rounded: Number(convertedValue.toFixed(4)),
+      },
+
+      meta: {
+        unit: toUnit,
+      },
+    };
+  }
+
+  /* ================= DERIVED RESULT ================= */
+
+  const result = useMemo(() => {
+    return convertUnits({
+      value,
+      category,
       fromUnit,
       toUnit,
     });
-  }
+  }, [value, category, fromUnit, toUnit]);
+
+  /* ================= UNIT OPTIONS ================= */
 
   const unitOptions =
     category === "temperature"
       ? Object.keys(units.temperature)
-      : Object.keys(units[category]);
+      : Object.keys(units[category] || {});
+
+  /* ================= UI ================= */
 
   return (
     <section
@@ -114,65 +150,44 @@ export default function UnitConverter() {
           Unit Converter
         </h1>
         <p className="text-sm leading-relaxed">
-          Convert units instantly using this Unit Converter. It supports
-          length, weight, and temperature conversions with accurate
-          results.
+          Convert units instantly across length, weight, and temperature.
         </p>
       </header>
 
-      {/* ================= FORM ================= */}
-      <form onSubmit={convertUnits} className="space-y-4">
-        {/* Value */}
-        <div className="space-y-1">
-          <label className="text-sm font-medium">Value</label>
-          <input
-            type="number"
-            value={value}
-            onChange={(e) => setValue(e.target.value)}
-            placeholder="Enter value"
-            className="w-full px-3 py-2 rounded"
-            style={{
-              border: "1px solid var(--border)",
-              backgroundColor: "var(--surface)",
-            }}
-          />
-        </div>
+      {/* ================= INPUTS ================= */}
+      <div className="space-y-4">
+        <AmountInput
+          label="Value"
+          value={value}
+          onChange={handleValueChange}
+          prefix=""
+        />
 
         {/* Category */}
-        <div className="space-y-1">
-          <label className="text-sm font-medium">Unit Category</label>
-          <select
-            value={category}
-            onChange={(e) => {
-              setCategory(e.target.value);
-              setFromUnit("");
-              setToUnit("");
-              setResult(null);
-            }}
-            className="w-full px-3 py-2 rounded"
-            style={{
-              border: "1px solid var(--border)",
-              backgroundColor: "var(--surface)",
-            }}
-          >
-            <option value="length">Length</option>
-            <option value="weight">Weight</option>
-            <option value="temperature">Temperature</option>
-          </select>
-        </div>
+        <select
+          value={category}
+          onChange={(e) => {
+            const newCategory = e.target.value;
+            setCategory(newCategory);
+
+            const options = Object.keys(units[newCategory]);
+            setFromUnit(options[0]);
+            setToUnit(options[1] || options[0]);
+          }}
+          className="w-full px-3 py-2 rounded border"
+        >
+          <option value="length">Length</option>
+          <option value="weight">Weight</option>
+          <option value="temperature">Temperature</option>
+        </select>
 
         {/* Units */}
-        <div className="flex gap-3">
+        <div className="grid grid-cols-2 gap-4">
           <select
             value={fromUnit}
             onChange={(e) => setFromUnit(e.target.value)}
-            className="w-full px-3 py-2 rounded"
-            style={{
-              border: "1px solid var(--border)",
-              backgroundColor: "var(--surface)",
-            }}
+            className="px-3 py-2 rounded border"
           >
-            <option value="">From</option>
             {unitOptions.map((u) => (
               <option key={u} value={u}>
                 {u}
@@ -183,13 +198,8 @@ export default function UnitConverter() {
           <select
             value={toUnit}
             onChange={(e) => setToUnit(e.target.value)}
-            className="w-full px-3 py-2 rounded"
-            style={{
-              border: "1px solid var(--border)",
-              backgroundColor: "var(--surface)",
-            }}
+            className="px-3 py-2 rounded border"
           >
-            <option value="">To</option>
             {unitOptions.map((u) => (
               <option key={u} value={u}>
                 {u}
@@ -197,82 +207,35 @@ export default function UnitConverter() {
             ))}
           </select>
         </div>
-
-        {error && (
-          <p className="text-sm text-red-500">
-            {error}
-          </p>
-        )}
-
-        <button
-          type="submit"
-          className="w-full py-2.5 rounded-md font-medium flex items-center justify-center gap-2"
-          style={{
-            backgroundColor: "var(--primary)",
-            color: "#fff",
-          }}
-        >
-          <Calculator size={18} />
-          Convert Units
-        </button>
-      </form>
+      </div>
 
       {/* ================= RESULT ================= */}
-      {result && (
-        <div aria-live="polite">
-          <ResultCard
-            variant="primary"
-            icon={<Ruler size={20} />}
-            label="Converted Value"
-            value={`${result.convertedValue} ${result.toUnit}`}
-          />
-        </div>
-      )}
+      <div aria-live="polite">
+        <ResultCard
+          variant="primary"
+          icon={<Ruler size={20} />}
+          label="Converted Value"
+          value={`${result?.stats?.rounded || 0} ${
+            result?.meta?.unit || ""
+          }`}
+        />
+      </div>
 
-      {/* ================= SEO BLOG CONTENT ================= */}
+      {/* ================= SEO ================= */}
       <article className="space-y-4 text-sm leading-relaxed">
         <h2 className="font-semibold text-base">
           What Is a Unit Converter?
         </h2>
 
         <p>
-          A Unit Converter is a utility tool that allows you to convert
-          measurements from one unit to another. It is commonly used in
-          education, engineering, science, travel, and daily activities.
-        </p>
-
-        <h3 className="font-semibold">
-          Supported Unit Conversions
-        </h3>
-
-        <ul className="list-disc pl-5">
-          <li>Length (meter, kilometer, mile, inch, etc.)</li>
-          <li>Weight (kilogram, gram, pound, ounce)</li>
-          <li>Temperature (Celsius, Fahrenheit, Kelvin)</li>
-        </ul>
-
-        <h3 className="font-semibold">
-          Why Use a Unit Converter?
-        </h3>
-
-        <ul className="list-disc pl-5">
-          <li>Fast and accurate conversions</li>
-          <li>Eliminates manual calculation errors</li>
-          <li>Useful for students and professionals</li>
-          <li>Works for multiple unit categories</li>
-        </ul>
-
-        <p>
-          This unit converter uses standard conversion formulas to
-          provide reliable and precise results.
+          A unit converter allows quick and accurate conversion between
+          different measurement units across multiple categories.
         </p>
       </article>
 
       {/* ================= DISCLAIMER ================= */}
       <aside className="text-xs text-muted">
-        ⚠️ Unit conversion results are calculated using standard
-        mathematical formulas and are provided for informational
-        purposes only.
+        Results are calculated using standard conversion formulas.
       </aside>
     </section>
   );
