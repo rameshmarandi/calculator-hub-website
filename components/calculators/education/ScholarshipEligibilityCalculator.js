@@ -8,6 +8,7 @@ import { AmountInput } from "../../inputs/AmountInput";
 import { ResultCard } from "../../ResultCard";
 
 import { scholarshipEligibilityCalculator } from "../../../lib/formulas";
+import ScholarshipEligibilityCalculatorArticle from "../../content/education/ScholarshipEligibilityCalculatorArticle";
 
 export default function ScholarshipEligibilityCalculator() {
 
@@ -78,29 +79,7 @@ export default function ScholarshipEligibilityCalculator() {
       </div>
 
       {/* SEO CONTENT */}
-      <article className="space-y-4 text-sm leading-relaxed">
-
-        <h2 className="font-semibold text-base">
-          Scholarship Eligibility Criteria
-        </h2>
-
-        <p>
-          Most scholarships require a minimum academic percentage
-          along with a maximum annual family income threshold.
-        </p>
-
-        <ul className="list-disc pl-5">
-          <li>Minimum 60% academic score</li>
-          <li>Family income below ₹8,00,000</li>
-          <li>Additional criteria depending on scholarship</li>
-        </ul>
-
-      </article>
-
-      <aside className="text-xs text-muted">
-        ⚠️ This calculator provides a general estimate. Actual
-        eligibility depends on the scholarship provider.
-      </aside>
+    <ScholarshipEligibilityCalculatorArticle/>
 
     </section>
   );

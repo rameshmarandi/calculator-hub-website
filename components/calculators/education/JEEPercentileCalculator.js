@@ -7,6 +7,7 @@ import { AmountInput } from "../../inputs/AmountInput";
 import { ResultCard } from "../../ResultCard";
 
 import { jeePercentileCalculator } from "../../../lib/formulas";
+import JEEPercentileCalculatorArticle from "../../content/education/JEEPercentileCalculatorArticle";
 
 export default function JEEPercentileCalculator() {
 
@@ -101,35 +102,7 @@ export default function JEEPercentileCalculator() {
         />
       </div>
 
-      {/* SEO CONTENT */}
-      <article className="space-y-4 text-sm leading-relaxed">
-
-        <h2 className="font-semibold text-base">
-          What Is JEE Percentile?
-        </h2>
-
-        <p>
-          JEE percentile represents the percentage of candidates who scored
-          equal to or less than your score in the exam.
-        </p>
-
-        <h3 className="font-semibold">
-          Percentile Formula
-        </h3>
-
-        <p
-          className="font-mono text-xs p-3 rounded"
-          style={{ backgroundColor: "var(--surface-2)" }}
-        >
-          Percentile = (Candidates with Score ≤ Yours ÷ Total Candidates) × 100
-        </p>
-
-      </article>
-
-      <aside className="text-xs text-muted">
-        ⚠️ This calculator provides an estimated percentile. Official JEE
-        percentile is calculated by NTA using normalization.
-      </aside>
+     <JEEPercentileCalculatorArticle/>
 
     </section>
   );

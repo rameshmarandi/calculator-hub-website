@@ -7,6 +7,7 @@ import { InputField } from "../../inputs/InputField";
 import { ResultCard } from "../../ResultCard";
 
 import { gpaCalculator } from "../../../lib/formulas";
+import GpaCalculatorArticle from "../../content/education/GPACalculatorArticle";
 
 export default function GPACalculator() {
 
@@ -95,33 +96,7 @@ export default function GPACalculator() {
 
 
       {/* SEO CONTENT */}
-      <article className="space-y-4 text-sm leading-relaxed">
-
-        <h2 className="font-semibold text-base">
-          What Is GPA?
-        </h2>
-
-        <p>
-          GPA (Grade Point Average) represents the average
-          academic performance of a student across subjects.
-        </p>
-
-        <h3 className="font-semibold">
-          GPA Formula
-        </h3>
-
-        <p
-          className="font-mono text-xs p-3 rounded"
-          style={{ backgroundColor: "var(--surface-2)" }}
-        >
-          GPA = (Sum of Grade Points) ÷ (Number of Subjects)
-        </p>
-
-      </article>
-
-      <aside className="text-xs text-muted">
-        ⚠️ GPA systems vary between institutions.
-      </aside>
+      <GpaCalculatorArticle/>
 
     </section>
   );

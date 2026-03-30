@@ -7,6 +7,7 @@ import { AmountInput } from "../../inputs/AmountInput";
 import { ResultCard } from "../../ResultCard";
 
 import { studyTimePlannerCalculator } from "../../../lib/formulas";
+import StudyTimePlannerCalculatorArticle from "../../content/education/StudyTimePlannerCalculatorArticle";
 
 export default function StudyTimePlannerCalculator() {
 
@@ -94,36 +95,7 @@ export default function StudyTimePlannerCalculator() {
 
 
       {/* SEO CONTENT */}
-      <article className="space-y-4 text-sm leading-relaxed">
-
-        <h2 className="font-semibold text-base">
-          How Study Planning Works
-        </h2>
-
-        <p>
-          A study planner distributes the total syllabus workload
-          across the available preparation days. This helps maintain
-          consistency and prevents last-minute exam stress.
-        </p>
-
-        <h3 className="font-semibold">
-          Study Time Formula
-        </h3>
-
-        <p
-          className="font-mono text-xs p-3 rounded"
-          style={{ backgroundColor: "var(--surface-2)" }}
-        >
-          Daily Study Hours = Total Syllabus Hours ÷ Days Available
-        </p>
-
-      </article>
-
-
-      <aside className="text-xs text-muted">
-        ⚠️ Study schedules are estimates. Adjust for revision,
-        practice tests, and rest days.
-      </aside>
+     <StudyTimePlannerCalculatorArticle/>
 
     </section>
   );

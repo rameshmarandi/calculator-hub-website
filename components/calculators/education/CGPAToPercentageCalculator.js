@@ -8,6 +8,7 @@ import { ResultCard } from "../../ResultCard";
 
 import { cgpaToPercentageCalculator } from "../../../lib/formulas";
 import { InputField } from "../../inputs/InputField";
+import CGPAToPercentageCalculatorArticle from "../../content/education/CGPAToPercentageCalculatorArticle";
 
 export default function CGPAToPercentageCalculator() {
 
@@ -93,61 +94,7 @@ export default function CGPAToPercentageCalculator() {
 
 
       {/* ================= SEO CONTENT ================= */}
-      <article className="space-y-4 text-sm leading-relaxed">
-
-        <h2 className="font-semibold text-base">
-          How CGPA Is Converted to Percentage
-        </h2>
-
-        <p>
-          CGPA (Cumulative Grade Point Average) is widely used by schools
-          and universities to measure academic performance. Some institutions
-          convert CGPA scores into percentage format for transcripts,
-          job applications, and higher education admissions.
-        </p>
-
-        <h3 className="font-semibold">
-          CGPA to Percentage Formula
-        </h3>
-
-        <p
-          className="font-mono text-xs p-3 rounded"
-          style={{ backgroundColor: "var(--surface-2)" }}
-        >
-          Percentage = CGPA × Conversion Factor
-        </p>
-
-        <ul className="list-disc pl-5">
-          <li>Most Indian boards use a factor of 9.5</li>
-          <li>Some universities use custom multipliers</li>
-          <li>Always verify the official rule of your institution</li>
-        </ul>
-
-        <h3 className="font-semibold">
-          Why Use a CGPA to Percentage Calculator?
-        </h3>
-
-        <ul className="list-disc pl-5">
-          <li>Provides quick conversion of CGPA scores</li>
-          <li>Helps students estimate their percentage</li>
-          <li>Useful for resumes and college applications</li>
-          <li>Eliminates manual calculation mistakes</li>
-        </ul>
-
-        <p>
-          This calculator estimates the percentage equivalent of your CGPA
-          using a configurable conversion factor.
-        </p>
-
-      </article>
-
-
-      {/* ================= DISCLAIMER ================= */}
-      <aside className="text-xs text-muted">
-        ⚠️ CGPA conversion rules differ by university and education board.
-        Always verify official grading policies before submitting academic
-        records.
-      </aside>
+     <CGPAToPercentageCalculatorArticle/>
 
     </section>
   );

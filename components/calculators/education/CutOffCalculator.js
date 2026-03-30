@@ -7,6 +7,7 @@ import { AmountInput } from "../../inputs/AmountInput";
 import { ResultCard } from "../../ResultCard";
 
 import { cutoffCalculator } from "../../../lib/formulas";
+import CutOffCalculatorArticle from "../../content/education/CutOffCalculatorArticle";
 
 export default function CutOffCalculator() {
 
@@ -97,38 +98,7 @@ export default function CutOffCalculator() {
 
 
       {/* SEO CONTENT */}
-      <article className="space-y-4 text-sm leading-relaxed">
-
-        <h2 className="font-semibold text-base">
-          What Is Cut Off Marks?
-        </h2>
-
-        <p>
-          Cutoff marks are used in engineering admissions to rank
-          candidates based on subject scores. Mathematics carries
-          full weightage while Physics and Chemistry contribute
-          half weightage each.
-        </p>
-
-        <h3 className="font-semibold">
-          Cut Off Calculation Formula
-        </h3>
-
-        <p
-          className="font-mono text-xs p-3 rounded"
-          style={{ backgroundColor: "var(--surface-2)" }}
-        >
-          Cut Off = Maths + (Physics ÷ 2) + (Chemistry ÷ 2)
-        </p>
-
-      </article>
-
-
-      {/* DISCLAIMER */}
-      <aside className="text-xs text-muted">
-        ⚠️ Cutoff rules differ by board and admission authority.
-      </aside>
-
+     <CutOffCalculatorArticle/>
     </section>
   );
 }

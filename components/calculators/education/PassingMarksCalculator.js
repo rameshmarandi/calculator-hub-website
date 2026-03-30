@@ -8,6 +8,7 @@ import { PercentageInput } from "../../inputs/PercentageInput";
 import { ResultCard } from "../../ResultCard";
 
 import { passingMarksCalculator } from "../../../lib/formulas";
+import PassingMarksCalculatorArticle from "../../content/education/PassingMarksCalculatorArticle";
 
 export default function PassingMarksCalculator() {
 
@@ -81,35 +82,7 @@ export default function PassingMarksCalculator() {
 
 
       {/* SEO CONTENT */}
-      <article className="space-y-4 text-sm leading-relaxed">
-
-        <h2 className="font-semibold text-base">
-          How Passing Marks Are Calculated
-        </h2>
-
-        <p>
-          Passing marks represent the minimum score required to
-          successfully pass an examination. Most institutions
-          define passing marks as a percentage of the total marks.
-        </p>
-
-        <h3 className="font-semibold">
-          Passing Marks Formula
-        </h3>
-
-        <p
-          className="font-mono text-xs p-3 rounded"
-          style={{ backgroundColor: "var(--surface-2)" }}
-        >
-          Passing Marks = (Total Marks × Passing Percentage) ÷ 100
-        </p>
-
-      </article>
-
-
-      <aside className="text-xs text-muted">
-        ⚠️ Passing criteria vary by board and university.
-      </aside>
+      <PassingMarksCalculatorArticle/>
 
     </section>
   );

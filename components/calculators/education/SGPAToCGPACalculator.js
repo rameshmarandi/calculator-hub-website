@@ -7,6 +7,7 @@ import { InputField } from "../../inputs/InputField";
 import { ResultCard } from "../../ResultCard";
 
 import { sgpaToCgpaCalculator } from "../../../lib/formulas";
+import SGPAToCGPACalculatorArticle from "../../content/education/SGPAToCGPACalculatorArticle";
 
 export default function SGPAToCGPACalculator() {
 
@@ -95,48 +96,7 @@ export default function SGPAToCGPACalculator() {
 
 
       {/* ================= SEO CONTENT ================= */}
-      <article className="space-y-4 text-sm leading-relaxed">
-
-        <h2 className="font-semibold text-base">
-          How SGPA Is Converted to CGPA
-        </h2>
-
-        <p>
-          SGPA (Semester Grade Point Average) represents academic performance
-          in a single semester. CGPA (Cumulative Grade Point Average) is the
-          average of all SGPA values across multiple semesters.
-        </p>
-
-        <h3 className="font-semibold">
-          SGPA to CGPA Formula
-        </h3>
-
-        <p
-          className="font-mono text-xs p-3 rounded"
-          style={{ backgroundColor: "var(--surface-2)" }}
-        >
-          CGPA = (Sum of All SGPA Values) ÷ (Number of Semesters)
-        </p>
-
-        <ul className="list-disc pl-5">
-          <li>Each semester contributes equally</li>
-          <li>Commonly used in Indian universities</li>
-          <li>Simple averaging method</li>
-        </ul>
-
-        <p>
-          Some universities may apply credit-weighted CGPA calculations,
-          which can produce different results.
-        </p>
-
-      </article>
-
-
-      {/* ================= DISCLAIMER ================= */}
-      <aside className="text-xs text-muted">
-        ⚠️ CGPA calculation rules vary by university. Always verify
-        official grading policies.
-      </aside>
+     <SGPAToCGPACalculatorArticle/>
 
     </section>
   );

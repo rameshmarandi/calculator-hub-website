@@ -7,6 +7,7 @@ import { AmountInput } from "../../inputs/AmountInput";
 import { ResultCard } from "../../ResultCard";
 
 import { examMarksCalculator } from "../../../lib/formulas";
+import ExamMarksCalculatorArticle from "../../content/education/ExamMarksCalculatorArticle";
 
 export default function ExamMarksCalculator() {
 
@@ -106,37 +107,7 @@ export default function ExamMarksCalculator() {
 
 
       {/* SEO CONTENT */}
-      <article className="space-y-4 text-sm leading-relaxed">
-
-        <h2 className="font-semibold text-base">
-          How Exam Marks Are Calculated
-        </h2>
-
-        <p>
-          Exam scores are determined using correct answers,
-          marks assigned to each question, and negative
-          marking penalties for incorrect responses.
-        </p>
-
-        <h3 className="font-semibold">
-          Score Formula
-        </h3>
-
-        <p
-          className="font-mono text-xs p-3 rounded"
-          style={{ backgroundColor: "var(--surface-2)" }}
-        >
-          Total Marks = (Correct Answers × Marks per Question) −
-          (Wrong Answers × Negative Marks)
-        </p>
-
-      </article>
-
-
-      <aside className="text-xs text-muted">
-        ⚠️ This calculator provides an estimate only.
-        Official scores may vary based on exam authority rules.
-      </aside>
+      <ExamMarksCalculatorArticle/>
 
     </section>
   );

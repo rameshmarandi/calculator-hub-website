@@ -7,6 +7,7 @@ import { AmountInput } from "../../inputs/AmountInput";
 import { ResultCard } from "../../ResultCard";
 
 import { catPercentileCalculator } from "../../../lib/formulas";
+import CATPercentileCalculatorArticle from "../../content/education/CATPercentileCalculatorArticle";
 
 export default function CATPercentileCalculator() {
 
@@ -79,35 +80,7 @@ export default function CATPercentileCalculator() {
       </div>
 
       {/* SEO CONTENT */}
-      <article className="space-y-4 text-sm leading-relaxed">
-
-        <h2 className="font-semibold text-base">
-          What Is CAT Percentile?
-        </h2>
-
-        <p>
-          CAT percentile represents the percentage of candidates who
-          scored less than you in the CAT exam. It is the primary metric
-          used by IIMs and top MBA colleges for shortlisting applicants.
-        </p>
-
-        <h3 className="font-semibold">
-          CAT Percentile Formula
-        </h3>
-
-        <p
-          className="font-mono text-xs p-3 rounded"
-          style={{ backgroundColor: "var(--surface-2)" }}
-        >
-          Percentile = ((Total Candidates − Rank) ÷ Total Candidates) × 100
-        </p>
-
-      </article>
-
-      <aside className="text-xs text-muted">
-        ⚠️ This percentile is an estimate only. Official CAT percentiles
-        are calculated after normalization.
-      </aside>
+      <CATPercentileCalculatorArticle/>
 
     </section>
   );

@@ -7,6 +7,7 @@ import { AmountInput } from "../../inputs/AmountInput";
 import { ResultCard } from "../../ResultCard";
 
 import { marksToPercentageCalculator } from "../../../lib/formulas";
+import PercentageCalculatorArticle from "../../content/education/MarksToPercentageCalculatorArticle";
 
 export default function MarksToPercentageCalculator() {
 
@@ -82,44 +83,7 @@ export default function MarksToPercentageCalculator() {
 
 
       {/* SEO CONTENT */}
-      <article className="space-y-4 text-sm leading-relaxed">
-
-        <h2 className="font-semibold text-base">
-          How Marks Are Converted to Percentage
-        </h2>
-
-        <p>
-          Percentage is a common way to represent academic performance.
-          It shows how much of the total marks a student has achieved in
-          an exam or assessment.
-        </p>
-
-        <h3 className="font-semibold">
-          Marks to Percentage Formula
-        </h3>
-
-        <p
-          className="font-mono text-xs p-3 rounded"
-          style={{ backgroundColor: "var(--surface-2)" }}
-        >
-          Percentage = (Obtained Marks ÷ Total Marks) × 100
-        </p>
-
-        <ul className="list-disc pl-5">
-          <li>Used by schools, colleges, and universities</li>
-          <li>Helpful for admissions and applications</li>
-          <li>Standard academic conversion method</li>
-        </ul>
-
-      </article>
-
-
-      {/* DISCLAIMER */}
-      <aside className="text-xs text-muted">
-        ⚠️ Results are calculated using standard mathematical formulas.
-        Academic evaluation rules may vary by institution.
-      </aside>
-
+     <PercentageCalculatorArticle/>
     </section>
   );
 }

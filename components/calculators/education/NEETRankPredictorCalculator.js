@@ -8,6 +8,7 @@ import { AmountInput } from "../../inputs/AmountInput";
 import { ResultCard } from "../../ResultCard";
 
 import { neetRankPredictorCalculator } from "../../../lib/formulas";
+import NEETRankPredictorCalculatorArticle from "../../content/education/NEETRankPredictorCalculatorArticle";
 
 export default function NEETRankPredictorCalculator() {
 
@@ -81,36 +82,7 @@ export default function NEETRankPredictorCalculator() {
 
 
       {/* SEO CONTENT */}
-      <article className="space-y-4 text-sm leading-relaxed">
-
-        <h2 className="font-semibold text-base">
-          What Is NEET Rank?
-        </h2>
-
-        <p>
-          NEET rank represents a candidate's position among all students
-          appearing for the NEET examination. Higher percentile scores
-          generally correspond to better ranks.
-        </p>
-
-        <h3 className="font-semibold">
-          Rank Prediction Formula
-        </h3>
-
-        <p
-          className="font-mono text-xs p-3 rounded"
-          style={{ backgroundColor: "var(--surface-2)" }}
-        >
-          Predicted Rank ≈ (100 − Percentage) × Total Candidates ÷ 100
-        </p>
-
-      </article>
-
-
-      <aside className="text-xs text-muted">
-        ⚠️ This rank prediction is an estimate only. Official NEET ranks
-        are calculated by NTA using normalization methods.
-      </aside>
+      <NEETRankPredictorCalculatorArticle/>
 
     </section>
   );

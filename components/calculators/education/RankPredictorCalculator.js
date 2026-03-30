@@ -8,9 +8,9 @@ import { AmountInput } from "../../inputs/AmountInput";
 import { ResultCard } from "../../ResultCard";
 
 import { rankPredictorCalculator } from "../../../lib/formulas";
+import RankPredictorCalculatorArticle from "../../content/education/RankPredictorCalculatorArticle";
 
 export default function RankPredictorCalculator() {
-
   /* ---------------- PREFILLED VALUES ---------------- */
   const [percentage, setPercentage] = useState("92");
   const [totalCandidates, setTotalCandidates] = useState("150000");
@@ -22,7 +22,7 @@ export default function RankPredictorCalculator() {
   /* ---------------- CALCULATION ---------------- */
   const result = rankPredictorCalculator({
     percentage: safePercentage,
-    totalCandidates: safeTotalCandidates
+    totalCandidates: safeTotalCandidates,
   });
 
   return (
@@ -33,23 +33,18 @@ export default function RankPredictorCalculator() {
         border: "1px solid var(--border)",
       }}
     >
-
       {/* HEADER */}
       <header>
-        <h1 className="text-2xl font-bold mb-1">
-          Rank Predictor Calculator
-        </h1>
+        <h1 className="text-2xl font-bold mb-1">Rank Predictor Calculator</h1>
 
         <p className="text-sm leading-relaxed">
-          Predict your approximate exam rank using your percentage score
-          and the total number of candidates.
+          Predict your approximate exam rank using your percentage score and the
+          total number of candidates.
         </p>
       </header>
 
-
       {/* INPUTS */}
       <div className="space-y-4">
-
         <PercentageInput
           label="Your Percentage (%)"
           value={percentage}
@@ -65,9 +60,7 @@ export default function RankPredictorCalculator() {
           placeholder="150000"
           min={1}
         />
-
       </div>
-
 
       {/* RESULT */}
       <div aria-live="polite">
@@ -79,39 +72,7 @@ export default function RankPredictorCalculator() {
         />
       </div>
 
-
-      {/* SEO CONTENT */}
-      <article className="space-y-4 text-sm leading-relaxed">
-
-        <h2 className="font-semibold text-base">
-          What Is a Rank Predictor?
-        </h2>
-
-        <p>
-          A rank predictor estimates your expected exam rank based on
-          your percentage score and the number of candidates appearing
-          for the exam.
-        </p>
-
-        <h3 className="font-semibold">
-          Rank Prediction Formula
-        </h3>
-
-        <p
-          className="font-mono text-xs p-3 rounded"
-          style={{ backgroundColor: "var(--surface-2)" }}
-        >
-          Predicted Rank ≈ (100 − Percentage) × Total Candidates ÷ 100
-        </p>
-
-      </article>
-
-
-      {/* DISCLAIMER */}
-      <aside className="text-xs text-muted">
-        ⚠️ Rank prediction is an estimate only. Actual results may vary.
-      </aside>
-
+      <RankPredictorCalculatorArticle />
     </section>
   );
 }
