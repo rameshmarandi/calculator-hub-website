@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Sparkles } from "lucide-react";
 import { calculateRashi } from "../../../lib/formulas";
+import RashiCalculatorArticle from "../../content/astrology/RashiCalculatorArticle";
 
 /* ================= FORMULA ================= */
 
@@ -103,40 +104,7 @@ export default function RashiCalculator() {
       </div>
 
       {/* ================= SEO BLOG CONTENT ================= */}
-      <article className="space-y-4 text-sm leading-relaxed">
-        <h2 className="font-semibold text-base">What Is Rashi in Astrology?</h2>
-
-        <p>
-          Rashi refers to the zodiac sign in which the Moon was positioned at
-          the time of your birth.
-        </p>
-
-        <h3 className="font-semibold">Importance of Rashi</h3>
-
-        <ul className="list-disc pl-5">
-          <li>Represents emotional nature</li>
-          <li>Used in Kundli matching</li>
-          <li>Important in Vedic astrology</li>
-        </ul>
-
-        <h3 className="font-semibold">Why Use a Rashi Calculator?</h3>
-
-        <ul className="list-disc pl-5">
-          <li>Instant calculation</li>
-          <li>No astrology knowledge needed</li>
-          <li>Useful for insights</li>
-        </ul>
-
-        <p>
-          This is a simplified calculator. Accurate results require astronomical
-          data.
-        </p>
-      </article>
-
-      {/* ================= DISCLAIMER ================= */}
-      <aside className="text-xs text-muted">
-        ⚠️ Astrology is based on traditional belief systems.
-      </aside>
+    <RashiCalculatorArticle/>
     </section>
   );
 }

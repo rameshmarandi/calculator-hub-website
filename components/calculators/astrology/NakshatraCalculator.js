@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Star } from "lucide-react";
 
 import { calculateNakshatra } from "../../../lib/formulas";
+import NakshatraCalculatorArticle from "../../content/astrology/NakshatraCalculatorArticle";
 
 /* ================= INPUT ================= */
 function InputField({ label, type = "text", value, onChange }) {
@@ -101,39 +102,7 @@ export default function NakshatraCalculator() {
       </div>
 
       {/* BLOG (UNCHANGED) */}
-      <article className="space-y-4 text-sm leading-relaxed">
-        <h2 className="font-semibold text-base">What Is Nakshatra?</h2>
-
-        <p>
-          Nakshatra represents the Moon's position at birth and plays a key role
-          in Vedic astrology.
-        </p>
-
-        <h3 className="font-semibold">Importance of Nakshatra</h3>
-
-        <ul className="list-disc pl-5">
-          <li>Used in Kundli matching</li>
-          <li>Influences personality</li>
-          <li>Important for predictions</li>
-        </ul>
-
-        <h3 className="font-semibold">Why Use a Nakshatra Calculator?</h3>
-
-        <ul className="list-disc pl-5">
-          <li>Instant results</li>
-          <li>No astrology knowledge needed</li>
-        </ul>
-
-        <p>
-          This is a simplified calculator. Accurate results require astronomical
-          data.
-        </p>
-      </article>
-
-      {/* DISCLAIMER */}
-      <aside className="text-xs text-muted">
-        ⚠️ Astrology is based on traditional belief systems.
-      </aside>
+     <NakshatraCalculatorArticle/>
     </section>
   );
 }
