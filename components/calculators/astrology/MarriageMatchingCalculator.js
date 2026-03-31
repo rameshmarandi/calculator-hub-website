@@ -4,6 +4,7 @@ import { useState } from "react";
 import { HeartHandshake } from "lucide-react";
 
 import { calculateMarriageMatching } from "../../../lib/formulas";
+import MarriageMatchingCalculatorArticle from "../../content/astrology/MarriageMatchingCalculatorArticle";
 
 const nakshatras = [
   "Ashwini",
@@ -166,24 +167,7 @@ export default function MarriageMatchingCalculator() {
       </div>
 
       {/* BLOG (UNCHANGED) */}
-      <article className="space-y-4 text-sm leading-relaxed">
-        <h2 className="font-semibold text-base">What Is Guna Milan?</h2>
-
-        <p>Guna Milan evaluates compatibility based on Nakshatra matching.</p>
-
-        <ul className="list-disc pl-5">
-          <li>36–28: Excellent</li>
-          <li>27–18: Good</li>
-          <li>Below 18: Concern</li>
-        </ul>
-
-        <p>This is a simplified calculation.</p>
-      </article>
-
-      {/* DISCLAIMER */}
-      <aside className="text-xs text-muted">
-        ⚠️ For guidance purposes only.
-      </aside>
+    <MarriageMatchingCalculatorArticle/>
     </section>
   );
 }

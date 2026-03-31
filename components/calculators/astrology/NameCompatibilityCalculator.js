@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Heart } from "lucide-react";
 
 import { calculateNameCompatibility } from "../../../lib/formulas";
+import NameCompatibilityCalculatorArticle from "../../content/astrology/NameCompatibilityCalculatorArticle";
 
 /* ================= INPUT ================= */
 function InputField({ label, value, onChange }) {
@@ -96,29 +97,7 @@ export default function NameCompatibilityCalculator() {
       </div>
 
       {/* BLOG (UNCHANGED) */}
-      <article className="space-y-4 text-sm leading-relaxed">
-        <h2 className="font-semibold text-base">
-          How Name Compatibility Works
-        </h2>
-
-        <p>
-          Each letter carries a numerical vibration. Compatibility is based on
-          harmony between numbers.
-        </p>
-
-        <ul className="list-disc pl-5">
-          <li>Letters → numbers</li>
-          <li>Numbers → reduced</li>
-          <li>Difference → compatibility</li>
-        </ul>
-
-        <p>This provides a general estimate only.</p>
-      </article>
-
-      {/* DISCLAIMER */}
-      <aside className="text-xs text-muted">
-        ⚠️ For entertainment purposes only.
-      </aside>
+      <NameCompatibilityCalculatorArticle/>
     </section>
   );
 }

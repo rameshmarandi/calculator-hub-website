@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Briefcase } from "lucide-react";
 
 import { calculateCareerAstrology } from "../../../lib/formulas";
+import CareerAstrologyCalculatorArticle from "../../content/astrology/CareerAstrologyCalculatorArticle";
 
 const rashis = [
   "Aries (Mesh)",
@@ -138,16 +139,7 @@ export default function CareerAstrologyCalculator() {
       </div>
 
       {/* BLOG (UNCHANGED) */}
-      <article className="space-y-4 text-sm leading-relaxed">
-        <h2 className="font-semibold text-base">How Career Astrology Works</h2>
-
-        <p>
-          Career astrology combines numerology and zodiac traits to suggest
-          suitable professions.
-        </p>
-      </article>
-
-      <aside className="text-xs text-muted">⚠️ For guidance only.</aside>
+      <CareerAstrologyCalculatorArticle/>
     </section>
   );
 }

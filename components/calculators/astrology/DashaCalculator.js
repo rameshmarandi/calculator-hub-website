@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Timer } from "lucide-react";
 
 import { calculateDasha } from "../../../lib/formulas";
+import DashaCalculatorArticle from "../../content/astrology/DashaCalculatorArticle";
 
 const nakshatraList = [
   "Ashwini",
@@ -137,12 +138,7 @@ export default function DashaCalculator() {
       </div>
 
       {/* BLOG (UNCHANGED) */}
-      <article className="space-y-4 text-sm leading-relaxed">
-        <h2 className="font-semibold text-base">What Is Dasha?</h2>
-        <p>Dasha represents planetary periods influencing life.</p>
-      </article>
-
-      <aside className="text-xs text-muted">⚠️ For guidance only.</aside>
+      <DashaCalculatorArticle/>
     </section>
   );
 }

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Palette } from "lucide-react";
 
 import { calculateLuckyColor } from "../../../lib/formulas";
+import LuckyColorCalculatorArticle from "../../content/astrology/LuckyColorCalculatorArticle";
 
 /* ================= INPUT ================= */
 function InputField({ label, type = "text", value, onChange }) {
@@ -96,33 +97,7 @@ export default function LuckyColorCalculator() {
       </div>
 
       {/* BLOG (UNCHANGED) */}
-      <article className="space-y-4 text-sm leading-relaxed">
-        <h2 className="font-semibold text-base">What Is a Lucky Color?</h2>
-
-        <p>
-          A Lucky Color is associated with numerology numbers and is believed to
-          attract positive energy.
-        </p>
-
-        <ul className="list-disc pl-5">
-          <li>1 → Red</li>
-          <li>2 → White</li>
-          <li>3 → Yellow</li>
-          <li>4 → Blue</li>
-          <li>5 → Green</li>
-          <li>6 → Pink</li>
-          <li>7 → Grey</li>
-          <li>8 → Dark Blue / Black</li>
-          <li>9 → Golden</li>
-        </ul>
-
-        <p>Lucky colors are symbolic and belief-based.</p>
-      </article>
-
-      {/* DISCLAIMER */}
-      <aside className="text-xs text-muted">
-        ⚠️ For guidance and entertainment only.
-      </aside>
+      <LuckyColorCalculatorArticle/>
     </section>
   );
 }

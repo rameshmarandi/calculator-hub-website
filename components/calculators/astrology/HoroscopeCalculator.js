@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Sun } from "lucide-react";
 
 import { calculateHoroscope } from "../../../lib/formulas";
+import HoroscopeCalculatorArticle from "../../content/astrology/HoroscopeCalculatorArticle";
 
 const rashis = [
   "Aries (Mesh)",
@@ -122,23 +123,7 @@ export default function HoroscopeCalculator() {
       </div>
 
       {/* BLOG (UNCHANGED) */}
-      <article className="space-y-4 text-sm leading-relaxed">
-        <h2 className="font-semibold text-base">What Is a Horoscope?</h2>
-
-        <p>A horoscope provides daily guidance based on your Moon Sign.</p>
-
-        <ul className="list-disc pl-5">
-          <li>Based on planetary positions</li>
-          <li>Used for daily decisions</li>
-          <li>Helps emotional awareness</li>
-        </ul>
-
-        <p>This is a simplified daily horoscope.</p>
-      </article>
-
-      <aside className="text-xs text-muted">
-        ⚠️ For guidance and entertainment only.
-      </aside>
+      <HoroscopeCalculatorArticle/>
     </section>
   );
 }

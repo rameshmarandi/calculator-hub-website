@@ -4,6 +4,7 @@ import { useState } from "react";
 import { AlertTriangle } from "lucide-react";
 
 import { calculateSadeSati } from "../../../lib/formulas";
+import SadeSatiCalculatorArticle from "../../content/astrology/SadeSatiCalculatorArticle";
 
 const rashis = [
   "Aries (Mesh)",
@@ -135,24 +136,7 @@ export default function SadeSatiCalculator() {
       </div>
 
       {/* BLOG (UNCHANGED) */}
-      <article className="space-y-4 text-sm leading-relaxed">
-        <h2 className="font-semibold text-base">What Is Sade Sati?</h2>
-
-        <p>Sade Sati is a 7.5-year Saturn transit affecting life phases.</p>
-
-        <ul className="list-disc pl-5">
-          <li>Rising Phase</li>
-          <li>Peak Phase</li>
-          <li>Setting Phase</li>
-        </ul>
-
-        <p>It can bring growth, discipline, and transformation.</p>
-      </article>
-
-      {/* DISCLAIMER */}
-      <aside className="text-xs text-muted">
-        ⚠️ Astrology results are for guidance only.
-      </aside>
+      <SadeSatiCalculatorArticle/>
     </section>
   );
 }

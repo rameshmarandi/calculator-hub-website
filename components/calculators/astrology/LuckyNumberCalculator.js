@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Clover } from "lucide-react";
 
 import { calculateLuckyNumber } from "../../../lib/formulas";
+import LuckyNumberCalculatorArticle from "../../content/astrology/LuckyNumberCalculatorArticle";
 
 /* ================= INPUT ================= */
 function InputField({ label, type = "text", value, onChange }) {
@@ -95,39 +96,7 @@ export default function LuckyNumberCalculator() {
       </div>
 
       {/* ================= SEO BLOG CONTENT ================= */}
-      <article className="space-y-4 text-sm leading-relaxed">
-        <h2 className="font-semibold text-base">What Is a Lucky Number?</h2>
-
-        <p>
-          A Lucky Number is derived from numerology using your date of birth. It
-          represents positive vibrations and is believed to influence success
-          and opportunities.
-        </p>
-
-        <h3 className="font-semibold">How Lucky Numbers Are Calculated</h3>
-
-        <ul className="list-disc pl-5">
-          <li>All digits of date of birth are added</li>
-          <li>The sum is reduced to a single digit</li>
-          <li>Master numbers like 11, 22, 33 are preserved</li>
-        </ul>
-
-        <h3 className="font-semibold">Why Use a Lucky Number Calculator?</h3>
-
-        <ul className="list-disc pl-5">
-          <li>Discover your favorable number</li>
-          <li>Used in decisions and planning</li>
-          <li>Popular in numerology</li>
-        </ul>
-
-        <p>This is a simplified numerology calculation.</p>
-      </article>
-
-      {/* ================= DISCLAIMER ================= */}
-      <aside className="text-xs text-muted">
-        ⚠️ Results are based on numerology beliefs and are for informational
-        purposes only.
-      </aside>
+    <LuckyNumberCalculatorArticle/>
     </section>
   );
 }

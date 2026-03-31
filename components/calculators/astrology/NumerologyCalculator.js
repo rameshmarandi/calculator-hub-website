@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Hash } from "lucide-react";
 
 import { calculateNumerology } from "../../../lib/formulas";
+import NumerologyCalculatorArticle from "../../content/astrology/NumerologyCalculatorArticle";
 
 /* ================= INPUT ================= */
 function InputField({ label, type = "text", value, onChange }) {
@@ -95,36 +96,7 @@ export default function NumerologyCalculator() {
       </div>
 
       {/* BLOG (UNCHANGED) */}
-      <article className="space-y-4 text-sm leading-relaxed">
-        <h2 className="font-semibold text-base">What Is Numerology?</h2>
-
-        <p>
-          Numerology is the study of numbers and their influence on human life.
-        </p>
-
-        <h3 className="font-semibold">Numerology Number Calculation</h3>
-
-        <ul className="list-disc pl-5">
-          <li>Letters are converted into numbers</li>
-          <li>Numbers are reduced to a single digit</li>
-          <li>Master numbers like 11 and 22 are preserved</li>
-        </ul>
-
-        <h3 className="font-semibold">Why Use a Numerology Calculator?</h3>
-
-        <ul className="list-disc pl-5">
-          <li>Understand personality</li>
-          <li>Identify strengths</li>
-          <li>Plan life decisions</li>
-        </ul>
-
-        <p>This calculator provides a basic interpretation.</p>
-      </article>
-
-      {/* DISCLAIMER */}
-      <aside className="text-xs text-muted">
-        ⚠️ Numerology is based on traditional belief systems.
-      </aside>
+      <NumerologyCalculatorArticle/>
     </section>
   );
 }

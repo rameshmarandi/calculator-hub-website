@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Route } from "lucide-react";
 
 import { calculateLifePathNumber } from "../../../lib/formulas";
+import LifePathNumberCalculatorArticle from "../../content/astrology/LifePathNumberCalculatorArticle";
 
 /* ================= INPUT ================= */
 function InputField({ label, type = "text", value, onChange }) {
@@ -95,36 +96,7 @@ export default function LifePathNumberCalculator() {
       </div>
 
       {/* BLOG (UNCHANGED) */}
-      <article className="space-y-4 text-sm leading-relaxed">
-        <h2 className="font-semibold text-base">What Is a Life Path Number?</h2>
-
-        <p>The Life Path Number represents your life purpose and direction.</p>
-
-        <h3 className="font-semibold">Life Path Number Calculation</h3>
-
-        <p className="font-mono text-xs p-3 rounded">
-          Sum of DOB digits → Reduce to single digit (11, 22, 33 preserved)
-        </p>
-
-        <ul className="list-disc pl-5">
-          <li>Based on date of birth</li>
-          <li>Represents destiny</li>
-        </ul>
-
-        <h3 className="font-semibold">Why Use This Calculator?</h3>
-
-        <ul className="list-disc pl-5">
-          <li>Understand life direction</li>
-          <li>Discover strengths</li>
-        </ul>
-
-        <p>This is a simplified numerology calculator.</p>
-      </article>
-
-      {/* DISCLAIMER */}
-      <aside className="text-xs text-muted">
-        ⚠️ Numerology is based on traditional belief systems.
-      </aside>
+     <LifePathNumberCalculatorArticle/>
     </section>
   );
 }
