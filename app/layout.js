@@ -35,7 +35,8 @@ export default function RootLayout({ children }) {
               className={`min-h-[70vh] ${isCalculatorPage ? "" : "md:p-6"}`}
               style={{
                 backgroundColor: "var(--surface)",
-              }}>
+              }}
+            >
               {children}
             </main>
 
@@ -46,12 +47,18 @@ export default function RootLayout({ children }) {
         </div>
 
         <Footer />
+{/* // Google AdSense */}
+        <script
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9519915184026727"
+          crossorigin="anonymous"
+        ></script>
 
         <Script
           src="https://www.googletagmanager.com/gtag/js?id=G-GKJDZ488MR"
           strategy="afterInteractive"
         />
-
+        
         <Script id="ga-init" strategy="afterInteractive">
           {`
             window.dataLayer = window.dataLayer || [];
