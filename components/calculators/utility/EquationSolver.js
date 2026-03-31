@@ -5,6 +5,7 @@ import { Sigma } from "lucide-react";
 
 import { ResultCard } from "../../ResultCard";
 import { AmountInput } from "@/components/inputs/AmountInput";
+import EquationSolverArticle from "../../content/utility/EquationSolverArticle";
 
 export default function EquationSolver() {
   /* ================= STATE ================= */
@@ -141,26 +142,7 @@ export default function EquationSolver() {
       </div>
 
       {/* ================= SEO ================= */}
-      <article className="space-y-4 text-sm leading-relaxed">
-        <h2 className="font-semibold text-base">
-          What Is an Equation Solver?
-        </h2>
-
-        <p>
-          An equation solver finds the value of x that satisfies the equation ax + b = c.
-        </p>
-
-        <h3 className="font-semibold">Formula</h3>
-
-        <p className="font-mono text-xs p-3 rounded ">
-          x = (c − b) ÷ a
-        </p>
-      </article>
-
-      {/* ================= DISCLAIMER ================= */}
-      <aside className="text-xs text-muted">
-        Results are based on standard algebraic rules.
-      </aside>
+     <EquationSolverArticle/>
     </section>
   );
 }

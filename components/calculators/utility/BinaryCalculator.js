@@ -5,6 +5,7 @@ import { Binary } from "lucide-react";
 
 import { ResultCard } from "../../ResultCard";
 import { AmountInput } from "@/components/inputs/AmountInput";
+import BinaryCalculatorArticle from "../../content/utility/BinaryCalculatorArticle";
 
 export default function BinaryCalculator() {
   /* ================= STATE ================= */
@@ -152,20 +153,7 @@ export default function BinaryCalculator() {
       </div>
 
       {/* ================= SEO ================= */}
-      <article className="space-y-4 text-sm leading-relaxed">
-        <h2 className="font-semibold text-base">
-          What Is a Binary Calculator?
-        </h2>
-
-        <p>
-          A binary calculator converts numbers between base-2 and base-10 systems used in computing.
-        </p>
-      </article>
-
-      {/* ================= DISCLAIMER ================= */}
-      <aside className="text-xs text-muted">
-        Results follow standard binary conversion rules.
-      </aside>
+      <BinaryCalculatorArticle/>
     </section>
   );
 }

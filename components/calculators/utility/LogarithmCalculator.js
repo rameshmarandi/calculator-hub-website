@@ -5,6 +5,7 @@ import { LogOut } from "lucide-react";
 
 import { ResultCard } from "../../ResultCard";
 import { AmountInput } from "@/components/inputs/AmountInput";
+import LogarithmCalculatorArticle from "../../content/utility/LogarithmCalculatorArticle";
 
 export default function LogarithmCalculator() {
   /* ================= STATE ================= */
@@ -136,26 +137,7 @@ export default function LogarithmCalculator() {
       </div>
 
       {/* ================= SEO ================= */}
-      <article className="space-y-4 text-sm leading-relaxed">
-        <h2 className="font-semibold text-base">
-          What Is a Logarithm?
-        </h2>
-
-        <p>
-          A logarithm determines the exponent required to raise a base to a given number.
-        </p>
-
-        <h3 className="font-semibold">Formula</h3>
-
-        <p className="font-mono text-xs p-3 rounded ">
-          log<sub>b</sub>(x) = ln(x) ÷ ln(b)
-        </p>
-      </article>
-
-      {/* ================= DISCLAIMER ================= */}
-      <aside className="text-xs text-muted">
-        Results follow standard logarithmic rules.
-      </aside>
+      <LogarithmCalculatorArticle/>
     </section>
   );
 }

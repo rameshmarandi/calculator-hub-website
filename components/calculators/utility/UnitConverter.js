@@ -5,6 +5,7 @@ import { Ruler } from "lucide-react";
 
 import { ResultCard } from "../../ResultCard";
 import {AmountInput} from "@/components/inputs/AmountInput";
+import UnitConverterArticle from "../../content/utility/UnitConverterArticle";
 
 export default function UnitConverter() {
   /* ================= STATE ================= */
@@ -222,21 +223,7 @@ export default function UnitConverter() {
       </div>
 
       {/* ================= SEO ================= */}
-      <article className="space-y-4 text-sm leading-relaxed">
-        <h2 className="font-semibold text-base">
-          What Is a Unit Converter?
-        </h2>
-
-        <p>
-          A unit converter allows quick and accurate conversion between
-          different measurement units across multiple categories.
-        </p>
-      </article>
-
-      {/* ================= DISCLAIMER ================= */}
-      <aside className="text-xs text-muted">
-        Results are calculated using standard conversion formulas.
-      </aside>
+     <UnitConverterArticle/>
     </section>
   );
 }

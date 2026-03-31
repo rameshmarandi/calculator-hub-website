@@ -5,6 +5,7 @@ import { BarChart2 } from "lucide-react";
 
 import { ResultCard } from "../../ResultCard";
 import { AmountInput } from "@/components/inputs/AmountInput";
+import ProfitLossCalculatorArticle from "../../content/utility/ProfitLossCalculatorArticle";
 
 export default function ProfitLossCalculator() {
   /* ================= STATE ================= */
@@ -172,28 +173,7 @@ export default function ProfitLossCalculator() {
       </div>
 
       {/* ================= SEO ================= */}
-      <article className="space-y-4 text-sm leading-relaxed">
-        <h2 className="font-semibold text-base">
-          What Is Profit and Loss?
-        </h2>
-
-        <p>
-          Profit occurs when selling price is higher than cost price, while loss occurs when selling price is lower.
-        </p>
-
-        <h3 className="font-semibold">Formula</h3>
-
-        <p className="font-mono text-xs p-3 rounded bg-gray-100">
-          Profit = SP − CP
-          <br />
-          Loss = CP − SP
-        </p>
-      </article>
-
-      {/* ================= DISCLAIMER ================= */}
-      <aside className="text-xs text-muted">
-        Results are calculated using standard financial formulas.
-      </aside>
+      <ProfitLossCalculatorArticle/>
     </section>
   );
 }

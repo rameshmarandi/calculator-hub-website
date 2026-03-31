@@ -5,6 +5,7 @@ import { Clock } from "lucide-react";
 
 import { ResultCard } from "../../ResultCard";
 import {AmountInput} from "@/components/inputs/AmountInput";
+import TimeCalculatorArticle from "../../content/utility/TimeCalculatorArticle";
 
 export default function TimeCalculator() {
   /* ================= STATE ================= */
@@ -183,29 +184,7 @@ export default function TimeCalculator() {
       </div>
 
       {/* ================= SEO ================= */}
-      <article className="space-y-4 text-sm leading-relaxed">
-        <h2 className="font-semibold text-base">
-          What Is a Time Calculator?
-        </h2>
-
-        <p>
-          A time calculator helps you add hours and minutes accurately for
-          schedules, work tracking, and planning.
-        </p>
-
-        <h3 className="font-semibold">How It Works</h3>
-
-        <ul className="list-disc pl-5">
-          <li>Converts time into minutes</li>
-          <li>Adds values precisely</li>
-          <li>Returns normalized hours and minutes</li>
-        </ul>
-      </article>
-
-      {/* ================= DISCLAIMER ================= */}
-      <aside className="text-xs text-muted">
-        Inputs are validated and normalized for accurate results.
-      </aside>
+     <TimeCalculatorArticle/>
     </section>
   );
 }

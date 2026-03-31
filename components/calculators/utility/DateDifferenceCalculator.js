@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { CalendarDays } from "lucide-react";
 
 import { ResultCard } from "../../ResultCard";
+import DateDifferenceCalculatorArticle from "../../content/utility/DateDifferenceCalculatorArticle";
 
 export default function DateDifferenceCalculator() {
   /* ================= STATE ================= */
@@ -138,29 +139,7 @@ export default function DateDifferenceCalculator() {
       </div>
 
       {/* ================= SEO ================= */}
-      <article className="space-y-4 text-sm leading-relaxed">
-        <h2 className="font-semibold text-base">
-          What Is a Date Difference Calculator?
-        </h2>
-
-        <p>
-          This tool calculates the exact difference between two dates, breaking
-          it into years, months, and days.
-        </p>
-
-        <h3 className="font-semibold">How It Works</h3>
-
-        <ul className="list-disc pl-5">
-          <li>Computes total days between dates</li>
-          <li>Adjusts months and days accurately</li>
-          <li>Handles calendar variations</li>
-        </ul>
-      </article>
-
-      {/* ================= DISCLAIMER ================= */}
-      <aside className="text-xs text-muted">
-        Results are for informational purposes only.
-      </aside>
+      <DateDifferenceCalculatorArticle/>
     </section>
   );
 }

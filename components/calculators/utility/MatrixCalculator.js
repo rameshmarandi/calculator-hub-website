@@ -5,6 +5,7 @@ import { Grid } from "lucide-react";
 
 import { ResultCard } from "../../ResultCard";
 import { AmountInput } from "@/components/inputs/AmountInput";
+import MatrixCalculatorArticle from "../../content/utility/MatrixCalculatorArticle";
 
 export default function MatrixCalculator() {
   /* ================= STATE ================= */
@@ -202,21 +203,7 @@ export default function MatrixCalculator() {
       </div>
 
       {/* ================= SEO ================= */}
-      <article className="space-y-4 text-sm leading-relaxed">
-        <h2 className="font-semibold text-base">
-          What Is a Matrix Calculator?
-        </h2>
-
-        <p>
-          A matrix calculator performs operations like addition, subtraction,
-          and multiplication on matrices used in linear algebra.
-        </p>
-      </article>
-
-      {/* ================= DISCLAIMER ================= */}
-      <aside className="text-xs text-muted">
-        Results follow standard matrix operation rules.
-      </aside>
+      <MatrixCalculatorArticle/>
     </section>
   );
 }

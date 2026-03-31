@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { Calendar } from "lucide-react";
 
 import { ResultCard } from "../../ResultCard";
+import AgeCalculatorArticle from "../../content/utility/AgeCalculatorArticle";
 
 export default function AgeCalculator() {
   /* ================= STATE ================= */
@@ -122,36 +123,7 @@ export default function AgeCalculator() {
       </div>
 
       {/* ================= SEO CONTENT ================= */}
-      <article className="space-y-4 text-sm leading-relaxed">
-        <h2 className="font-semibold text-base">What Is an Age Calculator?</h2>
-
-        <p>
-          An age calculator determines your exact age based on your date of
-          birth. It calculates years, months, and days accurately using calendar
-          differences.
-        </p>
-
-        <h3 className="font-semibold">How It Works</h3>
-
-        <ul className="list-disc pl-5">
-          <li>Compares current date with birth date</li>
-          <li>Adjusts months and days dynamically</li>
-          <li>Handles varying month lengths</li>
-        </ul>
-
-        <h3 className="font-semibold">Use Cases</h3>
-
-        <ul className="list-disc pl-5">
-          <li>Government forms</li>
-          <li>Job eligibility</li>
-          <li>Personal tracking</li>
-        </ul>
-      </article>
-
-      {/* ================= DISCLAIMER ================= */}
-      <aside className="text-xs text-muted">
-        Results are based on system date and are for informational use only.
-      </aside>
+      <AgeCalculatorArticle/>
     </section>
   );
 }

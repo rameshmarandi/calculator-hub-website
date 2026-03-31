@@ -5,6 +5,7 @@ import { TrendingDown } from "lucide-react";
 
 import { ResultCard } from "../../ResultCard";
 import { AmountInput } from "@/components/inputs/AmountInput";
+import PercentageDecreaseCalculatorArticle from "../../content/utility/PercentageDecreaseCalculatorArticle";
 
 export default function PercentageDecreaseCalculator() {
   /* ================= STATE ================= */
@@ -150,26 +151,7 @@ export default function PercentageDecreaseCalculator() {
       </div>
 
       {/* ================= SEO ================= */}
-      <article className="space-y-4 text-sm leading-relaxed">
-        <h2 className="font-semibold text-base">
-          What Is Percentage Decrease?
-        </h2>
-
-        <p>
-          Percentage decrease measures how much a value has reduced compared to its original value.
-        </p>
-
-        <h3 className="font-semibold">Formula</h3>
-
-        <p className="font-mono text-xs p-3 rounded bg-gray-100">
-          (Original Value − New Value) ÷ Original Value × 100
-        </p>
-      </article>
-
-      {/* ================= DISCLAIMER ================= */}
-      <aside className="text-xs text-muted">
-        Results are calculated using standard mathematical formulas.
-      </aside>
+      <PercentageDecreaseCalculatorArticle/>
     </section>
   );
 }

@@ -5,6 +5,7 @@ import { TrendingUp } from "lucide-react";
 
 import { ResultCard } from "../../ResultCard";
 import { AmountInput } from "@/components/inputs/AmountInput";
+import PercentageIncreaseCalculatorArticle from "../../content/utility/PercentageIncreaseCalculatorArticle";
 
 export default function PercentageIncreaseCalculator() {
   /* ================= STATE ================= */
@@ -147,26 +148,7 @@ export default function PercentageIncreaseCalculator() {
       </div>
 
       {/* ================= SEO ================= */}
-      <article className="space-y-4 text-sm leading-relaxed">
-        <h2 className="font-semibold text-base">
-          What Is Percentage Increase?
-        </h2>
-
-        <p>
-          Percentage increase shows how much a value has grown compared to its original value.
-        </p>
-
-        <h3 className="font-semibold">Formula</h3>
-
-        <p className="font-mono text-xs p-3 rounded ">
-          (New Value − Original Value) ÷ Original Value × 100
-        </p>
-      </article>
-
-      {/* ================= DISCLAIMER ================= */}
-      <aside className="text-xs text-muted">
-        Results are calculated using standard mathematical formulas.
-      </aside>
+    <PercentageIncreaseCalculatorArticle/>
     </section>
   );
 }

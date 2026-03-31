@@ -5,6 +5,7 @@ import { Calculator } from "lucide-react";
 
 import { ResultCard } from "../../ResultCard";
 import { AmountInput } from "@/components/inputs/AmountInput";
+import SimpleCalculatorArticle from "../../content/utility/SimpleCalculatorArticle";
 
 export default function SimpleCalculator() {
   /* ================= STATE ================= */
@@ -164,21 +165,7 @@ export default function SimpleCalculator() {
       </div>
 
       {/* ================= SEO ================= */}
-      <article className="space-y-4 text-sm leading-relaxed">
-        <h2 className="font-semibold text-base">
-          What Is a Simple Calculator?
-        </h2>
-
-        <p>
-          A simple calculator performs basic arithmetic operations such as addition,
-          subtraction, multiplication, and division.
-        </p>
-      </article>
-
-      {/* ================= DISCLAIMER ================= */}
-      <aside className="text-xs text-muted">
-        Results are calculated using standard arithmetic rules.
-      </aside>
+      <SimpleCalculatorArticle/>
     </section>
   );
 }

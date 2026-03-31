@@ -5,6 +5,7 @@ import { Tag } from "lucide-react";
 
 import { ResultCard } from "../../ResultCard";
 import { AmountInput } from "@/components/inputs/AmountInput";
+import DiscountCalculatorArticle from "../../content/utility/DiscountCalculatorArticle";
 
 export default function DiscountCalculator() {
   /* ================= STATE ================= */
@@ -159,28 +160,7 @@ export default function DiscountCalculator() {
       </div>
 
       {/* ================= SEO ================= */}
-      <article className="space-y-4 text-sm leading-relaxed">
-        <h2 className="font-semibold text-base">
-          What Is a Discount Calculator?
-        </h2>
-
-        <p>
-          A discount calculator helps you determine the final price after applying a percentage discount.
-        </p>
-
-        <h3 className="font-semibold">Formula</h3>
-
-        <p className="font-mono text-xs p-3 rounded ">
-          Discount = Price × % ÷ 100
-          <br />
-          Final Price = Price − Discount
-        </p>
-      </article>
-
-      {/* ================= DISCLAIMER ================= */}
-      <aside className="text-xs text-muted">
-        Results are calculated using standard formulas.
-      </aside>
+      <DiscountCalculatorArticle/>
     </section>
   );
 }

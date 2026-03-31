@@ -5,6 +5,7 @@ import { Zap } from "lucide-react";
 
 import { ResultCard } from "../../ResultCard";
 import { AmountInput } from "@/components/inputs/AmountInput";
+import PowerCalculatorArticle from "../../content/utility/PowerCalculatorArticle";
 
 export default function PowerCalculator() {
   /* ================= STATE ================= */
@@ -133,26 +134,7 @@ export default function PowerCalculator() {
       </div>
 
       {/* ================= SEO ================= */}
-      <article className="space-y-4 text-sm leading-relaxed">
-        <h2 className="font-semibold text-base">
-          What Is a Power Calculator?
-        </h2>
-
-        <p>
-          A power calculator computes a number raised to the power of another number.
-        </p>
-
-        <h3 className="font-semibold">Formula</h3>
-
-        <p className="font-mono text-xs p-3 rounded">
-          Result = Base<sup>Exponent</sup>
-        </p>
-      </article>
-
-      {/* ================= DISCLAIMER ================= */}
-      <aside className="text-xs text-muted">
-        Results follow standard exponential rules.
-      </aside>
+     <PowerCalculatorArticle/>
     </section>
   );
 }

@@ -5,6 +5,7 @@ import { FunctionSquare } from "lucide-react";
 
 import { ResultCard } from "../../ResultCard";
 import { AmountInput } from "@/components/inputs/AmountInput";
+import ScientificCalculatorArticle from "../../content/utility/ScientificCalculatorArticle";
 
 export default function ScientificCalculator() {
   /* ================= STATE ================= */
@@ -179,20 +180,7 @@ export default function ScientificCalculator() {
       </div>
 
       {/* ================= SEO ================= */}
-      <article className="space-y-4 text-sm leading-relaxed">
-        <h2 className="font-semibold text-base">
-          What Is a Scientific Calculator?
-        </h2>
-
-        <p>
-          A scientific calculator performs advanced mathematical operations such as trigonometry, logarithms, and powers.
-        </p>
-      </article>
-
-      {/* ================= DISCLAIMER ================= */}
-      <aside className="text-xs text-muted">
-        Results are based on standard mathematical functions.
-      </aside>
+     <ScientificCalculatorArticle/>
     </section>
   );
 }
