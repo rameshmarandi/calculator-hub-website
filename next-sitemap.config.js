@@ -76,8 +76,7 @@ module.exports = {
       { prefix: "/construction", priority: 0.9, freq: "weekly" },
       { prefix: "/health", priority: 0.88, freq: "weekly" },
       { prefix: "/education", priority: 0.85, freq: "weekly" },
-      { prefix: "/astrology", priority: 0.82, freq: "weekly" },
-      { prefix: "/utility", priority: 0.75, freq: "monthly" },
+     
     ];
 
     const rule = categoryRules.find((r) => path.startsWith(r.prefix));

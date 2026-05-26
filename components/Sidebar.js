@@ -10,8 +10,7 @@ const CATEGORY_LABELS = {
   construction: "Construction Calculators",
   health: "Health & Fitness",
   education: "Education Calculators",
-  astrology: "Astrology Calculators",
-  utility: "General & Utility",
+
 };
 
 export default function Sidebar() {
