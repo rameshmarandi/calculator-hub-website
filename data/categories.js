@@ -48,29 +48,7 @@ const categories = [
     },
   },
 
-  {
-    slug: "astrology",
-    name: "Astrology Calculators",
-    description: "Kundli, rashi, numerology and astrology calculators",
-
-    seo: {
-      title: "Astrology Calculators | Kundli, Rashi, Numerology Tools",
-      priority: 0.82,
-      changefreq: "weekly",
-    },
-  },
-
-  {
-    slug: "utility",
-    name: "General & Utility Calculators",
-    description: "Age, date, unit, percentage and daily use calculators",
-
-    seo: {
-      title: "Utility Calculators | Age, Date, Percentage, Converter Tools",
-      priority: 0.75,
-      changefreq: "monthly",
-    },
-  },
+ 
 ];
 
 export default categories;

@@ -152,11 +152,11 @@ export default function Footer() {
                 Education
               </Link>
             </li>
-            <li>
+            {/* <li>
               <Link href="/utility" className="hover:text-[var(--primary)]">
                 Utilities
               </Link>
-            </li>
+            </li> */}
           </ul>
         </div>
 

@@ -13,8 +13,7 @@ const UI_RELATION_MAP = {
   business: ["finance", "loan"],
   health: ["health"],
   education: ["education"],
-  astrology: ["astrology"],
-  utility: ["utility"],
+  
 };
 
 export default function RelatedCalculators() {

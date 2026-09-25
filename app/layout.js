@@ -1,25 +1,41 @@
-"use client";
-
 import "./globals.css";
+
 import { Inter } from "next/font/google";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
-import Sidebar from "@/components/Sidebar";
-import RightSidebar from "@/components/RightSidebar";
-import { usePathname } from "next/navigation";
 import Script from "next/script";
+
+import SiteShell from "@/components/SiteShell";
 
 const inter = Inter({
   subsets: ["latin"],
   display: "swap",
 });
 
+export const metadata = {
+  metadataBase: new URL("https://swiftcalcfy.com"),
+  title: {
+    default: "Swiftcalcfy | Free Online Calculators",
+    template: "%s | Swiftcalcfy",
+  },
+  description:
+    "Free online calculators for finance, construction, health, education, and everyday calculations. Explore practical tools with clear formulas, examples, and explanations.",
+  alternates: {
+    canonical: "https://swiftcalcfy.com/",
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
+  openGraph: {
+    title: "Swiftcalcfy | Free Online Calculators",
+    description:
+      "Practical online calculators for finance, construction, health, education, and everyday calculations.",
+    url: "https://swiftcalcfy.com/",
+    siteName: "Swiftcalcfy",
+    type: "website",
+  },
+};
+
 export default function RootLayout({ children }) {
-  const pathname = usePathname();
-
-  // Detect calculator detail page
-  const isCalculatorPage = pathname.includes("-calculator");
-
   return (
     <html lang="en">
       <body className={inter.className}>
@@ -35,8 +51,7 @@ export default function RootLayout({ children }) {
               className={`min-h-[70vh] ${isCalculatorPage ? "" : "md:p-6"}`}
               style={{
                 backgroundColor: "var(--surface)",
-              }}
-            >
+              }}>
               {children}
             </main>
 
@@ -47,18 +62,17 @@ export default function RootLayout({ children }) {
         </div>
 
         <Footer />
-{/* // Google AdSense */}
+        {/* // Google AdSense */}
         <script
           async
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9519915184026727"
-          crossorigin="anonymous"
-        ></script>
+          crossorigin="anonymous"></script>
 
         <Script
           src="https://www.googletagmanager.com/gtag/js?id=G-GKJDZ488MR"
           strategy="afterInteractive"
         />
-        
+
         <Script id="ga-init" strategy="afterInteractive">
           {`
             window.dataLayer = window.dataLayer || [];

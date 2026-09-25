@@ -2,33 +2,26 @@
 
 const { FULL_BASE_URL } = require("./lib/constant");
 
-const siteUrl = FULL_BASE_URL;
-
 module.exports = {
-  siteUrl,
+  siteUrl: FULL_BASE_URL,
 
-  /* =================================
-     STATIC EXPORT COMPATIBILITY
-  ================================= */
-  outDir: "./out", // critical for nginx static hosting
+  // Static export directory
+  outDir: "./out",
 
-  /* =================================
-     CORE
-  ================================= */
+  // Generate robots.txt
   generateRobotsTxt: true,
-  generateIndexSitemap: true,
+
+  // Your site is currently small enough for one sitemap.
+  generateIndexSitemap: false,
+
   sitemapSize: 7000,
+
   autoLastmod: true,
 
-  /* =================================
-     DEFAULT FALLBACK
-  ================================= */
   changefreq: "monthly",
   priority: 0.7,
 
-  /* =================================
-     NEVER INDEX THESE
-  ================================= */
+  // Exclude pages that should never be in the sitemap
   exclude: [
     "/admin/*",
     "/api/*",
@@ -37,11 +30,11 @@ module.exports = {
     "/_next/*",
     "/404",
     "/500",
+
+    // Removed Astrology section
+    "/astrology/*",
   ],
 
-  /* =================================
-     ROBOTS
-  ================================= */
   robotsTxtOptions: {
     policies: [
       {
@@ -53,40 +46,46 @@ module.exports = {
         disallow: ["/admin", "/api", "/dashboard", "/private"],
       },
     ],
-    additionalSitemaps: [`${siteUrl}/sitemap.xml`],
   },
 
-  /* =================================
-     SMART PRIORITY LOGIC
-  ================================= */
   transform: async (config, path) => {
-    const now = new Date().toISOString();
-
     if (path === "/") {
       return {
         loc: path,
         changefreq: "daily",
         priority: 1.0,
-        lastmod: now,
       };
     }
 
     const categoryRules = [
-      { prefix: "/finance", priority: 0.95, freq: "daily" },
-      { prefix: "/construction", priority: 0.9, freq: "weekly" },
-      { prefix: "/health", priority: 0.88, freq: "weekly" },
-      { prefix: "/education", priority: 0.85, freq: "weekly" },
-      { prefix: "/astrology", priority: 0.82, freq: "weekly" },
-      { prefix: "/utility", priority: 0.75, freq: "monthly" },
+      {
+        prefix: "/finance",
+        priority: 0.95,
+        freq: "daily",
+      },
+      {
+        prefix: "/construction",
+        priority: 0.9,
+        freq: "weekly",
+      },
+      {
+        prefix: "/health",
+        priority: 0.88,
+        freq: "weekly",
+      },
+      {
+        prefix: "/education",
+        priority: 0.85,
+        freq: "weekly",
+      },
     ];
 
-    const rule = categoryRules.find((r) => path.startsWith(r.prefix));
+    const rule = categoryRules.find((item) => path.startsWith(item.prefix));
 
     return {
       loc: path,
       changefreq: rule?.freq ?? config.changefreq,
       priority: rule?.priority ?? config.priority,
-      lastmod: now,
     };
   },
 };

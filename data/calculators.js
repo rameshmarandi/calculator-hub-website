@@ -119,41 +119,8 @@ const calculators = {
     { slug: "gpa-calculator", name: "GPA Calculator", ui: "education" }
   ],
 
-  astrology: [
-    { slug: "kundli-calculator", name: "Kundli Calculator", ui: "astrology" },
-    { slug: "birth-chart-calculator", name: "Birth Chart Calculator", ui: "astrology" },
-    { slug: "moon-sign-calculator", name: "Moon Sign Calculator", ui: "astrology" },
-    { slug: "rashi-calculator", name: "Rashi Calculator", ui: "astrology" },
-    { slug: "nakshatra-calculator", name: "Nakshatra Calculator", ui: "astrology" },
-    { slug: "numerology-calculator", name: "Numerology Calculator", ui: "astrology" },
-    { slug: "life-path-number-calculator", name: "Life Path Number Calculator", ui: "astrology" },
-    { slug: "name-compatibility-calculator", name: "Name Compatibility Calculator", ui: "astrology" },
-    { slug: "marriage-matching-calculator", name: "Marriage Matching Calculator", ui: "astrology" },
-    { slug: "dasha-calculator", name: "Dasha Calculator", ui: "astrology" },
-    { slug: "sade-sati-calculator", name: "Sade Sati Calculator", ui: "astrology" },
-    { slug: "horoscope-calculator", name: "Horoscope Calculator", ui: "astrology" },
-    { slug: "lucky-number-calculator", name: "Lucky Number Calculator", ui: "astrology" },
-    { slug: "lucky-color-calculator", name: "Lucky Color Calculator", ui: "astrology" },
-    { slug: "career-astrology-calculator", name: "Career Astrology Calculator", ui: "astrology" }
-  ],
 
-  utility: [
-    { slug: "age-calculator", name: "Age Calculator", ui: "utility" },
-    { slug: "date-difference-calculator", name: "Date Difference Calculator", ui: "utility" },
-    { slug: "time-calculator", name: "Time Calculator", ui: "utility" },
-    { slug: "unit-converter", name: "Unit Converter", ui: "utility" },
-    { slug: "percentage-increase-calculator", name: "Percentage Increase Calculator", ui: "utility" },
-    { slug: "percentage-decrease-calculator", name: "Percentage Decrease Calculator", ui: "utility" },
-    { slug: "discount-calculator", name: "Discount Calculator", ui: "utility" },
-    { slug: "profit-and-loss-calculator", name: "Profit and Loss Calculator", ui: "utility" },
-    { slug: "simple-calculator", name: "Simple Calculator", ui: "utility" },
-    { slug: "scientific-calculator", name: "Scientific Calculator", ui: "utility" },
-    { slug: "binary-calculator", name: "Binary Calculator", ui: "utility" },
-    { slug: "matrix-calculator", name: "Matrix Calculator", ui: "utility" },
-    { slug: "equation-solver", name: "Equation Solver", ui: "utility" },
-    { slug: "logarithm-calculator", name: "Logarithm Calculator", ui: "utility" },
-    { slug: "power-calculator", name: "Power Calculator", ui: "utility" }
-  ]
+  
 };
 
 export default calculators;

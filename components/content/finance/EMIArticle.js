@@ -56,13 +56,13 @@ const EMIArticle = () => {
           existing expenses, and savings goals.
         </p>
 
-        <p>
+        {/* <p>
           Financial planners generally recommend that total loan EMIs should
           remain within 30 to 40 percent of your monthly income. Staying within
           this range helps maintain financial stability and ensures that you
           still have enough money for daily living expenses, investments, and
           emergency savings.
-        </p>
+        </p> */}
 
         <p>
           Another important reason to calculate EMI in advance is to understand
