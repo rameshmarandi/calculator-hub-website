@@ -101,11 +101,15 @@ const PersonalLoanEMIArticle = () => {
         </p>
 
         <p>
-          Financial planners generally recommend that total loan EMIs should
+          {/* Financial planners generally recommend that total loan EMIs should
           remain within 30 to 40 percent of a borrower’s monthly income. Staying
           within this range ensures that loan repayments do not interfere with
           essential living expenses, emergency savings, or long term financial
-          goals.
+          goals. */}
+          A commonly used budgeting guideline is to keep debt payments at a
+          manageable share of household income. The appropriate level varies
+          based on income, existing debt, essential expenses, savings, and
+          financial goals.
         </p>
 
         <p>
