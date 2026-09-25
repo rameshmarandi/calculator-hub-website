@@ -61,10 +61,9 @@ export default function Footer() {
               href="https://hisabtracker.com"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-3 hover:opacity-90 transition"
-            >
+              className="flex items-center gap-3 hover:opacity-90 transition">
               <Image
-                src="https://res.cloudinary.com/dvhjtth5f/image/upload/v1763839566/hisabTrackerOnlyImage_eyqbuq.png"
+                src="https://res.cloudinary.com/dmqlnxdes/image/upload/v1786808273/only-logo_k0b0pw.png"
                 alt="HisabTracker Expense Tracker App"
                 width={34}
                 height={34}
@@ -93,8 +92,7 @@ export default function Footer() {
                 href="https://x.com/swiftcalcfy"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="p-2 rounded-md hover:bg-[var(--surface-2)] transition"
-              >
+                className="p-2 rounded-md hover:bg-[var(--surface-2)] transition">
                 <Twitter size={18} />
               </a>
 
@@ -102,8 +100,7 @@ export default function Footer() {
                 href="https://www.facebook.com/swiftcalcfy"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="p-2 rounded-md hover:bg-[var(--surface-2)] transition"
-              >
+                className="p-2 rounded-md hover:bg-[var(--surface-2)] transition">
                 <Facebook size={18} />
               </a>
 
@@ -111,8 +108,7 @@ export default function Footer() {
                 href="https://www.instagram.com/swiftcalcfy/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="p-2 rounded-md hover:bg-[var(--surface-2)] transition"
-              >
+                className="p-2 rounded-md hover:bg-[var(--surface-2)] transition">
                 <Instagram size={18} />
               </a>
             </div>
@@ -137,8 +133,7 @@ export default function Footer() {
             <li>
               <Link
                 href="/construction"
-                className="hover:text-[var(--primary)]"
-              >
+                className="hover:text-[var(--primary)]">
                 Construction
               </Link>
             </li>
@@ -186,8 +181,7 @@ export default function Footer() {
             <li>
               <Link
                 href="/privacy-policy"
-                className="hover:text-[var(--primary)]"
-              >
+                className="hover:text-[var(--primary)]">
                 Privacy Policy
               </Link>
             </li>
